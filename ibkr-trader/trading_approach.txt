@@ -1,0 +1,534 @@
+Defining my approach to stock selection for Scalping
+
+Logging patterns:
+
+[Order Characteristics]
+// for picking a security to execute strategy on.
+(Find orders to turn into trades ---> [Look for orders] ---> [Detected order -> Pre Trade Analysis] -->[Technical Analysis --> Generate Order Characteristics] -> [Execute trade])
+
+[Order Detection]: Date/Time: [Unix timestamp]
+                Instrument: [Symbol/Security]
+                Detection Method: [Level 2/Volume Spike/Price Action/Tape]
+                OrderSignature: [Visible Wall/Iceberg/Algo Pattern/Block]
+                Estimated Size: [Shares/Contracts]
+                Price Level: [Where order sits]
+                Market Regime: [Trending/Ranging/News-driven]
+                Spread: [Current spread]
+                MarketDepth: [Snapshot of order book]
+                VolumeRatio: [Current/Average]
+                Latency=[measured latency]ms
+                Strategy=[Selected strategy]
+                Decision=[Proceed/Monitor/Skip]
+
+[Pre Trade Analysis]: Date/Time: [Unix timestamp]
+                Instrument: [Symbol/Security]
+                Detection Method: [Level 2/Volume Spike/Price Action/Tape]
+                OrderSignature: [Visible Wall/Iceberg/Algo Pattern/Block]
+                Estimated Size: [Shares/Contracts]
+                Price Level: [Where order sits]
+                Market Regime: [Trending/Ranging/News-driven]
+                Spread: [Current spread]
+                MarketDepth: [Snapshot of order book]
+                VolumeRatio: [Current/Average]
+                Latency=[measured latency]ms
+                Strategy=[Selected strategy]
+                Decision=[Proceed/Monitor/Skip]
+                +
+                Slippage=[calculated]
+                SlippageAllowance=[threshold]
+                Liquidity=[LiquidityMeasurment]
+                LiquidityScore: [1-10]
+                DisrutiveMetrics:[InformedByOtherToolWatchingTheMarket]
+                SpreadRating:[measured: 1-10]
+                DepthRating:[measured: 1-10]
+                BookDepth:[measured: 1-10]
+                Spoofing: [measured: 1-10]
+                Levels:[LevelDefenseMetrics]
+                EMA20:[measured]
+                MovementAtMajorLevels:[measured: 1-10]
+                AverageTrueRange:{Order Tracker.AverageTrueRange}
+                Decision=[Proceed/Monitor/Skip]
+
+[Technical Analysis]: Date/Time: [Unix timestamp]
+                Instrument: [Symbol/Security]
+                Detection Method: [Level 2/Volume Spike/Price Action/Tape]
+                OrderSignature: [Visible Wall/Iceberg/Algo Pattern/Block]
+                Estimated Size: [Shares/Contracts]
+                Price Level: [Where order sits]
+                Market Regime: [Trending/Ranging/News-driven]
+                Spread: [Current spread]
+                MarketDepth: [Snapshot of order book]
+                VolumeRatio: [Current/Average]
+                Latency=[measured latency]ms
+                Strategy=[Selected strategy]
+                Decision=[Proceed/Monitor/Skip]
+                +
+                Slippage=[calculated]
+                SlippageAllowance=[threshold]
+                Liquidity=[LiquidityMeasurment]
+                LiquidityScore: [1-10]
+                DisrutiveMetrics:[InformedByOtherToolWatchingTheMarket]
+                SpreadRating:[measured: 1-10]
+                DepthRating:[measured: 1-10]
+                BookDepth:[measured: 1-10]
+                Spoofing: [measured: 1-10]
+                Levels:[LevelDefenseMetrics]
+                EMA:[measured - EMA20]
+                MovementAtMajorLevels:[measured: 1-10]
+                AverageTrueRange:{Order Tracker.AverageTrueRange}
+                Decision=[Proceed/Monitor/Skip]
+                +
+                RSI: [RSI Measurement]
+                EMA: {
+                    EMA1: [Value]
+                    EMA5: [Value]
+                    EMA8: [Value]
+                    EMA13: [Value]
+                    EMA20: [Value]
+                    Alignment: [Bullish/Bearish/Mixed]
+                }
+                VWAP: {
+                    Price: [Current VWAP]
+                    Deviation: [Price vs VWAP %]
+                    Trend: [Above/Below/At]
+                }
+                Piecewise_Trapezoid: {
+                    AreaAboveOpen: [Calculated value]
+                    AreaBelowOpen: [Calculated value]
+                    NetPressure: [Buy/Sell bias]
+                }
+                PositionToTakeCharacteristics: {
+                    Direction: [Long/Short]
+                    EntryType: [Market/Limit/Stop]
+                    EntryPrice: [Target entry]
+                    PositionSize: [Shares]
+                    StopLoss: [Price]
+                    Target1: [Price]
+                    Target2: [Price]
+                    RiskReward: [Ratio]
+                    TimeFrame: [Expected hold time]
+                    Confidence: [1-10]
+                }
+                ExitPositionCharacteristics: {
+                    PrimaryExits: {
+                        Target1: [Price - Quick scalp]
+                        Target2: [Price - Extended target]
+                        StopLoss: [Price - Risk limit]
+                        TrailingStop: [ATR-based/Fixed/None]
+                        TimeStop: [Max holding period]
+                    }
+                    
+                DynamicExitTriggers: {
+                    OrderBookExits: {
+                        LargeOrderRemoval: [Exit if supporting order pulled]
+                        DepthDeterioration: [Exit if liquidity dries up]
+                        SpreadWidening: [Exit if spread > threshold]
+                        ImbalanceReversal: [Exit if order book flips]
+                    }
+                    
+                    TechnicalExits: {
+                        MomentumExhaustion: [RSI divergence/Volume decline]
+                        EMAcrossover: [Fast EMA crosses slow]
+                        VWAPrejection: [Failed VWAP break]
+                        ATRexpansion: [Volatility spike exit]
+                    }
+                    
+                    MicrostructureExits: {
+                        AlgoDetection: [Aggressive algo on opposite side]
+                        SpoofingConfirmed: [Supporting order was fake]
+                        LiquidityVacuum: [Sudden depth disappearance]
+                        TapeExhaustion: [Buying/selling drying up]
+                    }
+                    
+                    LevelBasedExits: {
+                        ResistanceRejection: [Failed breakout]
+                        SupportBreak: [Key level lost]
+                        RangeCompletion: [Hit range boundary]
+                        PivotTest: [Major level approach]
+                    }
+                }
+                
+                ExitScaling: {
+                    PartialExits: [Take 1/3, 1/2, etc.]
+                    ScaleOutLevels: [Specific prices]
+                    BreakevenStop: [Move stop to BE after Target1]
+                    RunnersStrategy: [Leave portion for extended move]
+                }
+                
+                EmergencyExits: {
+                    MaxLoss: [Absolute $ loss limit]
+                    VolatilitySpike: [ATR exceeds threshold]
+                    NewsEvent: [Unexpected news]
+                    SystemLatency: [Connection issues]
+                    LiquidityCrisis: [No exit liquidity]
+                }
+                
+                ExitPriority: [Which exit type takes precedence]
+                ExitConfirmation: [Require multiple signals?]
+            }
+
+                Decision: [Execute/Monitor/Skip]
+                
+{
+  "orderTracker": {
+    /***********************************************************************/
+    /* 1) Fingerprinting & Evolution of the Specific Order(s) in the Book */
+    /***********************************************************************/
+    "orderFingerprint": {
+      "initialSize": 0,          // Visible size at detection
+      "replenishCount": 0,       // Times refilled (iceberg or repeated layering)
+      "executedVolume": 0,       // Filled volume so far
+      "remainingEstimate": 0      // Projected total if partial fills continue
+    },
+
+    /*****************************************************/
+    /* 2) Disruption Metrics & Advanced Market Activity  */
+    /*****************************************************/
+    "disruptionMetrics": {
+      "orderBookImbalance": 0.0,  // Ratio: (bidSize - askSize) / (bidSize + askSize)
+      "microstructureShift": false, 
+      "algoActivityLevel": "Low",  // "Low", "Medium", or "High"
+      "marketMakerWithdrawal": false
+    },
+
+    /*************************************/
+    /* 3) Iceberg Detection & Indicators */
+    /*************************************/
+    "icebergIndicators": {
+      "refillSpeedMs": 0,           // Average ms between replenishments
+      "sizeConsistency": 0.0,       // Std dev of refill sizes
+      "priceDefense": false,        // If it consistently defends a particular price
+      "hiddenRatio": 0.0            // Estimated hidden vs visible portion
+    },
+
+    /**************************************************/
+    /* 4) Spoofing/Manipulation Detection Indicators  */
+    /**************************************************/
+    "spoofingIndicators": {
+      "orderLifespanMs": 0,         // Duration in the book before cancel or fill
+      "cancelRatePct": 0.0,         // % of total size canceled vs executed
+      "priceReaction": "MovesAway", // e.g. "MovesToward", "MovesAway", "Neutral"
+      "flashPattern": false,        // Appears/disappears repeatedly
+      "executionAvoidance": false,  // Moves if approached
+      "layeringDetected": false,    // Multiple orders layered on same side
+      "postCancelMove": false,      // Price reversal after large cancellation
+      "orderVelocity": 0,           // Speed of placement/cancellation
+      "intentionScore": 5           // 1=Likely spoof, 10=Genuine
+    },
+
+    /**********************************/
+    /* 5) Observed Behavior Patterns  */
+    /**********************************/
+    "behaviorPatterns": {
+      "timingPattern": "Random",    // "Regular intervals" / "Random"
+      "priceDistance": 0,           // Ticks from current NBBO
+      "sizeProgression": "Static",  // "Increasing", "Decreasing", or "Static"
+      "crossMarketActivity": false, // Correlated activity across correlated symbols
+      "volumeImpact": 0.0           // Actual vs displayed/expected volume impact
+    },
+
+    /***********************************************/
+    /* 6) Technical & Market Regime Mini-Snapshots */
+    /***********************************************/
+    "technicalSnapshot": {
+      // Many scalpers track these over time to see if the environment changes.
+      "marketRegime": "Trending",   // "Trending", "Ranging", or "News-driven"
+      "rsi": 0.0,                   // Current RSI or short-term RSI
+      "ema": {                      // Quick reference to short/medium EMAs
+        "ema1": 0.0,
+        "ema5": 0.0,
+        "ema8": 0.0,
+        "ema13": 0.0,
+        "ema20": 0.0,
+        "alignment": "Bullish"      // "Bullish", "Bearish", "Mixed"
+      },
+      "vwap": {
+        "price": 0.0,
+        "deviation": 0.0,          // % difference between current price & VWAP
+        "trend": "Above"           // "Above", "Below", or "At"
+      },
+      "piecewiseTrapezoid": {
+        "areaAboveOpen": 0.0,
+        "areaBelowOpen": 0.0,
+        "netPressure": "Buy"       // "Buy" or "Sell" bias
+      },
+      "spread": 0.0,                // Current inside market spread
+      "volumeRatio": 0.0,           // Current vol vs average
+      "latencyMs": 0,               // Updated measure of execution connection
+      "movementAtMajorLevels": 0    // 1-10 scale on how strong rejections/breaks are
+    },
+
+    /***********************************/
+    /* 7) ATR & Scalping Feasibility   */
+    /***********************************/
+    "averageTrueRange": {
+      "atr": 0.0,
+      "period": 14,                 // Default 14 periods
+      "timeframe": "1min",
+
+      "scalpingMetrics": {
+        "atrInTicks": 0,
+        "minScalpAtr": 0.0,
+        "currentVsMin": "Below",    // "Above" or "Below" threshold
+        "scalpingGo": false         // Quick yes/no feasibility
+      },
+
+      "riskParameters": {
+        "stopDistance": 0.0,        // e.g. 0.5 × ATR
+        "targetDistance": 0.0,      // e.g. 1.0 × ATR
+        "maxPositionSize": 0,       // Based on ATR + account risk
+        "currentPosition": 0        // Size currently open
+      },
+
+      "orderContext": {
+        "moveSignificance": 0.0,    // Price move in multiples of ATR
+        "abnormalMove": false,      // Move > 2 ATR? (often signals volatility)
+        "orderImpact": 0.0          // Expected impact in ATR
+      }
+    },
+
+    /**************************************************************/
+    /* 8) Tracking Defense/Resistance/Support at Critical Levels  */
+    /**************************************************************/
+    "levelDefenseMetrics": {
+      "priceLevel": 0.0,
+      "levelType": "Technical",     // "Round number", "VWAP", "Historical", ...
+      "defenseStrength": 0,         // 1-10 scale
+
+      "rejectionMetrics": {
+        "approachCount": 0,
+        "rejectionCount": 0,
+        "rejectionSpeedMs": 0,
+        "maxPenetrationTicks": 0,
+        "volumeAbsorbed": 0.0
+      },
+
+      "capMetrics": {
+        "timeAtLevelMs": 0,
+        "priceRangeTicks": 0,
+        "breakAttempts": 0,
+        "volumeToBreak": 0.0,
+        "orderRefreshRate": 0
+      },
+
+      "suppressionPatterns": {
+        "capping": false,          // Pushing price down
+        "supporting": false,       // Pushing price up
+        "rangeBinding": false,     // Forcing a horizontal range
+        "exhaustion": false,       // Absorbing repeated attempts
+        "accumulationZone": false  // Building a position quietly
+      },
+
+      "levelPersistence": {
+        "firstAppearance": 0,      // Timestamp
+        "activeDurationMs": 0,
+        "breakdownTime": 0,        // When finally broken
+        "postBreakBehavior": "",   // "Acceleration", "Reversal", "Pause"
+        "levelMemory": false       // Price eventually returns to test
+      }
+    },
+
+    /*************************/
+    /* 9) Execution Quality  */
+    /*************************/
+    "executionQuality": {
+      "recentFills": {
+        "averageSlippage": 0.0,     // Actual fill - expected fill
+        "fillRatePct": 0.0,         // % of attempts that got filled
+        "spreadConditions": "Tight" // "Tight", "Normal", or "Wide"
+      },
+      "liquidityConditions": {
+        "depthQuality": "Good",     // "Good", "Fair", "Poor"
+        "quoteStability": "Stable", // "Stable", "Flickering", "Volatile"
+        "hiddenLiquidity": false
+      },
+      // Extended to capture commonly referenced fields:
+      "slippageAllowance": 0.0,     // Threshold for acceptable slippage
+      "liquidityScore": 0,         // 1-10 scale
+      "spreadRating": 0,           // 1-10 scale
+      "depthRating": 0,            // 1-10 scale
+      "bookDepth": 0               // 1-10 scale
+    },
+
+    /********************************************/
+    /* 10) Global Market State / Session Metrics */
+    /********************************************/
+    "marketStateMetrics": {
+      "sessionTime": "Open",       // "Pre", "Open", "Mid", "Close", "After"
+      "volumeProfile": {
+        "currentVsAverage": 0.0,
+        "volumeAcceleration": "Steady", // "Increasing", "Steady", "Decreasing"
+        "relativeVolume": 0.0          // e.g. RVOL measure
+      },
+      "momentumIndicators": {
+        "priceVelocity": 0.0,          // Rate of change
+        "directionalBias": "Neutral",  // "Up", "Down", "Neutral"
+        "trendStrength": 0,            // 1-10
+        "momentumDivergence": false
+      }
+    },
+
+    /************************************/
+    /* 11) Position & Trade Monitoring  */
+    /************************************/
+    "positionMonitoring": {
+      "realTimeMetrics": {
+        "unrealizedPnL": 0.0,
+        "timeInTradeSec": 0,
+        "maxFavorableExcursion": 0.0,  // Highest favorable move from entry
+        "maxAdverseExcursion": 0.0,    // Largest pullback from entry
+        "currentAtrMultiple": 0.0      // Current gain/loss in ATR multiples
+      },
+      "exitReadiness": {
+        "nearTargetPct": 0.0,          // % distance to primary target
+        "stopDistance": 0.0,           // Price distance to stop
+        "exitLiquidity": 0.0,          // Available volume or market depth
+        "orderBookHealth": "Good"      // Compare current vs. initial conditions
+      }
+    },
+
+    /**************************************************/
+    /* 12) Trade/Order Plan for Scalping (New Section)*/
+    /**************************************************/
+    "tradePlan": {
+      // Fields that come from your “Technical Analysis -> PositionToTakeCharacteristics”
+      "direction": "",        // "Long" or "Short"
+      "entryType": "",        // "Market", "Limit", "Stop"
+      "entryPrice": 0.0,
+      "positionSize": 0,      // # of shares/contracts
+      "stopLoss": 0.0,
+      "target1": 0.0,
+      "target2": 0.0,
+      "riskReward": 0.0,      // R:R ratio
+      "timeFrame": "",        // e.g. "5 minutes"
+      "confidence": 0,        // 1-10
+
+      // Any final or updated decision about proceeding with the trade
+      "decision": "",         // "Execute", "Monitor", "Skip"
+
+      // Exit strategy references (from “ExitPositionCharacteristics”)
+      "exitStrategy": {
+        "primaryExits": {
+          "target1": 0.0,
+          "target2": 0.0,
+          "stopLoss": 0.0,
+          "trailingStop": "",   // "ATR-based", "Fixed", "None"
+          "timeStopSec": 0
+        },
+        "dynamicExitTriggers": {
+          "orderBookExits": {
+            "largeOrderRemoval": false,
+            "depthDeterioration": false,
+            "spreadWidening": false,
+            "imbalanceReversal": false
+          },
+          "technicalExits": {
+            "momentumExhaustion": false,
+            "emaCrossover": false,
+            "vwapRejection": false,
+            "atrExpansion": false
+          },
+          "microstructureExits": {
+            "algoDetection": false,
+            "spoofingConfirmed": false,
+            "liquidityVacuum": false,
+            "tapeExhaustion": false
+          },
+          "levelBasedExits": {
+            "resistanceRejection": false,
+            "supportBreak": false,
+            "rangeCompletion": false,
+            "pivotTest": false
+          }
+        },
+        "exitScaling": {
+          "partialExits": "",       // "1/3, then 1/2," etc.
+          "scaleOutLevels": [],
+          "breakevenStop": false,
+          "runnersStrategy": ""
+        },
+        "emergencyExits": {
+          "maxLoss": 0.0,
+          "volatilitySpike": false,
+          "newsEvent": false,
+          "systemLatency": false,
+          "liquidityCrisis": false
+        },
+        "exitPriority": "",         // "Stop > TimeStop > Target", etc.
+        "exitConfirmation": false   // Require multiple triggers?
+      }
+    }
+  }
+}
+
+
+[Pre Trade Analysis]: ## Large Order Detection - [Date/Time]
+                    **Symbol**: XYZ
+                    **Detection Time**: 09:45:32
+                    **Order Details**:
+                    - Size: 500,000 shares
+                    - Price: $45.50 (ask)
+                    - Type: Visible wall
+                    - Market Phase: Opening range
+
+                    **Market Context**:
+                    - Trend: Uptrend from open
+                    - Volume: 2x average
+                    - News: None
+                    - Technical: Near resistance at $45.75
+
+                    **Initial Assessment**:
+                    - Likely: Distribution/Profit taking
+                    - Impact: Cap upside temporarily
+                    - Strategy: Wait for resolution
+
+[Post Trade Analysis]: ## Trade Review - [Date]
+                    **Outcome**: Win/Loss/Scratch
+                    **P&L**: +$28
+                    **Exit**: Covered @ $45.20
+
+                    **Large Order Behavior**:
+                    - Filled: ~300,000 shares
+                    - Time to Fill: 15 minutes
+                    - Price Action: Rejected at order
+                    - Pulled/Completed: Partially pulled
+
+                    **Lessons Learned**:
+                    - Correctly identified distribution
+                    - Entry timing was good
+                    - Could have sized up
+                    - Large order provided resistance
+
+[Pattern Recognition Log]: ## Large Order Patterns - [Week/Month]
+                        **Accumulation Signs**:
+                        - Persistent bid support
+                        - Buying dips repeatedly  
+                        - Higher lows forming
+                        - Success Rate: 75% (6/8 trades)
+
+                        **Distribution Signs**:
+                        - Ask walls at resistance
+                        - Selling rallies
+                        - Lower highs forming
+                        - Success Rate: 60% (3/5 trades)
+
+                        **False Signals**:
+                        - Spoofed orders pulled quickly
+                        - Algo games at round numbers
+                        - Instances: 4 this week
+
+
+
+
+| Test                                          | Condition                                                         | Decision                  |Action
+- Test (ping) api latency                        ping result + code execution time > 50ms                            Bail                        Log unix time & latency to chart, Detection Method: [Level 2/Volume Spike/Price Action/Tape]
+- Market Regime Detection                        Market regime detection determines strategy                         Set strategy                Log Regime detected & strategy used, Detection Method: [Level 2/Volume Spike/Price Action/Tape]
+- Trading Volume                                 Minimum Volume requirments < min required to meet liquidity need    Bail                        Log Market Regime, volume detected & Decision(bail or buy), Detection Method: [Level 2/Volume Spike/Price Action/Tape]
+
+- Calculate expected Slippage                    (Slippage prediction/Slippage allowance) > .80                      Bail                        Log Market Regime, calcualted slippage and actual slippage if bough, also log the result of the Trade, Detection Method: [Level 2/Volume Spike/Price Action/Tape]
+- Check for liquidity Vaccum                     Extreme thinness of orders causes sharp price change                Set strategy or bail        Log Market Regime, unix time, log price level, Detection Method: [Level 2/Volume Spike/Price Action/Tape]
+- Check for large dirutive orders & icebergs     order sizes 10-100x normal, heavy bid/ask etc...                    Either: join the order &    Log Market Regime, Detection Method: [Level 2/Volume Spike/Price Action/Tape] 
+                                                                                                                             exit before it 
+                                                                                                                             completes
+                                                                                                                     -OR- Exit take quick profits
+                                                                                                                     -OR- Reduce size by 50-75%
