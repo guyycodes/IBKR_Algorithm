@@ -1,51 +1,6 @@
-// Readme.md
-
 # IBKR Trading System
 
 ## System Overview
-
-The IBKR Trading System is designed to collect, process, and analyze stock market data in real-time. It connects to Interactive Brokers' API to request and receive market data, which is then processed through a queue-based architecture with multiple threads for concurrent data handling.
-
-### Key Components
-
-1. **Stock Queue Manager** (`stk_queue_manager/`)
-   - Manages multiple independent queue threads
-   - Handles assignment of symbols to queues
-   - Collects and stores tick-by-tick data
-   - Purges old data based on retention policies
-
-2. **Observer Pattern** (`observer/`)
-   - Monitors queues and CSV files for changes
-   - Triggers actions when events occur
-   - Enables pub/sub communication between components
-
-3. **IBKR Trader** (`config/`)
-   - Connects to Interactive Brokers API
-   - Requests various types of market data
-   - Processes callbacks from the API
-
-## Architecture Overview
-
-This system consists of three core components that work together to create an automated trading pipeline:
-
-1. **Market Monitor**
-   - Ingests live ticker data via stock queues
-   - Maintains data structures for analysis
-   - Feeds information to charts and models
-
-2. **Position Monitor**
-   - Observes chart and model data
-   - Identifies favorable position characteristics
-   - Analyzes various trading setups
-
-3. **Trader**
-   - Identifies favorable position entry points
-   - Generates entry and exit parameters
-   - Executes trades with precise entries and exits
-
-### Data Flow
-
-`Market Data → Market Monitor → Position Monitor → Trader → Trade Execution`
 
 ### Architecture Diagram
 
@@ -98,87 +53,113 @@ This system consists of three core components that work together to create an au
 
 ```
 
-## Core Functionality
+## Testing the Input Manager
 
-### Stock Queue Manager
+The Input Manager component can be tested in two different modes: CLI Mode (for interactive testing) and API Mode (for programmatic testing via HTTP requests).
 
-The `STKQueueManager` class (in `src/stk_queue_manager/`) manages 10 independent stock queues, each running on its own thread:
+### Building the Test Environment
 
-- **Initialization**: `initializeAllStockQueues()` creates 10 empty queues, each with its own observer running on a separate thread
-- **Symbol Assignment**: `assignSymbolToQueue(index, symbol, period)` assigns a symbol to a queue and begins collecting tick data
-- **Data Retention**: `purgeOldDataFromQueue(index)` removes data older than the specified retention period
-- **Queue Release**: `releaseQueue(index)` stops tracking a symbol and frees the queue for other uses
-- **File Storage**: Tick data is written to symbol-specific text files (e.g., "AAPL.txt")
+```bash
+# Install required dependencies (if needed)
+mkdir -p include/nlohmann
+wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp -O include/nlohmann/json.hpp
 
-### CSV File Monitoring
+# Build the project
+make clean
+make
+```
 
-The system can monitor a CSV file for changes:
+### CLI Mode Testing
 
-- When a new symbol is detected, user is prompted to:
-  1. Confirm whether to track the symbol
-  2. Set a data retention period (1 minute, 5 minutes, or no limit)
-- The symbol is then assigned to an available queue for data collection
+CLI Mode provides an interactive terminal interface for manually entering trading parameters:
 
-### CLI Interface
+```bash
+# Run CLI test
+make test
+```
 
-The main application provides a CLI menu (`src/main.cpp`) with options to:
+In CLI Mode, you can:
+- Add trading symbols with parameters (lots, margin, stopLoss, etc.)
+- Clear specific symbols
+- Submit all inputs for processing
+- Trigger emergency exit
 
-- Connect to IBKR and request various types of market data
-- Add/remove symbols to the watch list
-- View queue status
-- Manually assign/release symbols to queues
-- Purge old data from queues
+This mode is best for direct user interaction and local development testing.
 
-## Key Methods and Locations
+### API Mode Testing
 
-### STK Queue Manager (`src/stk_queue_manager/stk_queue_manager.hpp` & `.cpp`)
+API Mode runs an HTTP server that accepts requests via curl or other HTTP clients:
 
-| Method | Purpose |
-|--------|---------|
-| `initializeAllStockQueues()` | Creates 10 empty queues on separate threads |
-| `findAvailableQueueIndex()` | Finds an unused queue for symbol assignment |
-| `assignSymbolToQueue(index, symbol, period)` | Starts tracking a symbol and collecting data |
-| `releaseQueue(index)` | Stops tracking a symbol and frees the queue |
-| `purgeOldDataFromQueue(index)` | Removes data older than retention period |
-| `handleTickData(symbol, data)` | Processes incoming tick data for a symbol |
-| `displayQueueStatus()` | Shows the current state of all queues |
+```bash
+# Run API server on the default port (9000)
+make test-api
 
-### IBKR Trader (`src/config/config.hpp` & `.cpp`)
+# Run API server on a specific port
+./bin/ibkr-trader --api --port 8080
+```
 
-| Method | Purpose |
-|--------|---------|
-| `connect()` | Establishes connection to IBKR API |
-| `requestTickByTickData()` | Requests real-time tick data for a symbol |
-| `tickByTickAllLast()` | Callback that receives tick data from IBKR |
+#### Available Endpoints
 
-### Observer Implementation (`src/observer/observer.hpp` & `.cpp`)
+| Method | Endpoint          | Description                    |
+|--------|-------------------|--------------------------------|
+| GET    | /status           | Get server status              |
+| GET    | /trades           | Get current trades             |
+| POST   | /trade            | Submit a trade request         |
+| POST   | /clear            | Clear a specific symbol        |
+| POST   | /clear-all        | Clear all symbols              |
+| POST   | /emergency-stop   | Trigger emergency stop         |
 
-| Method | Purpose |
-|--------|---------|
-| `createCSVObserver()` | Creates an observer for the CSV file |
-| `startWatching()` | Begins monitoring in a separate thread |
-| `addObserver()` | Registers a consumer to receive notifications |
+#### Example curl Commands
 
-## Threading Architecture
+Get server status:
+```bash
+curl -X GET http://localhost:9000/status
+```
 
-Each stock queue has its own dedicated thread:
-- Thread is created when `observer->startWatching()` is called
-- Queue observer continuously monitors for changes
-- Independent, concurrent processing of multiple symbols
+Get current trades:
+```bash
+curl -X GET http://localhost:9000/trades
+```
 
-## Detailed Data Flow
+Submit a trade request:
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "AAPL",
+    "params": {
+      "lots": 5,
+      "margin": ".10",
+      "stopLoss": ".05",
+      "maxTrades": 10,
+      "lossThreshold": 30,  // daily loss threshold before giving up on this stock for the day
+      "winThreshold": 50,  // daily win threshold before giving up on this stock for the day
+      "minWinRate": ".50",
+      "maxHoldSeconds": 3600
+    }
+  }' \
+  http://localhost:9000/trade
+```
 
-1. IBKR API sends tick data via callbacks
-2. Data is processed in `tickByTickAllLast()`
-3. Formatted data is passed to `STKQueueManager::handleTickData()`
-4. Data is written to files and stored in queues
-5. Old data is automatically purged based on retention periods
+Clear a specific symbol:
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"symbol": "AAPL"}' \
+  http://localhost:9000/clear
+```
 
-## Usage
+Clear all symbols:
+```bash
+curl -X POST http://localhost:9000/clear-all
+```
 
-Run the program and use the CLI menu to:
-1. Connect to IBKR (option 0)
-2. Add symbols to watch via CSV or manual assignment (options 14, 19)
-3. Interact with queue management (options 17, 18, 20)
-4. Request various types of market data (options 1-13)
+Trigger emergency stop:
+```bash
+curl -X POST http://localhost:9000/emergency-stop
+```
 
+### Notes for Docker/Container Testing
+
+When testing in a container environment, ensure:
+1. The port used by the API server (default: 9000) is exposed in your container configuration
+2. Use the container IP or hostname instead of localhost in curl commands from your host machine
+3. For complete container isolation, you may need to use `docker-compose` to set up networking between services 

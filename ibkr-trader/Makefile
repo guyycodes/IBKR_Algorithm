@@ -3,11 +3,13 @@ CXXFLAGS = -std=c++17 -w -g
 INCLUDES = -I./include \
            -I./include/ibkr/cppclient/client \
            -I./include/ibkr/cppclient/client/protobufUnix \
+           -I./include/nlohmann \
            -I./src
 SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
 LIBDIR = lib
+TESTDIR = $(SRCDIR)/tests
 
 # Link against protobuf library
 LIBS = -L$(LIBDIR) -lprotobuf -pthread -lbid
@@ -16,6 +18,7 @@ LIBS = -L$(LIBDIR) -lprotobuf -pthread -lbid
 IBKR_SRCDIR = include/ibkr/cppclient/client
 SOURCES = $(wildcard $(SRCDIR)/*.cpp) \
           $(wildcard $(SRCDIR)/*/*.cpp) \
+          $(wildcard $(SRCDIR)/*/*/*.cpp) \
           $(wildcard $(IBKR_SRCDIR)/*.cpp) \
           $(wildcard $(IBKR_SRCDIR)/protobufUnix/*.cc)
           
@@ -31,6 +34,29 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
+
+# Test targets using TestInputManager
+test-cli: $(TARGET)
+	@echo "Running test CLI mode (using TestInputManager)..."
+	@$(TARGET) --test-cli
+
+test-api: $(TARGET)
+	@echo "Running test API mode (using TestInputManager)..."
+	@$(TARGET) --test-api
+
+# Direct mode targets using InputManager
+run-cli: $(TARGET)
+	@echo "Running CLI mode directly (using InputManager)..."
+	@$(TARGET) --cli
+	
+run-api: $(TARGET)
+	@echo "Running API server directly (using InputManager)..."
+	@$(TARGET) --api
+
+# Help target
+help: $(TARGET)
+	@echo "Showing help..."
+	@$(TARGET) --help
 
 # Rule for src files
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
@@ -50,4 +76,4 @@ $(OBJDIR)/ibkr/protobuf/%.o: $(IBKR_SRCDIR)/protobufUnix/%.cc
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
 
-.PHONY: all clean
+.PHONY: all clean test-cli test-api run-cli run-api help
