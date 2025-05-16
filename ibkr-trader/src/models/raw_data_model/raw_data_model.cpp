@@ -7,8 +7,15 @@ namespace raw_data_model {
 // RawDataModel implementation
 //
 
-RawDataModel::RawDataModel(const std::string& symbol) 
-    : m_symbol(symbol), m_timestamp(0) {
+RawDataModel::RawDataModel(const std::string& symbol)
+    : m_symbol(symbol) {
+    // Initialize trading parameters with default values
+    m_params = {};
+    m_status = "initialized";
+    m_timestamp = 0;
+    
+    // Initialize the stock queue
+    m_stockQueue = std::make_unique<stk_q::STK_Q>();
 }
 
 bool RawDataModel::initFromJson(const nlohmann::json& jsonData) {
@@ -41,9 +48,70 @@ bool RawDataModel::initFromJson(const nlohmann::json& jsonData) {
     }
 }
 
+// Convert MarketDataTick to STK_Q_Data
+stk_q::STK_Q_Data RawDataModel::convertTickToQueueData(const MarketDataTick& tick) const {
+    stk_q::STK_Q_Data queueData;
+    queueData.symbol = m_symbol;
+    queueData.price = tick.price;
+    queueData.time = static_cast<long>(tick.timestamp);
+    queueData.size = tick.volume;
+    queueData.exchange = ""; // Can be populated with actual exchange if available
+    return queueData;
+}
+
+// Add a market data tick - updates the queue only
+// This is the core instance method that adds data directly to this model's queue
 void RawDataModel::addTick(const MarketDataTick& tick) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_ticks.push_back(tick);
+    
+    // ********************************************************************
+    // IMPORTANT DESIGN DECISION:
+    // Ticks are stored ONLY in the queue (STK_Q).
+    // The ModelManager will prune the queue based on time window settings.
+    // ********************************************************************
+    
+    // Store data in the queue
+    if (m_stockQueue) {
+        stk_q::STK_Q_Data queueData = convertTickToQueueData(tick);
+        m_stockQueue->push(std::move(queueData));
+    }
+}
+
+// Queue operations
+void RawDataModel::pushToQueue(stk_q::STK_Q_Data& data) {
+    if (m_stockQueue) {
+        m_stockQueue->push(data);
+    }
+}
+
+void RawDataModel::pushToQueue(stk_q::STK_Q_Data&& data) {
+    if (m_stockQueue) {
+        m_stockQueue->push(std::move(data));
+    }
+}
+
+bool RawDataModel::popFromQueue(stk_q::STK_Q_Data& outData) {
+    if (m_stockQueue) {
+        return m_stockQueue->pop(outData);
+    }
+    return false;
+}
+
+stk_q::STK_Q* RawDataModel::getStockQueue() const {
+    return m_stockQueue.get();
+}
+
+size_t RawDataModel::getQueueSize() const {
+    if (m_stockQueue) {
+        return m_stockQueue->size();
+    }
+    return 0;
+}
+
+void RawDataModel::clearQueue() {
+    if (m_stockQueue) {
+        m_stockQueue->clear();
+    }
 }
 
 std::string RawDataModel::getSymbol() const {
@@ -54,26 +122,33 @@ const TradingParams& RawDataModel::getParams() const {
     return m_params;
 }
 
-const std::vector<MarketDataTick>& RawDataModel::getTicks() const {
-    return m_ticks;
-}
-
-const MarketDataTick* RawDataModel::getLatestTick() const {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    if (m_ticks.empty()) {
-        return nullptr;
-    }
-    return &m_ticks.back();
-}
-
-size_t RawDataModel::getTickCount() const {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    return m_ticks.size();
-}
 
 void RawDataModel::clearTicks() {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_ticks.clear();
+    
+    // Note: This method is kept for backward compatibility
+    // It now only clears the queue
+    if (m_stockQueue) {
+        m_stockQueue->clear();
+    }
+}
+
+// Get the most recent tick directly from the queue (more accurate with current design)
+bool RawDataModel::getLatestTickFromQueue(MarketDataTick& outTick) const {
+    if (!m_stockQueue || m_stockQueue->empty()) {
+        return false;
+    }
+    
+    stk_q::STK_Q_Data data;
+    if (m_stockQueue->peek(data)) {
+        // Convert queue data to tick format
+        outTick.price = data.price;
+        outTick.volume = data.size;
+        outTick.timestamp = data.time;
+        return true;
+    }
+    
+    return false;
 }
 
 //
@@ -127,10 +202,12 @@ bool RawDataModelManager::initModelFromJson(const nlohmann::json& jsonData) {
     }
 }
 
+// Manager method to add a tick to a model identified by symbol
+// This is a convenience method that handles model lookup/creation
 bool RawDataModelManager::addTickToModel(const std::string& symbol, const MarketDataTick& tick) {
     auto model = getModel(symbol);
     if (model) {
-        model->addTick(tick);
+        model->addTick(tick);  // Delegates to the instance method
         return true;
     }
     return false;

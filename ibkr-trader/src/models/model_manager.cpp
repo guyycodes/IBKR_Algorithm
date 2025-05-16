@@ -49,7 +49,11 @@ uint64_t ModelManager::windowToMilliseconds() const {
  * Remove data points that fall outside the specified time window
  * 
  * This is the key method that prevents uncontrolled data accumulation.
- * It calculates a cutoff timestamp and removes any ticks older than that.
+ * It calculates a cutoff timestamp and removes any ticks older than that
+ * from the queue.
+ * 
+ * This implementation uses the STK_Q::removeOlderThan method to efficiently
+ * filter out old data points from the queue based on the configured time window.
  */
 void ModelManager::pruneOldData() {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -60,34 +64,15 @@ void ModelManager::pruneOldData() {
     
     // Calculate cutoff time by subtracting the window size from current time
     auto cutoffMs = nowMs - windowToMilliseconds();
+
+    // Get access to the queue
+    auto* queue = m_rawDataModel->getStockQueue();
+    if (!queue) return;
     
-    // Get all ticks from the raw data model
-    const auto& ticks = m_rawDataModel->getTicks();
+    // Prune the queue by removing items older than the cutoff time
+    queue->removeOlderThan(cutoffMs);
     
-    // If no ticks or all ticks are within window (front/oldest tick is newer than cutoff), return
-    if (ticks.empty() || ticks.front().timestamp >= cutoffMs) {
-        return;
-    }
-    
-    // Create a new vector with only the ticks within the window
-    // This is more efficient than removing items one by one
-    std::vector<raw_data_model::MarketDataTick> newTicks;
-    newTicks.reserve(ticks.size()); // Pre-allocate memory to avoid reallocations
-    
-    // Copy only the ticks that are within the time window
-    for (const auto& tick : ticks) {
-        if (tick.timestamp >= cutoffMs) {
-            newTicks.push_back(tick);
-        }
-    }
-    
-    // Clear and replace the ticks in the raw data model
-    m_rawDataModel->clearTicks();
-    for (const auto& tick : newTicks) {
-        m_rawDataModel->addTick(tick);
-    }
-    
-    // Update last prune time to avoid pruning too frequently
+    // Update last prune time
     m_lastPruneTime = now;
 }
 
@@ -101,24 +86,25 @@ bool ModelManager::initFromJson(const nlohmann::json& jsonData) {
 }
 
 /**
- * Add a new market data tick and prune old data if necessary
+ * Add a new market data tick and immediately prune the queue
  * 
- * This method adds the tick to the underlying model and then checks
- * if pruning is needed based on the elapsed time since last prune.
+ * This method adds the tick to the RawDataModel's queue and then
+ * calls pruneOldData() to remove any data points that fall outside
+ * the specified time window. This ensures the queue size is constantly
+ * managed and prevents unbounded memory growth.
+ * 
+ * Note: This delegates the actual storage to RawDataModel::addTick,
+ * but adds time window management on top of it.
+ * 
+ * @param tick The new market data tick to add
  */
 void ModelManager::addTick(const raw_data_model::MarketDataTick& tick) {
-    // Add the tick to the underlying model
+    // Add the tick to the underlying model's queue
     m_rawDataModel->addTick(tick);
     
-    // Check if it's time to prune old data
-    auto now = std::chrono::system_clock::now();
-    auto elapsed = now - m_lastPruneTime;
-    
-    // Prune every second (can be adjusted for performance if needed)
-    // This ensures memory usage doesn't grow too large between pruning operations
-    if (std::chrono::duration_cast<std::chrono::seconds>(elapsed).count() >= 1) {
-        pruneOldData();
-    }
+    // Prune old data immediately after adding a new tick
+    // This ensures we maintain the time window constraint
+    pruneOldData();
 }
 
 /**
@@ -145,8 +131,12 @@ const raw_data_model::TradingParams& ModelManager::getParams() const {
 /**
  * Get all ticks that fall within the current time window
  * 
- * This provides a filtered view of the ticks based on the current time window,
- * without modifying the underlying raw data model.
+ * This provides a filtered view of the ticks based on the current time window.
+ * Since we're now storing ticks only in the queue rather than in vectors,
+ * this method creates a vector representation of the queue contents for
+ * compatibility with existing code.
+ * 
+ * Note: This creates a copy of data and should be used sparingly.
  */
 std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() const {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -158,17 +148,38 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
     // Calculate cutoff time by subtracting the window size from current time
     auto cutoffMs = nowMs - windowToMilliseconds();
     
-    // Get all ticks from the raw data model
-    const auto& ticks = m_rawDataModel->getTicks();
-    
-    // Create a new vector with only the ticks within the window
+    // Create a vector to hold the filtered ticks
     std::vector<raw_data_model::MarketDataTick> windowTicks;
-    windowTicks.reserve(ticks.size()); // Pre-allocate memory for efficiency
     
-    // Copy only the ticks that are within the time window
-    for (const auto& tick : ticks) {
-        if (tick.timestamp >= cutoffMs) {
-            windowTicks.push_back(tick);
+    // Get access to the queue
+    auto* queue = m_rawDataModel->getStockQueue();
+    if (!queue) return windowTicks;
+    
+    // Create a temporary queue to prevent modifying the original
+    std::queue<stk_q::STK_Q_Data> tempQueue;
+    stk_q::STK_Q_Data data;
+    
+    // Get a copy of the queue
+    auto queueSize = queue->size();
+    windowTicks.reserve(queueSize); // Reserve space for efficiency
+    
+    // We'll create a temporary copy of the queue by popping and re-adding
+    for (size_t i = 0; i < queueSize; i++) {
+        if (queue->pop(data)) {
+            // Only include data within the time window
+            if (static_cast<uint64_t>(data.time) >= cutoffMs) {
+                // Convert queue data back to MarketDataTick
+                raw_data_model::MarketDataTick tick;
+                tick.price = data.price;
+                tick.volume = data.size;
+                tick.timestamp = data.time;
+                
+                // Add to vector
+                windowTicks.push_back(tick);
+            }
+            
+            // Re-add to the original queue
+            queue->push(data);
         }
     }
     
@@ -177,22 +188,43 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
 
 /**
  * Get the most recent market data tick
+ * 
+ * This method gets the latest tick directly from the queue, which is
+ * where ticks are stored in the current design.
+ * 
+ * Note: This returns nullptr if the queue is empty or can't be accessed.
  */
 const raw_data_model::MarketDataTick* ModelManager::getLatestTick() const {
-    return m_rawDataModel->getLatestTick();
+    static raw_data_model::MarketDataTick latestTick;
+    
+    if (m_rawDataModel->getLatestTickFromQueue(latestTick)) {
+        return &latestTick;
+    }
+    
+    return nullptr;
 }
 
 /**
- * Get the total number of ticks currently stored
+ * Get the total number of ticks currently stored in the queue
+ * 
+ * This returns the size of the queue rather than the vector
+ * since ticks are now stored only in the queue.
  */
 size_t ModelManager::getTickCount() const {
-    return m_rawDataModel->getTickCount();
+    auto* queue = m_rawDataModel->getStockQueue();
+    if (!queue) {
+        return 0;
+    }
+    return queue->size();
 }
 
 /**
  * Clear all stored ticks (trading parameters are preserved)
+ * 
+ * This clears the STK_Q queue of all stored ticks.
  */
 void ModelManager::clearTicks() {
+    // This will clear the queue in RawDataModel
     m_rawDataModel->clearTicks();
 }
 

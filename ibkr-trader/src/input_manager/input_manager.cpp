@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <thread>
 #include <chrono>
+#include <iomanip>
 
 namespace input_manager {
 
@@ -222,76 +223,7 @@ void InputManager::clearAllInputs() {
 void InputManager::registerTradeCallback(std::function<void(const nlohmann::json&)> callback) {
     logMessage(1, "Registering trade callback");
     
-    // Create a combined callback that:
-    // 1. Processes the standardized JSON from input_manager to model_manager
-    // 2. Forwards the JSON to any user-provided callback
-    m_tradeCallback = [this, callback](const nlohmann::json& outputJson) {
-        // ===================================================================
-        // BRIDGE TO MODEL MANAGER
-        // This lambda acts as the connector between InputManager and ModelManager.
-        // It takes the standardized JSON from InputManager and creates/updates
-        // model instances in ModelManagerFactory for each symbol.
-        // ===================================================================
-        
-        // Process each symbol in the standardized JSON structure
-        for (auto it = outputJson.begin(); it != outputJson.end(); ++it) {
-            const std::string& symbol = it.key();
-            const nlohmann::json& tradeData = it.value();
-            
-            // Get the ModelManagerFactory singleton instance
-            // This ensures we're working with the same set of models across the application
-            auto& factory = model_manager::ModelManagerFactory::getInstance();
-            
-            // Set default time window for market data retention
-            // These values determine how much historical data the model will keep
-            size_t windowSize = 60;
-            model_manager::TimeWindowUnit windowUnit = model_manager::TimeWindowUnit::MINUTES;
-            
-            // Initialize or update the model with the JSON data
-            // If the model doesn't exist yet, it will be created with these parameters
-            // If it already exists, it will be updated with the new data
-            bool success = factory.initModelFromJson(symbol, tradeData, windowSize, windowUnit);
-            
-            // Retrieve the model instance to display information and verify singleton behavior
-            auto model = factory.getModelManager(symbol);
-            if (model) {
-                // Print model identification information
-                // The memory addresses should be consistent for the same symbol across calls,
-                // which confirms the singleton pattern is working correctly
-                std::cout << "\n[ModelManager] Initialized model for symbol: " << symbol << std::endl;
-                std::cout << "  Memory address: " << model.get() << std::endl;
-                
-                // Print information about the underlying raw data model
-                // This is also a singleton, so addresses should be consistent
-                auto rawModel = model->getRawDataModel();
-                std::cout << "  Raw data model address: " << rawModel.get() << std::endl;
-                std::cout << "  Symbol from model: " << model->getSymbol() << std::endl;
-                std::cout << "  Current tick count: " << model->getTickCount() << std::endl;
-                
-                // Print the time window configuration
-                // This shows how much historical data will be kept
-                auto window = model->getTimeWindow();
-                std::cout << "  Time window: " << window.first << " ";
-                switch (window.second) {
-                    case model_manager::TimeWindowUnit::SECONDS: std::cout << "seconds"; break;
-                    case model_manager::TimeWindowUnit::MINUTES: std::cout << "minutes"; break;
-                    case model_manager::TimeWindowUnit::HOURS: std::cout << "hours"; break;
-                }
-                std::cout << std::endl;
-            } else {
-                std::cout << "[ModelManager] Failed to get model for symbol: " << symbol << std::endl;
-            }
-        }
-        
-        // ===================================================================
-        // FORWARD TO USER CALLBACK
-        // After processing with ModelManager, we call the original callback
-        // This maintains the expected behavior while adding the new functionality
-        // ===================================================================
-        if (callback) {
-            callback(outputJson);
-        }
-    };
+
     
     // Register the combined callback with LocalAPI to ensure consistent behavior
     // throughout the application, regardless of the source of the data
@@ -360,6 +292,11 @@ nlohmann::json InputManager::getStatus() const {
 // Get the final JSON output
 nlohmann::json InputManager::getOutput() const {
     return m_outputJson;
+}
+
+// Set the output JSON directly (for testing)
+void InputManager::setOutput(const nlohmann::json& output) {
+    m_outputJson = output;
 }
 
 // Print banner
@@ -551,7 +488,162 @@ void InputManager::processOutput() {
     // Call the trade callback with the updated output
     if (m_tradeCallback) {
         logMessage(0, "Executing trade callback with processed output");
-        m_tradeCallback(m_outputJson);
+        
+        // Add direct ModelManager processing right here in processOutput 
+        // to see if there's an issue with the callback mechanism
+        std::cout << "\n===== DIRECT MODEL PROCESSING =====" << std::endl;
+        std::cout << "Direct processing with " << m_outputJson.size() << " symbols" << std::endl;
+        
+        try {
+            // Process each symbol in the standardized JSON structure
+            for (auto it = m_outputJson.begin(); it != m_outputJson.end(); ++it) {
+                const std::string& symbol = it.key();
+                const nlohmann::json& tradeData = it.value();
+                
+                std::cout << "[DEBUG] Processing symbol: " << symbol << std::endl;
+                
+                try {
+                    // Get the ModelManagerFactory singleton instance
+                    // This ensures we're working with the same set of models across the application
+                    std::cout << "[DEBUG] Getting ModelManagerFactory instance..." << std::endl;
+                    auto& factory = model_manager::ModelManagerFactory::getInstance();
+                    
+                    // Print out the ModelManagerFactory structure
+                    std::cout << "\n[STRUCTURE] MODEL MANAGER FACTORY:" << std::endl;
+                    std::cout << "  ╔═══════════════════════════════════════════════════════════╗" << std::endl;
+                    std::cout << "  ║ ModelManagerFactory (Singleton)                           ║" << std::endl;
+                    std::cout << "  ║ Purpose: Creates and manages ModelManager instances        ║" << std::endl;
+                    std::cout << "  ║ Contains: Map<symbol_string, ModelManager_ptr>            ║" << std::endl;
+                    std::cout << "  ╚═══════════════════════════════════════════════════════════╝" << std::endl;
+                    
+                    // List all symbols currently managed
+                    auto allSymbols = factory.getAllSymbols();
+                    std::cout << "  Currently managing " << allSymbols.size() << " symbols: ";
+                    for (const auto& sym : allSymbols) {
+                        std::cout << sym << " ";
+                    }
+                    std::cout << std::endl << std::endl;
+                    
+                    // Set default time window for market data retention
+                    // These values determine how much historical data the model will keep
+                    size_t windowSize = 60;
+                    model_manager::TimeWindowUnit windowUnit = model_manager::TimeWindowUnit::MINUTES;
+                    
+                    // Initialize or update the model with the JSON data
+                    // If the model doesn't exist yet, it will be created with these parameters
+                    // If it already exists, it will be updated with the new data
+                    std::cout << "[DEBUG] Initializing model from JSON data..." << std::endl;
+                    
+                    // Create properly structured JSON with symbol as top-level key
+                    // RawDataModel::initFromJson expects a JSON where symbol is a top-level key
+                    // Create a properly structured JSON
+                    nlohmann::json properJson;
+                    properJson[symbol] = tradeData;
+                    
+                    std::cout << "Properly structured JSON for RawDataModel:" << std::endl;
+                    std::cout << properJson.dump(2) << std::endl;
+
+                    // Get or create model
+                    auto model = factory.getModelManager(symbol);
+                    if (!model) {
+                        model = factory.createModelManager(symbol, windowSize, windowUnit);
+                    }
+                    
+                    // Initialize with properly structured JSON
+                    bool success = model ? model->initFromJson(properJson) : false;
+                    
+                    std::cout << "[DEBUG] Model initialization " << (success ? "successful" : "failed") << std::endl;
+                    
+                    // Retrieve the model instance to display information and verify singleton behavior
+                    std::cout << "[DEBUG] Getting model manager for symbol: " << symbol << std::endl;
+                    
+                    if (model) {
+                        // Print detailed structure of the ModelManager
+                        std::cout << "\n[STRUCTURE] MODEL MANAGER OBJECT HIERARCHY:" << std::endl;
+                        std::cout << "  ╔═══════════════════════════════════════════════════════════╗" << std::endl;
+                        std::cout << "  ║ ModelManager (for symbol: " << std::left << std::setw(30) << symbol + ")" << "  ║" << std::endl;
+                        std::cout << "  ║ Address: " << std::left << std::setw(48) << model.get() << " ║" << std::endl;
+                        std::cout << "  ║ ┌───────────────────────────────────────────────────────┐ ║" << std::endl;
+                        std::cout << "  ║ │ Contains:                                             │ ║" << std::endl;
+                        std::cout << "  ║ │ 1. RawDataModel (shared_ptr)                          │ ║" << std::endl;
+                        std::cout << "  ║ │    - Stores actual trade parameters                   │ ║" << std::endl;
+                        auto rawModel = model->getRawDataModel();
+                        std::cout << "  ║ │    - Address: " << std::left << std::setw(35) << rawModel.get() << "│ ║" << std::endl;
+                        std::cout << "  ║ │                                                       │ ║" << std::endl;
+                        std::cout << "  ║ │    - Contains STK_Q (stock queue)                     │ ║" << std::endl;
+                        std::cout << "  ║ │      * Address: " << std::left << std::setw(35) << rawModel->getStockQueue() << "        │ ║" << std::endl;
+                        std::cout << "  ║ │      * Queue size: " << std::left << std::setw(5) << rawModel->getQueueSize() << "                               │ ║" << std::endl;
+                        std::cout << "  ║ │                                                       │ ║" << std::endl;
+                        std::cout << "  ║ │ 2. Time Window Configuration                          │ ║" << std::endl;
+                        auto window = model->getTimeWindow();
+                        std::cout << "  ║ │    - Window Size: " << std::left << std::setw(5) << window.first << "                                │ ║" << std::endl;
+                        std::cout << "  ║ │    - Window Unit: " << std::left << std::setw(10);
+                        switch (window.second) {
+                            case model_manager::TimeWindowUnit::SECONDS: std::cout << "SECONDS"; break;
+                            case model_manager::TimeWindowUnit::MINUTES: std::cout << "MINUTES"; break;
+                            case model_manager::TimeWindowUnit::HOURS: std::cout << "HOURS"; break;
+                        }
+                        std::cout << "                      │ ║" << std::endl;
+                        std::cout << "  ║ └───────────────────────────────────────────────────────┘ ║" << std::endl;
+                        std::cout << "  ╚═══════════════════════════════════════════════════════════╝" << std::endl;
+                        
+                        // Print model identification information
+                        // The memory addresses should be consistent for the same symbol across calls,
+                        // which confirms the singleton pattern is working correctly
+                        std::cout << "\n[ModelManager] Initialized model for symbol: " << symbol << std::endl;
+                        std::cout << "  Memory address: " << model.get() << " (C++ ModelManager object)" << std::endl;
+                        
+                        // Print information about the underlying raw data model
+                        // This is also a singleton, so addresses should be consistent
+                        std::cout << "[DEBUG] Getting raw data model..." << std::endl;
+                        std::cout << "  Raw data model address: " << rawModel.get() << " (C++ RawDataModel object)" << std::endl;
+                        std::cout << "  Symbol from model: " << model->getSymbol() << std::endl;
+                        
+                        // Show what's actually stored in the model
+                        std::cout << "\n[DATA] Trade parameters stored in model:" << std::endl;
+                        const auto& params = rawModel->getParams();
+                        std::cout << "  Lots: " << params.lots << std::endl;
+                        std::cout << "  Margin: " << params.margin << std::endl;
+                        std::cout << "  Stop Loss: " << params.stopLoss << std::endl;
+                        std::cout << "  Max Trades: " << params.maxTrades << std::endl;
+                        std::cout << "  Loss Threshold: " << params.lossThreshold << std::endl;
+                        std::cout << "  Win Threshold: " << params.winThreshold << std::endl;
+                        std::cout << "  Min Win Rate: " << params.minWinRate << std::endl;
+                        std::cout << "  Max Hold Seconds: " << params.maxHoldSeconds << std::endl;
+                        
+                        std::cout << "  Current tick count: " << model->getTickCount() << std::endl;
+                        
+                        // Print the time window configuration
+                        // This shows how much historical data will be kept
+                        std::cout << "[DEBUG] Getting time window..." << std::endl;
+                        std::cout << "  Time window: " << window.first << " ";
+                        switch (window.second) {
+                            case model_manager::TimeWindowUnit::SECONDS: std::cout << "seconds"; break;
+                            case model_manager::TimeWindowUnit::MINUTES: std::cout << "minutes"; break;
+                            case model_manager::TimeWindowUnit::HOURS: std::cout << "hours"; break;
+                        }
+                        std::cout << std::endl;
+                    } else {
+                        std::cout << "[ModelManager] Failed to get model for symbol: " << symbol << std::endl;
+                    }
+                }
+                catch (const std::exception& e) {
+                    std::cout << "[ERROR] Exception processing symbol " << symbol << ": " << e.what() << std::endl;
+                }
+                catch (...) {
+                    std::cout << "[ERROR] Unknown exception processing symbol " << symbol << std::endl;
+                }
+            }
+        }
+        catch (const std::exception& e) {
+            std::cout << "[ERROR] Exception in trade callback: " << e.what() << std::endl;
+        }
+        catch (...) {
+            std::cout << "[ERROR] Unknown exception in trade callback" << std::endl;
+        }
+        std::cout << "===== END DIRECT PROCESSING =====" << std::endl;
+        
+        // print out the whole MODEL MANAGER SHAPE here
     }
 }
 // *****************************************************************************

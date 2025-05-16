@@ -55,7 +55,11 @@ public:
     InputSource getActiveSource() const;
     nlohmann::json getStatus() const;
     nlohmann::json getOutput() const;
+    void setOutput(const nlohmann::json& output);
     nlohmann::json getPendingRequests() const;
+    
+    // For testing only
+    void testProcessOutput() { processOutput(); }
     
     // UI functions
     void printBanner() const;

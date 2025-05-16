@@ -22,17 +22,23 @@
  * └── Maps symbols to ModelManager instances
  *     ├── ModelManager for "AAPL" (5-min window)
  *     │   └── Contains RawDataModel for "AAPL" from RawDataModelManager
- *     │       └── Contains filtered MarketDataTicks (only the last 5 minutes)
+ *     │       ├── Contains TradingParams {lots: 1, margin: "50%", ...}
+ *     │       │
+ *     │       └── Contains STK_Q for "AAPL" (Thread-safe queue for stock ticks)
  *     │           ├── Tick {price: 190.25, volume: 100, timestamp: 1633455600000}
  *     │           ├── Tick {price: 190.30, volume: 200, timestamp: 1633455601200}
  *     │           ├── ... (only ticks within the last 5 minutes)
  *     │           └── Tick {price: 190.45, volume: 150, timestamp: 1633455899800}
- *     │       └── Contains TradingParams {lots: 1, margin: "50%", ...}
  *     │
  *     └── ModelManager for "MSFT" (1-min window)
  *         └── Contains RawDataModel for "MSFT" from RawDataModelManager
- *             └── Contains filtered MarketDataTicks (only the last 1 minute)
- *             └── Contains TradingParams
+ *             ├── Contains TradingParams
+ *             │
+ *             └── Contains STK_Q for "MSFT" (Thread-safe queue for stock ticks)
+ *                ├── Tick {price: 190.25, volume: 100, timestamp: 1633455600000}
+ *                ├── Tick {price: 190.30, volume: 200, timestamp: 1633455601200}
+ *                ├── ... (only ticks within the last 5 minutes)
+ *                └── Tick {price: 190.45, volume: 150, timestamp: 1633455899800}
  * 
  * Usage flow:
  * 1. Client code creates/gets a ModelManager with a specified time window
@@ -59,29 +65,51 @@ enum class TimeWindowUnit {
  * This class wraps a RawDataModel and ensures that only data within a specified
  * time window is kept, preventing unbounded memory growth as new ticks arrive.
  */
+//
+// ModelManager class - Manages market data for a specific trading symbol
+//
+// This class is responsible for:
+// 1. Maintaining a reference to the underlying RawDataModel for a symbol
+// 2. Managing time window settings for historical data retention
+// 3. Actively pruning the STK_Q in RawDataModel to maintain the time window
+//
+// DESIGN NOTE: Market data ticks are stored ONLY in the STK_Q in RawDataModel,
+// not in the vector of ticks. The ModelManager automatically prunes old data
+// from the queue whenever new data is added, keeping only data within the 
+// specified time window.
+//
+// STRUCTURE:
+// ModelManager contains:
+//   1. A shared_ptr to a RawDataModel
+//      - The RawDataModel stores the actual trading parameters (lots, margin, etc.)
+//      - The RawDataModel contains a thread-safe STK_Q for stock data (ticks)
+//   2. Time window configuration 
+//      - Size and unit (e.g., 60 minutes)
+//      - Used to actively prune the queue to maintain the time window
+//   3. Methods to manipulate and access the data model
+//
 class ModelManager {
 private:
-    // Underlying raw data model from the RawDataModelManager singleton
+    // The underlying raw data model that stores the actual data
+    // This is the primary data model that contains all trading parameters and market data
     std::shared_ptr<raw_data_model::RawDataModel> m_rawDataModel;
     
-    // Time window settings that control how much historical data to keep
-    size_t m_windowSize;        // Size of the window (in units specified by m_windowUnit)
-    TimeWindowUnit m_windowUnit; // Unit for the window size (seconds, minutes, hours)
+    // Time window settings for historical data retention
+    size_t m_windowSize;                // Size of the time window
+    TimeWindowUnit m_windowUnit;        // Unit for the time window (seconds, minutes, hours)
+    std::chrono::system_clock::time_point m_lastPruneTime; // When data was last pruned
     
-    // Timestamp of when data was last pruned (to avoid pruning too frequently)
-    std::chrono::time_point<std::chrono::system_clock> m_lastPruneTime;
-    
-    // Mutex for thread safety when accessing/modifying data
+    // Mutex for thread-safe operations
     mutable std::mutex m_mutex;
     
     /**
-     * Convert the time window to milliseconds for timestamp comparisons
+     * Convert the time window to milliseconds for comparisons
      * @return Window size in milliseconds
      */
     uint64_t windowToMilliseconds() const;
     
     /**
-     * Remove data points outside the time window to maintain the sliding window
+     * Remove data points that fall outside the current time window
      * This is the key method that prevents unbounded data accumulation
      */
     void pruneOldData();
@@ -103,7 +131,13 @@ public:
     bool initFromJson(const nlohmann::json& jsonData);
     
     /**
-     * Add a new market data tick and automatically prune old data if needed
+     * Add a new market data tick and immediately prune the queue
+     * 
+     * This method adds the tick to the RawDataModel's queue and then
+     * calls pruneOldData() to remove any data points that fall outside
+     * the specified time window. This ensures the queue size is constantly
+     * managed and prevents unbounded memory growth.
+     * 
      * @param tick The new market data tick to add
      */
     void addTick(const raw_data_model::MarketDataTick& tick);
@@ -163,72 +197,64 @@ public:
     void setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit);
 };
 
-/**
- * @class ModelManagerFactory
- * @brief Singleton factory that creates and manages ModelManager instances
- * 
- * This class provides centralized access to all model managers in the system,
- * allowing retrieval by symbol and ensuring only one manager exists per symbol.
- */
+//
+// ModelManagerFactory - Singleton manager of ModelManager instances
+//
+// This class is responsible for creating, storing, and managing ModelManager instances.
+// It ensures that only one ModelManager exists per symbol (singleton per symbol).
+//
+// ARCHITECTURE:
+// - ModelManagerFactory (Singleton)
+//   |
+//   ├── Map<symbol, ModelManager>
+//   |    |
+//   |    ├── ModelManager for symbol "AAPL"
+//   |    |    └── Contains RawDataModel for "AAPL"
+//   |    |
+//   |    ├── ModelManager for symbol "MSFT" 
+//   |    |    └── Contains RawDataModel for "MSFT"
+//   |    |
+//   |    └── ... (more symbols)
+//   |
+//   └── Methods to create/get/manage ModelManagers
+//
 class ModelManagerFactory {
 private:
-    // Private constructor for singleton pattern
-    ModelManagerFactory() = default;
-    
-    // Map that associates trading symbols with their ModelManager instances
-    std::map<std::string, std::shared_ptr<ModelManager>> m_managers;
-    
-    // Mutex for thread safety when accessing the managers map
-    mutable std::mutex m_mutex;
-    
-    // Static singleton instance and its mutex
+    // Static singleton instance
     static std::unique_ptr<ModelManagerFactory> s_instance;
-    static std::mutex s_instanceMutex;
-
+    static std::mutex s_instanceMutex; // For thread-safe initialization
+    
+    // Map of symbol to ModelManager instances
+    // This is the core data structure that maintains all model managers
+    std::map<std::string, std::shared_ptr<ModelManager>> m_managers;
+    mutable std::mutex m_mutex; // For thread-safe operations on the map
+    
+    // Private constructor (singleton pattern)
+    ModelManagerFactory() {}
+    
 public:
-    // Delete copy/move constructors and assignment operators to ensure singleton
+    // Delete copy constructor and assignment (singleton pattern)
     ModelManagerFactory(const ModelManagerFactory&) = delete;
-    ModelManagerFactory(ModelManagerFactory&&) = delete;
     ModelManagerFactory& operator=(const ModelManagerFactory&) = delete;
-    ModelManagerFactory& operator=(ModelManagerFactory&&) = delete;
     
-    // Destructor
-    ~ModelManagerFactory() = default;
-    
-    /**
-     * Get the singleton instance of the factory
-     * @return Reference to the singleton instance
-     */
+    // Get the singleton instance of the factory
+    // This is the only way to access the factory
     static ModelManagerFactory& getInstance();
     
-    /**
-     * Create a new model manager for a symbol with specified time window
-     * @param symbol Trading symbol (e.g., "AAPL")
-     * @param windowSize Size of the time window
-     * @param windowUnit Unit for the time window
-     * @return Shared pointer to the created model manager
-     */
+    // Create a new model manager for a symbol
+    // If a manager already exists for the symbol, it will be replaced.
     std::shared_ptr<ModelManager> createModelManager(
         const std::string& symbol, 
         size_t windowSize, 
         TimeWindowUnit windowUnit
     );
     
-    /**
-     * Get an existing model manager for a symbol
-     * @param symbol Trading symbol to look up
-     * @return Shared pointer to the model manager, or nullptr if not found
-     */
+    // Get an existing model manager for a symbol
+    // Returns nullptr if no manager exists for the symbol
     std::shared_ptr<ModelManager> getModelManager(const std::string& symbol);
     
-    /**
-     * Initialize a model from JSON data, creating it if it doesn't exist
-     * @param symbol Trading symbol
-     * @param jsonData JSON configuration data
-     * @param windowSize Size of the time window
-     * @param windowUnit Unit for the time window
-     * @return True if initialization succeeded, false otherwise
-     */
+    // Initialize a model from JSON data
+    // Will create the model if it doesn't exist
     bool initModelFromJson(
         const std::string& symbol, 
         const nlohmann::json& jsonData, 
@@ -236,29 +262,16 @@ public:
         TimeWindowUnit windowUnit
     );
     
-    /**
-     * Check if a model exists for a given symbol
-     * @param symbol Trading symbol to check
-     * @return True if model exists, false otherwise
-     */
+    // Check if a model exists for a given symbol
     bool hasModel(const std::string& symbol);
     
-    /**
-     * Remove a model for a given symbol
-     * @param symbol Trading symbol to remove
-     * @return True if model was removed, false if it didn't exist
-     */
+    // Remove a model for a given symbol
     bool removeModel(const std::string& symbol);
     
-    /**
-     * Get all symbols that have model managers
-     * @return Vector of symbol strings
-     */
+    // Get all symbols that have model managers
     std::vector<std::string> getAllSymbols() const;
     
-    /**
-     * Clear all model managers
-     */
+    // Clear all model managers
     void clearAll();
 };
 

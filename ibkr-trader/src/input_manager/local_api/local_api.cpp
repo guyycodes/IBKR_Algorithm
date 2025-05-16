@@ -616,13 +616,14 @@ bool LocalAPI::executeRequest(const nlohmann::json& request) {
     // In a real implementation, this would send the request to the trading system
     // For now, just simulate success
     
-    // Create a response
+    // Create a response and store it, but don't call the callback directly
+    // This avoids the double callback issue
     nlohmann::json response = request;
-    response["status"] = "executed - inside local_api.cpp first";
+    response["status"] = "executed";
     response["timestamp"] = std::chrono::system_clock::now().time_since_epoch().count();
     
-    // Call the trade callback
-    m_tradeCallback(response);
+    // DON'T call the trade callback here - let notifyRequestQueueChanged handle it
+    // m_tradeCallback(response);  <-- This line is removed
     
     logMessage(0, "Request executed successfully");
     return true;

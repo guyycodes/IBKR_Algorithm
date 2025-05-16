@@ -8,6 +8,7 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <mutex>
+#include "../../util/stk_q/stk_q.hpp"
 
 namespace raw_data_model {
 
@@ -44,11 +45,12 @@ private:
     std::string m_status;
     uint64_t m_timestamp;
     
-    // Vector of market data ticks
-    std::vector<MarketDataTick> m_ticks;
+    // Thread-safe queue for stock data
+    // This allows efficient processing of real-time market data
+    std::unique_ptr<stk_q::STK_Q> m_stockQueue;
     
     // Mutex for thread safety
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
 
 public:
     // Constructor
@@ -57,8 +59,22 @@ public:
     // Initialize from JSON input
     bool initFromJson(const nlohmann::json& jsonData);
     
-    // Add a market data tick
+    // Add a market data tick - updates the queue only
+    // This is the instance-level method that works directly on this model object
+    // Use this when you already have a reference to a specific RawDataModel instance
+    // For symbol-based access, use RawDataModelManager::addTickToModel instead
     void addTick(const MarketDataTick& tick);
+    
+    // Convert MarketDataTick to STK_Q_Data
+    stk_q::STK_Q_Data convertTickToQueueData(const MarketDataTick& tick) const;
+    
+    // Stock queue operations
+    void pushToQueue(stk_q::STK_Q_Data& data);
+    void pushToQueue(stk_q::STK_Q_Data&& data);
+    bool popFromQueue(stk_q::STK_Q_Data& outData);
+    
+    // Get the stock queue for advanced operations
+    stk_q::STK_Q* getStockQueue() const;
     
     // Get the symbol
     std::string getSymbol() const;
@@ -66,17 +82,17 @@ public:
     // Get trading parameters
     const TradingParams& getParams() const;
     
-    // Get all ticks
-    const std::vector<MarketDataTick>& getTicks() const;
+    // Get the latest tick from queue (more accurate with current design)
+    bool getLatestTickFromQueue(MarketDataTick& outTick) const;
     
-    // Get the latest tick (or nullptr if none)
-    const MarketDataTick* getLatestTick() const;
-    
-    // Get number of ticks
-    size_t getTickCount() const;
+    // Get queue size
+    size_t getQueueSize() const;
     
     // Clear all ticks (keep trading parameters)
     void clearTicks();
+    
+    // Clear the queue
+    void clearQueue();
 };
 
 // Singleton manager that handles creation and access to individual models
@@ -89,7 +105,7 @@ private:
     std::map<std::string, std::shared_ptr<RawDataModel>> m_models;
     
     // Mutex for thread safety
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
     
     // Static singleton instance
     static std::unique_ptr<RawDataModelManager> s_instance;
@@ -114,7 +130,12 @@ public:
     // Initialize a model from JSON
     bool initModelFromJson(const nlohmann::json& jsonData);
     
-    // Add a tick to a model
+    // Add a tick to a model identified by symbol
+    // This is a high-level manager method that:
+    // 1. First gets or creates the model for the given symbol
+    // 2. Then calls RawDataModel::addTick() on that model
+    // Returns true if successful, false if the model couldn't be created
+    // Use this when you only have a symbol name and not a model reference
     bool addTickToModel(const std::string& symbol, const MarketDataTick& tick);
     
     // Check if a model exists
