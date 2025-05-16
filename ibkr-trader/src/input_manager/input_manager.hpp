@@ -42,8 +42,14 @@ public:
     bool getAutoConfirm() const;
     
     // Symbol management
-    bool clearSymbol(const std::string& symbol);
-    void clearAllInputs();
+    
+    // Clear a specific symbol from processing
+    // The shouldCallApi parameter prevents infinite recursion between InputManager and LocalAPI
+    bool clearSymbol(const std::string& symbol, bool shouldCallApi = true);
+    
+    // Clear all symbols and stop all threads
+    // The shouldCallApi parameter prevents infinite recursion between InputManager and LocalAPI
+    void clearAllInputs(bool shouldCallApi = true);
     
     // Callback registration
     void registerTradeCallback(std::function<void(const nlohmann::json&)> callback);

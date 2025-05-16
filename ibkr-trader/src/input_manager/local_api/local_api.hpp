@@ -40,7 +40,13 @@ public:
     bool confirmQueuedRequests();
     
     // Symbol management
+    
+    // Clears a specific symbol from queues and stops its associated thread
+    // Directly accesses AppState to manage threads (NOT via InputManager)
     bool clearSymbol(const std::string& symbol);
+    
+    // Clears all symbols from queues and stops all active threads
+    // Directly accesses AppState to manage threads (NOT via InputManager)
     void clearAllRequests();
     
     // Status and information

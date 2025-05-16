@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <sstream>
+#include "../../util/app_state/app_state.hpp"
 
 // Socket headers for HTTP server
 #include <sys/socket.h>
@@ -467,6 +468,23 @@ nlohmann::json LocalAPI::getStatus() const {
     status["auto_confirm"] = m_autoConfirm;
     status["config"] = m_config;
     
+    // Get the list of symbols that are running on threads
+    auto& appState = app_state::AppState::getInstance();
+    auto runningSymbols = appState.getRunningSymbols();
+    status["active_threads"] = runningSymbols;
+    status["thread_count"] = runningSymbols.size();
+    
+    // Add detailed information about requests in the queue
+    nlohmann::json queuedSymbols = nlohmann::json::object();
+    for (const auto& request : m_requestQueue) {
+        if (request.contains("symbol") && request.contains("params")) {
+            std::string symbol = request["symbol"];
+            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            queuedSymbols[symbol] = request["params"];
+        }
+    }
+    status["queued_symbols"] = queuedSymbols;
+    
     return status;
 }
 
@@ -686,6 +704,18 @@ void LocalAPI::notifyRequestQueueChanged() {
 }
 
 // Clear a specific symbol from the processing queue
+//
+// This method performs several important operations:
+// 1. Removes the symbol from both the main request queue and pending queue
+// 2. Stops and removes the thread associated with the symbol
+// 3. Updates the API's internal state
+//
+// IMPORTANT: This method directly accesses AppState to stop threads rather than
+// calling back to InputManager->clearSymbol() to avoid infinite recursion.
+// The original design had a circular reference where:
+//   - LocalAPI::clearSymbol() called InputManager::clearSymbol()
+//   - InputManager::clearSymbol() called LocalAPI::clearSymbol()
+//   - This created an infinite loop that caused stack overflow
 bool LocalAPI::clearSymbol(const std::string& symbol) {
     logMessage(1, "Clearing symbol: " + symbol);
     
@@ -716,21 +746,43 @@ bool LocalAPI::clearSymbol(const std::string& symbol) {
             ++pendingIt;
         }
     }
+
+    // Thread Management: Stop and remove the running thread if it exists
+    // We access AppState directly instead of going through InputManager to avoid circular references
+    auto& appState = app_state::AppState::getInstance();
+    if (appState.hasRunningThread(upperSymbol)) {
+        appState.removeModelThread(upperSymbol);
+        found = true;
+        logMessage(0, "Thread for symbol " + upperSymbol + " stopped and removed");
+    }
+    
+    // IMPORTANT: We do NOT call back to InputManager::clearSymbol here
+    // This would create an infinite recursion:
+    //   LocalAPI::clearSymbol -> InputManager::clearSymbol -> LocalAPI::clearSymbol -> ...
+    // Instead, we handle everything directly in this method
     
     if (found) {
-        logMessage(0, "Symbol " + symbol + " cleared from queues");
+        logMessage(0, "Symbol " + symbol + " cleared from queues and threads");
         // Notify input manager of changes
         notifyRequestQueueChanged();
     } else {
-        logMessage(1, "Symbol " + symbol + " not found in any queue");
+        logMessage(1, "Symbol " + symbol + " not found in any queue or active threads");
     }
     
     return found;
 }
 
 // Clear all pending requests
+//
+// This method performs several important operations:
+// 1. Clears all symbols from both the main request queue and pending queue
+// 2. Stops ALL running model threads via AppState
+// 3. Updates the API's internal state
+//
+// IMPORTANT: This method directly accesses AppState to stop threads rather than
+// calling back to InputManager->clearAllInputs() to avoid infinite recursion.
 void LocalAPI::clearAllRequests() {
-    logMessage(0, "Clearing all requests");
+    logMessage(0, "Clearing all requests and threads");
     
     // Clear the main request queue
     m_requestQueue.clear();
@@ -738,10 +790,21 @@ void LocalAPI::clearAllRequests() {
     // Also clear the pending queue
     m_pendingQueue.clear();
     
+    // Thread Management: Stop ALL running threads
+    // We access AppState directly instead of going through InputManager
+    auto& appState = app_state::AppState::getInstance();
+    appState.stopAllThreads();
+    logMessage(0, "All model threads stopped");
+    
+    // IMPORTANT: We do NOT call back to InputManager::clearAllInputs here
+    // This would create an infinite recursion:
+    //   LocalAPI::clearAllRequests -> InputManager::clearAllInputs -> LocalAPI::clearAllRequests -> ...
+    // Instead, we handle everything directly in this method
+    
     // Notify input manager of changes
     notifyRequestQueueChanged();
     
-    logMessage(0, "All requests cleared from both queues");
+    logMessage(0, "All requests cleared from queues and all threads stopped");
 }
 
 // Process a trading request (for backward compatibility)

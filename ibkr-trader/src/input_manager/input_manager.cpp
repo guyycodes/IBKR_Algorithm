@@ -1,5 +1,6 @@
 #include "input_manager.hpp"
 #include "../models/model_manager.hpp"
+#include "../util/app_state/app_state.hpp"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -186,11 +187,27 @@ bool InputManager::processBatchRequests(const std::vector<nlohmann::json>& reque
 }
 
 // Clear a symbol from both CLI and API
-bool InputManager::clearSymbol(const std::string& symbol) {
+//
+// This method performs several important operations:
+// 1. Removes the symbol from the InputManager's JSON data
+// 2. Optionally calls the LocalAPI to clear the symbol from its queues
+// 3. Stops and removes the thread associated with the symbol
+//
+// Parameters:
+// - symbol: The trading symbol to clear (e.g., "AAPL")
+// - shouldCallApi: Controls whether to call LocalAPI::clearSymbol
+//
+// The shouldCallApi parameter prevents infinite recursion:
+// - When called directly by user code: shouldCallApi=true (default)
+// - When called by LocalAPI: shouldCallApi=false
+//
+// Without this parameter, we'd have an infinite loop:
+//   InputManager::clearSymbol -> LocalAPI::clearSymbol -> InputManager::clearSymbol -> ...
+bool InputManager::clearSymbol(const std::string& symbol, bool shouldCallApi) {
     logMessage(1, "Clearing symbol: " + symbol);
     
     bool apiResult = true;
-    if (m_activeSource == InputSource::API) {
+    if (m_activeSource == InputSource::API && shouldCallApi) {
         apiResult = m_localApi->clearSymbol(symbol);
     }
     
@@ -203,20 +220,50 @@ bool InputManager::clearSymbol(const std::string& symbol) {
         m_outputJson.erase(upperSymbol);
         jsonResult = true;
     }
+
+    // Thread Management: Stop and remove the thread for this symbol if it's running
+    // We access AppState directly to ensure the thread is properly stopped
+    auto& appState = app_state::AppState::getInstance();
+    if (appState.hasRunningThread(upperSymbol)) {
+        logMessage(0, "Stopping and removing thread for symbol: " + upperSymbol);
+        appState.removeModelThread(upperSymbol);
+        return true;
+    }
     
     return apiResult || jsonResult;
 }
 
 // Clear all inputs from both CLI and API
-void InputManager::clearAllInputs() {
-    logMessage(0, "Clearing all inputs");
+//
+// This method performs several important operations:
+// 1. Clears all symbols from the InputManager's JSON data
+// 2. Optionally calls the LocalAPI to clear all symbols from its queues
+// 3. Stops ALL running model threads via AppState
+//
+// Parameters:
+// - shouldCallApi: Controls whether to call LocalAPI::clearAllRequests
+//
+// The shouldCallApi parameter prevents infinite recursion:
+// - When called directly by user code: shouldCallApi=true (default)
+// - When called by LocalAPI: shouldCallApi=false
+//
+// Without this parameter, we'd have an infinite loop:
+//   InputManager::clearAllInputs -> LocalAPI::clearAllRequests -> InputManager::clearAllInputs -> ...
+void InputManager::clearAllInputs(bool shouldCallApi) {
+    logMessage(0, "Clearing all inputs and stopping all threads");
     
-    if (m_activeSource == InputSource::API) {
+    if (m_activeSource == InputSource::API && shouldCallApi) {
         m_localApi->clearAllRequests();
     }
     
     // Clear output JSON
     m_outputJson.clear();
+    
+    // Thread Management: Stop ALL running threads
+    // We access AppState directly to ensure all threads are properly stopped
+    auto& appState = app_state::AppState::getInstance();
+    appState.stopAllThreads();
+    logMessage(0, "All model threads stopped");
 }
 
 // Register callbacks for events
@@ -257,7 +304,7 @@ void InputManager::emergencyStop() {
     stop();
     
     // Clear all inputs
-    clearAllInputs();
+    clearAllInputs(true);
     
     // Call the emergency stop on LocalAPI
     m_localApi->emergencyStop();
@@ -321,6 +368,7 @@ void InputManager::printMenu() const {
     std::cout << "2. Clear Symbol Input" << std::endl;
     std::cout << "3. Submit All Inputs" << std::endl;
     std::cout << "4. Clear Screen" << std::endl;
+    std::cout << "5. Display Running Threads" << std::endl;
     std::cout << "9. Emergency Exit" << std::endl;
     std::cout << "0. Exit" << std::endl;
     std::cout << "=======================================" << std::endl;
@@ -328,19 +376,52 @@ void InputManager::printMenu() const {
 
 // Print current inputs
 void InputManager::printCurrentInputs() const {
-    if (m_outputJson.empty()) {
-        std::cout << "\nNo inputs currently stored." << std::endl;
+    // Get all running threads from AppState
+    auto& appState = app_state::AppState::getInstance();
+    auto runningSymbols = appState.getRunningSymbols();
+    
+    // Combine running threads with output JSON to show complete picture
+    nlohmann::json combinedOutput = m_outputJson;
+    
+    // Add any running threads that might not be in the output JSON
+    for (const auto& symbol : runningSymbols) {
+        if (!combinedOutput.contains(symbol)) {
+            // This symbol has a thread but no entry in m_outputJson
+            // We'll create a placeholder with a note
+            combinedOutput[symbol] = {
+                {"symbol", symbol},
+                {"status", "running"},
+                {"note", "Thread running but parameters not available in current view"}
+            };
+        }
+    }
+    
+    if (combinedOutput.empty()) {
+        std::cout << "\nNo inputs currently stored. No running threads." << std::endl;
     } else {
-        std::cout << "\nCurrent Inputs (" << m_outputJson.size() << "/10):" << std::endl;
-        for (auto it = m_outputJson.begin(); it != m_outputJson.end(); ++it) {
+        std::cout << "\nCurrent Inputs and Running Threads (" << combinedOutput.size() << "/10):" << std::endl;
+        for (auto it = combinedOutput.begin(); it != combinedOutput.end(); ++it) {
             std::string symbol = it.key();
             const auto& entry = it.value();
             
-            std::cout << symbol << ": [";
+            // Indicate running threads with an asterisk
+            std::string runningIndicator = "";
+            if (std::find(runningSymbols.begin(), runningSymbols.end(), symbol) != runningSymbols.end()) {
+                runningIndicator = " *ACTIVE*";
+            }
+            
+            std::cout << symbol << runningIndicator << ": ";
+            
+            // Handle special case for placeholder entries
+            if (entry.contains("note")) {
+                std::cout << entry["note"] << std::endl;
+                continue;
+            }
             
             // Check if this is the new nested format with params inside
             if (entry.contains("params")) {
                 // New format: m_outputJson[symbol]["params"][param_name]
+                std::cout << "[";
                 const auto& params = entry["params"];
                 std::cout << "lots:" << params["lots"] << ", ";
                 std::cout << "margin: \"" << params["margin"] << "\", ";
@@ -362,6 +443,7 @@ void InputManager::printCurrentInputs() const {
             } else {
                 // Old format: m_outputJson[symbol][param_name]
                 // This is for backward compatibility
+                std::cout << "[";
                 std::cout << "lots:" << entry["lots"] << ", ";
                 std::cout << "margin: \"" << entry["margin"] << "\", ";
                 std::cout << "stopLoss: \"" << entry["stopLoss"] << "\", ";
@@ -372,6 +454,9 @@ void InputManager::printCurrentInputs() const {
                 std::cout << "maxHoldSeconds: " << entry["maxHoldSeconds"] << "]" << std::endl;
             }
         }
+        
+        // Add a legend for the active indicator
+        std::cout << "\n* ACTIVE indicates symbol has a running processing thread" << std::endl;
     }
 }
 
@@ -552,6 +637,17 @@ void InputManager::processOutput() {
                     // Initialize with properly structured JSON
                     bool success = model ? model->initFromJson(properJson) : false;
                     
+                    // IMPORTANT: Ensure that the model has a thread registered with AppState
+                    // If the model was previously cleared, its thread was removed
+                    // but the ModelManager itself remained in the factory
+                    if (success) {
+                        auto& appState = app_state::AppState::getInstance();
+                        if (!appState.hasRunningThread(symbol)) {
+                            // Only register a thread if one isn't already running for this symbol
+                            appState.registerModelThread(symbol, model);
+                        }
+                    }
+                    
                     std::cout << "[DEBUG] Model initialization " << (success ? "successful" : "failed") << std::endl;
                     
                     // Retrieve the model instance to display information and verify singleton behavior
@@ -634,6 +730,17 @@ void InputManager::processOutput() {
                     std::cout << "[ERROR] Unknown exception processing symbol " << symbol << std::endl;
                 }
             }
+            
+            // Display information about running threads
+            std::cout << "\n===== RUNNING MODEL THREADS =====" << std::endl;
+            auto& appState = app_state::AppState::getInstance();
+            auto runningSymbols = appState.getRunningSymbols();
+            
+            std::cout << "Currently running " << runningSymbols.size() << " symbol threads:" << std::endl;
+            for (const auto& sym : runningSymbols) {
+                std::cout << "  - " << sym << std::endl;
+            }
+            std::cout << "=================================" << std::endl;
         }
         catch (const std::exception& e) {
             std::cout << "[ERROR] Exception in trade callback: " << e.what() << std::endl;

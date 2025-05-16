@@ -1,4 +1,5 @@
 #include "model_manager.hpp"
+#include "../util/app_state/app_state.hpp"
 
 namespace model_manager {
 
@@ -251,6 +252,51 @@ void ModelManager::setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit) {
     pruneOldData();
 }
 
+/**
+ * Process a batch of data items from the queue
+ * 
+ * This method is designed to be called from the ModelManager's thread.
+ * It fetches a batch of items from the queue and processes them according
+ * to the trading rules for this symbol.
+ * 
+ * @param maxItems Maximum number of items to process in one batch
+ * @return Number of items actually processed
+ */
+size_t ModelManager::processQueueData(size_t maxItems) {
+    // Get the queue
+    auto* queue = m_rawDataModel->getStockQueue();
+    if (!queue) return 0;
+    
+    size_t processedCount = 0;
+    stk_q::STK_Q_Data data;
+    
+    // Process up to maxItems from the queue
+    for (size_t i = 0; i < maxItems; i++) {
+        // Try to get the next item
+        if (!queue->pop(data)) {
+            break; // No more items in queue
+        }
+        
+        // Skip items outside our time window
+        auto now = std::chrono::system_clock::now();
+        auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now).time_since_epoch().count();
+        auto cutoffMs = nowMs - windowToMilliseconds();
+        
+        if (static_cast<uint64_t>(data.time) < cutoffMs) {
+            continue; // Skip old data
+        }
+        
+        // Process this tick data according to trading rules
+        // In a real implementation, this would apply trading strategies,
+        // generate signals, etc.
+        
+        // For now, just count it as processed
+        processedCount++;
+    }
+    
+    return processedCount;
+}
+
 //
 // ModelManagerFactory implementation
 //
@@ -288,6 +334,10 @@ std::shared_ptr<ModelManager> ModelManagerFactory::createModelManager(
     // Create new model manager with the specified symbol and time window
     auto manager = std::make_shared<ModelManager>(symbol, windowSize, windowUnit);
     m_managers[symbol] = manager;
+    
+    // Register this manager with AppState to run on its own thread
+    app_state::AppState::getInstance().registerModelThread(symbol, manager);
+    
     return manager;
 }
 
@@ -311,6 +361,8 @@ std::shared_ptr<ModelManager> ModelManagerFactory::getModelManager(const std::st
  * Initialize a model from JSON data, creating it if it doesn't exist
  * 
  * This method gets or creates a model manager and initializes it with the JSON data.
+ * It also ensures that the model has a thread registered with AppState,
+ * which is crucial when reusing an existing model after its thread was previously stopped.
  */
 bool ModelManagerFactory::initModelFromJson(
     const std::string& symbol, 
@@ -320,6 +372,7 @@ bool ModelManagerFactory::initModelFromJson(
 ) {
     // Get or create the model manager
     std::shared_ptr<ModelManager> manager;
+    bool isNewManager = false;
     
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -330,11 +383,24 @@ bool ModelManagerFactory::initModelFromJson(
             // Create a new manager if one doesn't exist
             manager = std::make_shared<ModelManager>(symbol, windowSize, windowUnit);
             m_managers[symbol] = manager;
+            isNewManager = true;
         }
     }
     
     // Initialize the manager with JSON data
-    return manager->initFromJson(jsonData);
+    bool success = manager->initFromJson(jsonData);
+    
+    // IMPORTANT: Regardless of whether the model is new or reused,
+    // we need to ensure it has a thread registered with AppState.
+    // If the model was previously cleared, its thread was removed
+    // but the ModelManager itself remained in our map.
+    auto& appState = app_state::AppState::getInstance();
+    if (success && !appState.hasRunningThread(symbol)) {
+        // Only register a thread if one isn't already running for this symbol
+        appState.registerModelThread(symbol, manager);
+    }
+    
+    return success;
 }
 
 /**
@@ -352,6 +418,11 @@ bool ModelManagerFactory::hasModel(const std::string& symbol) {
  */
 bool ModelManagerFactory::removeModel(const std::string& symbol) {
     std::lock_guard<std::mutex> lock(m_mutex);
+    
+    // Stop and remove the thread for this symbol
+    app_state::AppState::getInstance().removeModelThread(symbol);
+    
+    // Remove the model from our map
     return m_managers.erase(symbol) > 0;
 }
 
@@ -374,6 +445,11 @@ std::vector<std::string> ModelManagerFactory::getAllSymbols() const {
  */
 void ModelManagerFactory::clearAll() {
     std::lock_guard<std::mutex> lock(m_mutex);
+    
+    // Stop all running threads
+    app_state::AppState::getInstance().stopAllThreads();
+    
+    // Clear all models
     m_managers.clear();
 }
 

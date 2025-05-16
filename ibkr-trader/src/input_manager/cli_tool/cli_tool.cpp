@@ -1,5 +1,6 @@
 #include "cli_tool.hpp"
 #include "../input_manager.hpp"
+#include "../../util/app_state/app_state.hpp"
 
 namespace cli_tool {
 
@@ -60,6 +61,10 @@ void CliTool::run() {
                 if (inputManager) {
                     inputManager->clearScreen();
                 }
+                break;
+                
+            case 5: // Display running threads
+                displayRunningThreads();
                 break;
                 
             case 9: // Emergency exit
@@ -162,12 +167,27 @@ void CliTool::clearSpecificInput() {
     // Convert to uppercase
     std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
     
-    // Check if symbol exists
+    bool removed = false;
+    
+    // Check if symbol exists in local JSON structure
     if (m_jsonInputs.contains(symbol)) {
         m_jsonInputs.erase(symbol);
+        removed = true;
+    }
+    
+    // Also try to clear from InputManager to ensure thread cleanup
+    auto inputManager = m_inputManager.lock();
+    if (inputManager) {
+        // Call InputManager's clearSymbol to properly stop and remove thread
+        if (inputManager->clearSymbol(symbol)) {
+            removed = true;
+        }
+    }
+    
+    if (removed) {
         std::cout << "Symbol " << symbol << " cleared successfully!" << std::endl;
     } else {
-        std::cout << "Symbol " << symbol << " not found in inputs." << std::endl;
+        std::cout << "Symbol " << symbol << " not found in inputs or active threads." << std::endl;
     }
     
     waitForKeypress();
@@ -255,6 +275,45 @@ void CliTool::waitForKeypress() const {
     std::cout << "Press Enter to continue...";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
+}
+
+// Display information about currently running threads
+void CliTool::displayRunningThreads() {
+    std::cout << "\n===== RUNNING MODEL THREADS =====" << std::endl;
+    
+    // Get AppState to access thread information
+    auto& appState = app_state::AppState::getInstance();
+    auto runningSymbols = appState.getRunningSymbols();
+    
+    if (runningSymbols.empty()) {
+        std::cout << "No active threads running." << std::endl;
+    } else {
+        std::cout << "Currently running " << runningSymbols.size() << " symbol threads:" << std::endl;
+        
+        // Display each running symbol
+        for (const auto& symbol : runningSymbols) {
+            std::cout << "  - " << symbol << std::endl;
+            
+            // Get the associated model parameters if available
+            auto inputManager = m_inputManager.lock();
+            if (inputManager) {
+                auto outputJson = inputManager->getOutput();
+                if (outputJson.contains(symbol) && outputJson[symbol].contains("params")) {
+                    // Display the parameters
+                    auto& params = outputJson[symbol]["params"];
+                    std::cout << "    Parameters: [";
+                    std::cout << "lots:" << params["lots"] << ", ";
+                    std::cout << "margin:" << params["margin"] << ", ";
+                    std::cout << "stopLoss:" << params["stopLoss"] << ", ";
+                    std::cout << "maxTrades:" << params["maxTrades"];
+                    std::cout << "]" << std::endl;
+                }
+            }
+        }
+    }
+    
+    std::cout << "=================================" << std::endl;
+    waitForKeypress();
 }
 
 } // namespace cli_tool

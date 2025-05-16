@@ -38,6 +38,9 @@ public:
     // Submit all inputs
     void submitInputs();
     
+    // Display running threads
+    void displayRunningThreads();
+    
     // Emergency exit - immediate exit
     void emergencyExit() const;
     

@@ -195,6 +195,10 @@ public:
      * @param windowUnit New window unit
      */
     void setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit);
+    
+    // Process data from the queue (called from the thread)
+    // Returns the number of items processed
+    size_t processQueueData(size_t maxItems = 10);
 };
 
 //
