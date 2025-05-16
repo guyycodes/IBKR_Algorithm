@@ -1,4 +1,5 @@
 #include "input_manager.hpp"
+#include "../models/model_manager.hpp"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -221,10 +222,80 @@ void InputManager::clearAllInputs() {
 void InputManager::registerTradeCallback(std::function<void(const nlohmann::json&)> callback) {
     logMessage(1, "Registering trade callback");
     
-    m_tradeCallback = callback;
+    // Create a combined callback that:
+    // 1. Processes the standardized JSON from input_manager to model_manager
+    // 2. Forwards the JSON to any user-provided callback
+    m_tradeCallback = [this, callback](const nlohmann::json& outputJson) {
+        // ===================================================================
+        // BRIDGE TO MODEL MANAGER
+        // This lambda acts as the connector between InputManager and ModelManager.
+        // It takes the standardized JSON from InputManager and creates/updates
+        // model instances in ModelManagerFactory for each symbol.
+        // ===================================================================
+        
+        // Process each symbol in the standardized JSON structure
+        for (auto it = outputJson.begin(); it != outputJson.end(); ++it) {
+            const std::string& symbol = it.key();
+            const nlohmann::json& tradeData = it.value();
+            
+            // Get the ModelManagerFactory singleton instance
+            // This ensures we're working with the same set of models across the application
+            auto& factory = model_manager::ModelManagerFactory::getInstance();
+            
+            // Set default time window for market data retention
+            // These values determine how much historical data the model will keep
+            size_t windowSize = 60;
+            model_manager::TimeWindowUnit windowUnit = model_manager::TimeWindowUnit::MINUTES;
+            
+            // Initialize or update the model with the JSON data
+            // If the model doesn't exist yet, it will be created with these parameters
+            // If it already exists, it will be updated with the new data
+            bool success = factory.initModelFromJson(symbol, tradeData, windowSize, windowUnit);
+            
+            // Retrieve the model instance to display information and verify singleton behavior
+            auto model = factory.getModelManager(symbol);
+            if (model) {
+                // Print model identification information
+                // The memory addresses should be consistent for the same symbol across calls,
+                // which confirms the singleton pattern is working correctly
+                std::cout << "\n[ModelManager] Initialized model for symbol: " << symbol << std::endl;
+                std::cout << "  Memory address: " << model.get() << std::endl;
+                
+                // Print information about the underlying raw data model
+                // This is also a singleton, so addresses should be consistent
+                auto rawModel = model->getRawDataModel();
+                std::cout << "  Raw data model address: " << rawModel.get() << std::endl;
+                std::cout << "  Symbol from model: " << model->getSymbol() << std::endl;
+                std::cout << "  Current tick count: " << model->getTickCount() << std::endl;
+                
+                // Print the time window configuration
+                // This shows how much historical data will be kept
+                auto window = model->getTimeWindow();
+                std::cout << "  Time window: " << window.first << " ";
+                switch (window.second) {
+                    case model_manager::TimeWindowUnit::SECONDS: std::cout << "seconds"; break;
+                    case model_manager::TimeWindowUnit::MINUTES: std::cout << "minutes"; break;
+                    case model_manager::TimeWindowUnit::HOURS: std::cout << "hours"; break;
+                }
+                std::cout << std::endl;
+            } else {
+                std::cout << "[ModelManager] Failed to get model for symbol: " << symbol << std::endl;
+            }
+        }
+        
+        // ===================================================================
+        // FORWARD TO USER CALLBACK
+        // After processing with ModelManager, we call the original callback
+        // This maintains the expected behavior while adding the new functionality
+        // ===================================================================
+        if (callback) {
+            callback(outputJson);
+        }
+    };
     
-    // Register with LocalAPI as well
-    m_localApi->registerTradeCallback(callback);
+    // Register the combined callback with LocalAPI to ensure consistent behavior
+    // throughout the application, regardless of the source of the data
+    m_localApi->registerTradeCallback(m_tradeCallback);
 }
 
 void InputManager::registerErrorCallback(std::function<void(const std::string&, const std::string&)> callback) {
