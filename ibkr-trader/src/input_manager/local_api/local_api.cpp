@@ -1,5 +1,6 @@
 #include "local_api.hpp"
 #include "../input_manager.hpp"
+#include "../../models/model_manager.hpp"
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -12,6 +13,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <cstring>
+#include <fcntl.h>
 
 namespace local_api {
 
@@ -22,9 +24,11 @@ LocalAPI::LocalAPI()
       m_serverRunning(false),
       m_serverSocket(-1),
       m_serverPort(9000),
-      m_autoConfirm(false) {
+      m_autoConfirm(false),
+      m_hasConnectionIssues(false) {
     // Initialize empty JSON objects
     m_config = nlohmann::json::object();
+    m_lastConnectionResults = nlohmann::json::object();
     m_requestQueue.clear();
     m_pendingQueue.clear();
     
@@ -132,13 +136,30 @@ void LocalAPI::stopHttpServer() {
     
     // Close server socket to stop accept() blocking
     if (m_serverSocket >= 0) {
+        // Force the socket to close immediately
+        #ifdef _WIN32
+        // Windows
+        closesocket(m_serverSocket);
+        #else
+        // Unix/Linux
         close(m_serverSocket);
+        #endif
         m_serverSocket = -1;
     }
     
     // Wait for the server thread to finish
     if (m_serverThread.joinable()) {
-        m_serverThread.join();
+        // Set a timeout for joining
+        std::thread joinThread([this]() {
+            if (m_serverThread.joinable()) {
+                m_serverThread.join();
+            }
+        });
+        
+        // Wait for join thread with timeout
+        if (joinThread.joinable()) {
+            joinThread.join();
+        }
     }
     
     logMessage(0, "HTTP server stopped");
@@ -163,6 +184,10 @@ void LocalAPI::httpServerThread() {
         return;
     }
     
+    // Set socket to non-blocking mode
+    int flags = fcntl(m_serverSocket, F_GETFL, 0);
+    fcntl(m_serverSocket, F_SETFL, flags | O_NONBLOCK);
+    
     // Bind to port
     struct sockaddr_in address;
     address.sin_family = AF_INET;
@@ -186,29 +211,58 @@ void LocalAPI::httpServerThread() {
     
     logMessage(0, "HTTP server listening on port " + std::to_string(m_serverPort));
     
-    // Accept connections loop
+    // Accept connections loop with timeout
     int addrlen = sizeof(address);
     while (m_serverRunning) {
-        int clientSocket = accept(m_serverSocket, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-        if (clientSocket < 0) {
-            if (m_serverRunning) {
-                logMessage(2, "Failed to accept connection");
-            }
-            continue;
+        // Use select to implement a timeout for accept
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(m_serverSocket, &readfds);
+        
+        // Set timeout to 1 second
+        struct timeval timeout;
+        timeout.tv_sec = 1;
+        timeout.tv_usec = 0;
+        
+        // Wait for activity on the socket with timeout
+        int activity = select(m_serverSocket + 1, &readfds, NULL, NULL, &timeout);
+        
+        if (activity < 0 && errno != EINTR) {
+            // Error occurred
+            logMessage(2, "Select error: " + std::string(strerror(errno)));
+            break;
         }
         
-        // Handle the request
-        handleHttpRequest(clientSocket);
+        // Check if we should still be running
+        if (!m_serverRunning) {
+            break;
+        }
         
-        // Close client socket
-        close(clientSocket);
+        // Check if we have a connection
+        if (activity > 0 && FD_ISSET(m_serverSocket, &readfds)) {
+            int clientSocket = accept(m_serverSocket, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+            if (clientSocket < 0) {
+                if (errno != EWOULDBLOCK && errno != EAGAIN && m_serverRunning) {
+                    logMessage(2, "Failed to accept connection: " + std::string(strerror(errno)));
+                }
+                continue;
+            }
+            
+            // Handle the request
+            handleHttpRequest(clientSocket);
+            
+            // Close client socket
+            close(clientSocket);
+        }
     }
     
-    // Clean up server socket (should be closed already)
+    // Clean up server socket
     if (m_serverSocket >= 0) {
         close(m_serverSocket);
         m_serverSocket = -1;
     }
+    
+    logMessage(0, "HTTP server thread exiting cleanly");
 }
 
 // Handle HTTP request
@@ -280,13 +334,32 @@ std::string LocalAPI::processHttpRequest(const std::string& request) {
                     logMessage(0, "Queueing trade request: " + requestJson.dump());
                     
                     if (queueTradingRequest(requestJson)) {
-                        responseBody = "{\"status\": \"success\", \"message\": \"Request queued\"}";
-                        statusCode = 200;
+                        bool autoConfirmWasDone = false;
                         
                         // Auto-confirm if enabled
                         if (m_autoConfirm) {
-                            confirmQueuedRequests();
+                            autoConfirmWasDone = confirmQueuedRequests();
+                            
+                            // Check for connection issues after auto-confirm
+                            if (autoConfirmWasDone && m_hasConnectionIssues) {
+                                // Return a warning response with connection status
+                                nlohmann::json response = {
+                                    {"status", "warning"},
+                                    {"message", "Request queued and auto-confirmed but IBKR connection failed"},
+                                    {"connection_status", m_lastConnectionResults},
+                                    {"error_code", 502},
+                                    {"error_message", "Couldn't connect to TWS/Gateway after maximum retry attempts"}
+                                };
+                                responseBody = response.dump(2);
+                                statusCode = 200; // Still 200 because request was processed, but with warning
+                                return buildHttpResponse(statusCode, responseBody, contentType);
+                            }
                         }
+                        
+                        // Standard success response if no auto-confirm or no connection issues
+                        responseBody = "{\"status\": \"success\", \"message\": \"" + 
+                            std::string(autoConfirmWasDone ? "Request queued and auto-confirmed" : "Request queued") + "\"}";
+                        statusCode = 200;
                     } else {
                         responseBody = "{\"status\": \"error\", \"message\": \"Failed to queue request\"}";
                         statusCode = 400;
@@ -299,8 +372,21 @@ std::string LocalAPI::processHttpRequest(const std::string& request) {
             else if (path == "/confirm") {
                 // Confirm all pending requests
                 if (confirmQueuedRequests()) {
-                    responseBody = "{\"status\": \"success\", \"message\": \"Requests confirmed\"}";
-                    statusCode = 200;
+                    if (m_hasConnectionIssues) {
+                        // Return a more detailed response with connection status
+                        nlohmann::json response = {
+                            {"status", "warning"},
+                            {"message", "Requests confirmed but IBKR connection failed - max retries reached"},
+                            {"connection_status", m_lastConnectionResults},
+                            {"error_code", 502},
+                            {"error_message", "Couldn't connect to TWS/Gateway after maximum retry attempts"}
+                        };
+                        responseBody = response.dump(2);
+                        statusCode = 200; // Still 200 because request was processed, but with warning
+                    } else {
+                        responseBody = "{\"status\": \"success\", \"message\": \"Requests confirmed\"}";
+                        statusCode = 200;
+                    }
                 } else {
                     responseBody = "{\"status\": \"error\", \"message\": \"No pending requests to confirm\"}";
                     statusCode = 400;
@@ -335,10 +421,23 @@ std::string LocalAPI::processHttpRequest(const std::string& request) {
                 statusCode = 200;
             }
             else if (path == "/emergency-stop") {
-                // Emergency stop
-                emergencyStop();
+                // Call emergency stop function
+                logMessage(0, "Emergency stop endpoint called");
+                
+                // Create a watchdog that will force exit after sending the response
+                std::thread([]() {
+                    // Wait a short time to allow response to be sent
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                    std::cout << "Emergency stop timeout reached. Forcing exit..." << std::endl;
+                    _exit(0);  // Force immediate exit
+                }).detach();
+                
+                // Send normal response
                 responseBody = "{\"status\": \"success\", \"message\": \"Emergency stop triggered\"}";
                 statusCode = 200;
+                
+                // Normal processing will continue, but watchdog will force exit soon
+                emergencyStop();
             }
             else if (path == "/set-auto-confirm") {
                 // Set auto-confirm mode
@@ -365,7 +464,11 @@ std::string LocalAPI::processHttpRequest(const std::string& request) {
         }
     }
     
-    // Build HTTP response
+    return buildHttpResponse(statusCode, responseBody, contentType);
+}
+
+// Helper method to build HTTP response
+std::string LocalAPI::buildHttpResponse(int statusCode, const std::string& responseBody, const std::string& contentType) {
     std::string statusText = (statusCode == 200) ? "OK" : (statusCode == 400) ? "Bad Request" : "Not Found";
     std::string response = "HTTP/1.1 " + std::to_string(statusCode) + " " + statusText + "\r\n";
     response += "Content-Type: " + contentType + "\r\n";
@@ -411,13 +514,43 @@ bool LocalAPI::confirmQueuedRequests() {
     
     logMessage(0, "Confirming " + std::to_string(m_pendingQueue.size()) + " pending requests");
     
+    nlohmann::json connectionResults = nlohmann::json::object();
+    bool hasConnectionIssues = false;
+    
     // Move all pending requests to the main queue and process them
     for (const auto& request : m_pendingQueue) {
         // Add to main queue
         m_requestQueue.push_back(request);
         
         // Execute the request
-        executeRequest(request);
+        bool executeSuccess = executeRequest(request);
+        
+        // Get the symbol to check its connection status
+        if (request.contains("symbol")) {
+            std::string symbol = request["symbol"];
+            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            
+            // Check connection status via AppState and ModelManagerFactory
+            auto& factory = model_manager::ModelManagerFactory::getInstance();
+            auto model = factory.getModelManager(symbol);
+            
+            if (model) {
+                // Check if the model has exceeded max connection attempts or has connection issues
+                int connectionAttempts = model->getConnectionAttempts();
+                bool connectedToIBKR = model->isConnected();
+                
+                connectionResults[symbol] = {
+                    {"symbol", symbol},
+                    {"connected", connectedToIBKR},
+                    {"connection_attempts", connectionAttempts},
+                    {"max_attempts_reached", connectionAttempts > model_manager::ModelManager::getMaxConnectionAttempts() - 1}
+                };
+                
+                if (!connectedToIBKR && connectionAttempts >= model_manager::ModelManager::getMaxConnectionAttempts()) {
+                    hasConnectionIssues = true;
+                }
+            }
+        }
     }
     
     // Clear the pending queue
@@ -428,6 +561,11 @@ bool LocalAPI::confirmQueuedRequests() {
     notifyRequestQueueChanged();
     
     logMessage(0, "Confirmed " + std::to_string(confirmedCount) + " requests");
+    
+    // Store connection status for use in HTTP responses
+    m_lastConnectionResults = connectionResults;
+    m_hasConnectionIssues = hasConnectionIssues;
+    
     return true;
 }
 
@@ -528,11 +666,29 @@ void LocalAPI::setLogLevel(int level) {
 void LocalAPI::emergencyStop() {
     logMessage(0, "EMERGENCY STOP TRIGGERED");
     
-    // Clear all pending requests
-    clearAllRequests();
+    // Forcefully close server socket to unblock accept() immediately
+    if (m_serverSocket >= 0) {
+        logMessage(0, "Forcefully closing server socket");
+        #ifdef _WIN32
+        // Windows
+        closesocket(m_serverSocket);
+        #else
+        // Unix/Linux
+        close(m_serverSocket);
+        #endif
+        m_serverSocket = -1;
+    }
     
-    // Stop the API
-    stop();
+    // Set server running flag to false to stop the server thread
+    m_serverRunning = false;
+    
+    // Clear all pending requests
+    m_requestQueue.clear();
+    m_pendingQueue.clear();
+    
+    // Signal threads to stop
+    auto& appState = app_state::AppState::getInstance();
+    appState.emergencyStopAllThreads(1000);
     
     // Call error callback to notify of emergency stop
     m_errorCallback("emergency_stop", "Emergency stop triggered");

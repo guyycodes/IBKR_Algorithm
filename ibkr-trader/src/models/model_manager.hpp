@@ -2,11 +2,14 @@
 #define MODEL_MANAGER_HPP
 
 #include "raw_data_model/raw_data_model.hpp"
+#include "../connection_manager/connection_manager.hpp"
+#include "../connection_manager/api_functions/api_functions.hpp"
 #include <chrono>
 #include <memory>
 #include <string>
 #include <mutex>
 #include <map>
+#include <atomic>
 
 /**
  * @file model_manager.hpp
@@ -21,33 +24,43 @@
  * ModelManagerFactory (Singleton)
  * └── Maps symbols to ModelManager instances
  *     ├── ModelManager for "AAPL" (5-min window)
- *     │   └── Contains RawDataModel for "AAPL" from RawDataModelManager
- *     │       ├── Contains TradingParams {lots: 1, margin: "50%", ...}
- *     │       │
- *     │       └── Contains STK_Q for "AAPL" (Thread-safe queue for stock ticks)
- *     │           ├── Tick {price: 190.25, volume: 100, timestamp: 1633455600000}
- *     │           ├── Tick {price: 190.30, volume: 200, timestamp: 1633455601200}
- *     │           ├── ... (only ticks within the last 5 minutes)
- *     │           └── Tick {price: 190.45, volume: 150, timestamp: 1633455899800}
+ *     │   ├── Contains RawDataModel for "AAPL" from RawDataModelManager
+ *     │   │   ├── Contains TradingParams {lots: 1, margin: "50%", ...}
+ *     │   │   │
+ *     │   │   └── Contains STK_Q for "AAPL" (Thread-safe queue for stock ticks)
+ *     │   │       ├── Tick {price: 190.25, volume: 100, timestamp: 1633455600000}
+ *     │   │       ├── Tick {price: 190.30, volume: 200, timestamp: 1633455601200}
+ *     │   │       ├── ... (only ticks within the last 5 minutes)
+ *     │   │       └── Tick {price: 190.45, volume: 150, timestamp: 1633455899800}
+ *     │   │
+ *     │   └── Contains own ConnectionManager with API connection to IBKR
+ *     │       └── Feeds data directly to STK_Q queue for "AAPL"
  *     │
  *     └── ModelManager for "MSFT" (1-min window)
- *         └── Contains RawDataModel for "MSFT" from RawDataModelManager
- *             ├── Contains TradingParams
- *             │
- *             └── Contains STK_Q for "MSFT" (Thread-safe queue for stock ticks)
- *                ├── Tick {price: 190.25, volume: 100, timestamp: 1633455600000}
- *                ├── Tick {price: 190.30, volume: 200, timestamp: 1633455601200}
- *                ├── ... (only ticks within the last 5 minutes)
- *                └── Tick {price: 190.45, volume: 150, timestamp: 1633455899800}
+ *         ├── Contains RawDataModel for "MSFT" from RawDataModelManager
+ *         │   ├── Contains TradingParams
+ *         │   │
+ *         │   └── Contains STK_Q for "MSFT" (Thread-safe queue for stock ticks)
+ *         │      ├── Tick {price: 190.25, volume: 100, timestamp: 1633455600000}
+ *         │      ├── Tick {price: 190.30, volume: 200, timestamp: 1633455601200}
+ *         │      ├── ... (only ticks within the last 5 minutes)
+ *         │      └── Tick {price: 190.45, volume: 150, timestamp: 1633455899800}
+ *         │ 
+ *         └── Contains own ConnectionManager with API connection to IBKR
+ *             └── Feeds data directly to STK_Q queue for "MSFT"
  * 
  * Usage flow:
  * 1. Client code creates/gets a ModelManager with a specified time window
- * 2. As ticks arrive from IBKR API, they are added via addTick()
- * 3. ModelManager automatically prunes old data outside the time window
- * 4. Client code can always access only the data within the specified time window
+ * 2. ModelManager establishes its own IBKR connection
+ * 3. As ticks arrive from IBKR API, they are added via addTick()
+ * 4. ModelManager automatically prunes old data outside the time window
+ * 5. Client code can always access only the data within the specified time window
  */
 
 namespace model_manager {
+
+// Forward declaration of ApiCallback
+class ApiCallback;
 
 /**
  * Time window units for specifying how long data should be retained
@@ -64,6 +77,9 @@ enum class TimeWindowUnit {
  * 
  * This class wraps a RawDataModel and ensures that only data within a specified
  * time window is kept, preventing unbounded memory growth as new ticks arrive.
+ * 
+ * Each ModelManager maintains its own connection to IBKR API and is responsible
+ * for fetching data for its assigned symbol.
  */
 //
 // ModelManager class - Manages market data for a specific trading symbol
@@ -72,6 +88,7 @@ enum class TimeWindowUnit {
 // 1. Maintaining a reference to the underlying RawDataModel for a symbol
 // 2. Managing time window settings for historical data retention
 // 3. Actively pruning the STK_Q in RawDataModel to maintain the time window
+// 4. Maintaining its own connection to IBKR API to fetch data for its symbol
 //
 // DESIGN NOTE: Market data ticks are stored ONLY in the STK_Q in RawDataModel,
 // not in the vector of ticks. The ModelManager automatically prunes old data
@@ -86,7 +103,10 @@ enum class TimeWindowUnit {
 //   2. Time window configuration 
 //      - Size and unit (e.g., 60 minutes)
 //      - Used to actively prune the queue to maintain the time window
-//   3. Methods to manipulate and access the data model
+//   3. Connection to IBKR API
+//      - Each ModelManager has its own connection to IBKR API
+//      - Fetches data specifically for its assigned symbol
+//   4. Methods to manipulate and access the data model
 //
 class ModelManager {
 private:
@@ -98,6 +118,18 @@ private:
     size_t m_windowSize;                // Size of the time window
     TimeWindowUnit m_windowUnit;        // Unit for the time window (seconds, minutes, hours)
     std::chrono::system_clock::time_point m_lastPruneTime; // When data was last pruned
+    
+    // IBKR API connection objects
+    std::unique_ptr<connection_manager::ConnectionManager> m_connManager;
+    std::shared_ptr<ApiCallback> m_apiCallback;
+    int m_requestId; // Request ID for this symbol's market data
+    std::atomic<bool> m_connected; // Flag indicating if we're connected to IBKR API
+    
+    // Connection retry tracking
+    std::atomic<int> m_connectionAttempts{0};
+    static const int MAX_CONNECTION_ATTEMPTS = 5;
+    std::chrono::system_clock::time_point m_lastConnectionAttempt;
+    static const int CONNECTION_RETRY_DELAY_SECONDS = 7;
     
     // Mutex for thread-safe operations
     mutable std::mutex m_mutex;
@@ -122,6 +154,12 @@ public:
      * @param windowUnit Unit for the time window (seconds, minutes, hours)
      */
     ModelManager(const std::string& symbol, size_t windowSize, TimeWindowUnit windowUnit);
+    
+    /**
+     * Destructor
+     * Ensures proper cleanup of API connections
+     */
+    ~ModelManager();
     
     /**
      * Initialize model parameters from JSON configuration
@@ -196,9 +234,128 @@ public:
      */
     void setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit);
     
-    // Process data from the queue (called from the thread)
-    // Returns the number of items processed
+    /**
+     * Process data from the queue (called from the thread)
+     * Returns the number of items processed
+     */
     size_t processQueueData(size_t maxItems = 10);
+    
+    /**
+     * Connect to IBKR API and subscribe to market data for this symbol
+     * @return True if connection successful, false otherwise
+     */
+    bool connectToIBKR();
+    
+    /**
+     * Disconnect from IBKR API and cancel market data subscription
+     */
+    void disconnectFromIBKR();
+    
+    /**
+     * Check if currently connected to IBKR API
+     * @return True if connected, false otherwise
+     */
+    bool isConnected() const;
+    
+    /**
+     * Get the connection status string
+     * @return String describing connection status
+     */
+    std::string getConnectionStatus() const;
+    
+    /**
+     * Get the number of connection attempts made
+     * @return Number of connection attempts
+     */
+    int getConnectionAttempts() const { return m_connectionAttempts; }
+    
+    /**
+     * Get the maximum number of connection attempts
+     * @return Maximum number of connection attempts
+     */
+    static int getMaxConnectionAttempts() { return MAX_CONNECTION_ATTEMPTS; }
+};
+
+/**
+ * @class ApiCallback
+ * @brief Custom callback class for handling IBKR API events for a specific symbol
+ * 
+ * This class is used by ModelManager to handle IBKR API callbacks for its assigned symbol.
+ * It filters market data and routes it to the appropriate ModelManager instance.
+ */
+class ApiCallback : public ibkr_api_functions::API_Functions {
+public:
+    /**
+     * Constructor
+     * @param trader Reference to IBKRTrader instance
+     * @param manager Reference to ModelManager that owns this callback
+     * @param symbol Symbol to filter for
+     */
+    ApiCallback(connection::IBKRTrader& trader, 
+                ModelManager& manager, 
+                const std::string& symbol);
+    
+    /**
+     * Handle tick price callback
+     * @param tickerId Ticker ID for the callback
+     * @param field Type of price (bid, ask, last, etc.)
+     * @param price Price value
+     * @param attrib Additional attributes
+     */
+    void handleTickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib);
+    
+    /**
+     * Handle tick size callback
+     * @param tickerId Ticker ID for the callback
+     * @param field Type of size (bidSize, askSize, volume, etc.)
+     * @param size Size value
+     */
+    void handleTickSize(TickerId tickerId, TickType field, Decimal size);
+    
+    /**
+     * Handle tick-by-tick all last callback (most granular data)
+     * @param reqId Request ID
+     * @param tickType Type of tick
+     * @param time Timestamp
+     * @param price Price value
+     * @param size Size value
+     * @param tickAttribLast Additional attributes
+     * @param exchange Exchange name
+     * @param specialConditions Special conditions
+     */
+    void handleTickByTickAllLast(int reqId, int tickType, time_t time, double price, 
+                            Decimal size, const TickAttribLast& tickAttribLast, 
+                            const std::string& exchange, const std::string& specialConditions);
+    
+    /**
+     * Handle error callback
+     * @param id Request ID
+     * @param errorCode Error code
+     * @param errorString Error message
+     */
+    void handleError(int id, int errorCode, const std::string& errorString);
+    
+    /**
+     * Set request ID for this callback
+     * @param requestId Request ID to use
+     */
+    void setRequestId(int requestId);
+    
+private:
+    // Reference to the ModelManager that owns this callback
+    ModelManager& m_manager;
+    
+    // Symbol to filter for
+    std::string m_symbol;
+    
+    // Request ID for market data subscription
+    int m_requestId;
+    
+    // Last seen price (for volume-only updates)
+    double m_lastPrice;
+    
+    // Route market data tick to the ModelManager
+    void routeTickToModelManager(double price, double volume, uint64_t timestamp = 0);
 };
 
 //
@@ -213,10 +370,12 @@ public:
 //   ├── Map<symbol, ModelManager>
 //   |    |
 //   |    ├── ModelManager for symbol "AAPL"
-//   |    |    └── Contains RawDataModel for "AAPL"
+//   |    |    ├── Contains RawDataModel for "AAPL"
+//   |    |    └── Contains own IBKR connection
 //   |    |
 //   |    ├── ModelManager for symbol "MSFT" 
-//   |    |    └── Contains RawDataModel for "MSFT"
+//   |    |    ├── Contains RawDataModel for "MSFT"
+//   |    |    └── Contains own IBKR connection
 //   |    |
 //   |    └── ... (more symbols)
 //   |

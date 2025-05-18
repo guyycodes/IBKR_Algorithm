@@ -25,8 +25,22 @@ void runModelManagerThread(std::shared_ptr<model_manager::ModelManager> manager,
     const std::string symbol = manager->getSymbol();
     std::cout << "[Thread] Started for symbol: " << symbol << std::endl;
     
+    // Connect to IBKR API 
+    std::cout << "[Thread] Connecting to IBKR API for symbol: " << symbol << std::endl;
+    bool connected = manager->connectToIBKR();
+    
+    if (connected) {
+        std::cout << "[Thread] Successfully connected to IBKR API for symbol: " << symbol << std::endl;
+    } else {
+        std::cout << "[Thread] Warning: Failed to connect to IBKR API for symbol: " << symbol << std::endl;
+        std::cout << "[Thread] Will continue running but no live data will be received." << std::endl;
+    }
+    
+    // Get reference to AppState for emergency shutdown check
+    auto& appState = app_state::AppState::getInstance();
+    
     // Main loop - run until signaled to stop
-    while (runFlag.load()) {
+    while (runFlag.load() && !appState.isEmergencyShutdown()) {
         // Process a batch of ticks from the queue 
         // The processQueueData method handles filtering old data
         // and applying the trading logic
@@ -42,6 +56,18 @@ void runModelManagerThread(std::shared_ptr<model_manager::ModelManager> manager,
         if (processed == 0) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+        
+        // Check for emergency shutdown again
+        if (appState.isEmergencyShutdown()) {
+            std::cout << "[Thread] Emergency shutdown detected for symbol: " << symbol << std::endl;
+            break;
+        }
+    }
+    
+    // Disconnect from IBKR API when thread is stopping
+    if (connected) {
+        std::cout << "[Thread] Disconnecting from IBKR API for symbol: " << symbol << std::endl;
+        manager->disconnectFromIBKR();
     }
     
     std::cout << "[Thread] Stopped for symbol: " << symbol << std::endl;
@@ -137,9 +163,99 @@ std::vector<std::string> AppState::getRunningSymbols() const {
     return symbols;
 }
 
+// Implement emergency stop for all threads with forceful termination of hanging threads
+void AppState::emergencyStopAllThreads(int timeoutMs) {
+    std::cout << "[AppState] EMERGENCY STOP of all threads with " << timeoutMs << "ms timeout" << std::endl;
+    
+    // Set emergency shutdown flag
+    m_emergencyShutdown.store(true);
+    
+    // Get a list of symbols with active threads
+    std::vector<std::string> activeSymbols;
+    
+    {
+        std::lock_guard<std::mutex> lock(m_threadMutex);
+        
+        // Get list of active symbols
+        for (const auto& pair : m_modelThreads) {
+            activeSymbols.push_back(pair.first);
+        }
+        
+        // Signal all threads to stop
+        for (auto& pair : m_threadRunFlags) {
+            pair.second.store(false);
+        }
+    }
+    
+    // Calculate timeout time
+    auto endTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+    
+    // Track which threads were joined successfully
+    std::vector<std::string> joinedThreads;
+    std::vector<std::string> detachedThreads;
+    
+    // Try to join each thread with timeout
+    for (const auto& symbol : activeSymbols) {
+        std::thread* threadPtr = nullptr;
+        
+        // Get a pointer to the thread (inside a lock)
+        {
+            std::lock_guard<std::mutex> lock(m_threadMutex);
+            auto it = m_modelThreads.find(symbol);
+            if (it != m_modelThreads.end() && it->second.joinable()) {
+                threadPtr = &(it->second);
+            }
+        }
+        
+        // Skip if thread doesn't exist or isn't joinable
+        if (!threadPtr) {
+            continue;
+        }
+        
+        // Create a future to join with timeout
+        auto joinFuture = std::async(std::launch::async, [threadPtr]() {
+            threadPtr->join();
+        });
+        
+        // Wait for join with timeout
+        if (joinFuture.wait_until(endTime) == std::future_status::ready) {
+            // Thread joined successfully
+            joinedThreads.push_back(symbol);
+        } else {
+            // Thread didn't join within timeout, detach it
+            std::cout << "[AppState] WARNING: Thread for symbol " << symbol 
+                      << " did not respond to stop signal within timeout. Detaching!" << std::endl;
+            threadPtr->detach();
+            detachedThreads.push_back(symbol);
+        }
+    }
+    
+    // Clean up the maps
+    {
+        std::lock_guard<std::mutex> lock(m_threadMutex);
+        
+        // Remove all joined threads
+        for (const auto& symbol : joinedThreads) {
+            m_modelThreads.erase(symbol);
+            m_threadRunFlags.erase(symbol);
+        }
+        
+        // Remove all detached threads
+        for (const auto& symbol : detachedThreads) {
+            m_modelThreads.erase(symbol);
+            m_threadRunFlags.erase(symbol);
+        }
+    }
+    
+    std::cout << "[AppState] Emergency stop completed: " << joinedThreads.size() 
+              << " threads stopped normally, " << detachedThreads.size() 
+              << " threads detached due to timeout" << std::endl;
+}
+
 // Destructor - ensure all threads are stopped
 AppState::~AppState() {
-    stopAllThreads();
+    // Use emergency stop to ensure all threads are stopped, even hanging ones
+    emergencyStopAllThreads(2000); // 2 second timeout
 }
 
 } // namespace app_state

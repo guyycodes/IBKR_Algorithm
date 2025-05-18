@@ -34,6 +34,10 @@ InputManager::~InputManager() {
     // Make sure to stop before destroying
     stop();
     
+    // Ensure all threads are stopped
+    auto& appState = app_state::AppState::getInstance();
+    appState.stopAllThreads();
+    
     logMessage(0, "InputManager instance destroyed");
 }
 
@@ -303,14 +307,21 @@ void InputManager::emergencyStop() {
     // Stop both input sources
     stop();
     
+    // Explicitly stop all threads first with timeout for hanging threads
+    auto& appState = app_state::AppState::getInstance();
+    appState.emergencyStopAllThreads(1500);
+    
     // Clear all inputs
-    clearAllInputs(true);
+    clearAllInputs(false); // Don't call the API again since we're already in emergency stop
     
     // Call the emergency stop on LocalAPI
     m_localApi->emergencyStop();
     
     // Call error callback
     m_errorCallback("emergency_stop", "Emergency stop triggered");
+    
+    // Give threads a moment to complete cleanup
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     
     logMessage(0, "Emergency stop completed");
 }
@@ -406,11 +417,23 @@ void InputManager::printCurrentInputs() const {
             
             // Indicate running threads with an asterisk
             std::string runningIndicator = "";
-            if (std::find(runningSymbols.begin(), runningSymbols.end(), symbol) != runningSymbols.end()) {
+            bool isRunning = std::find(runningSymbols.begin(), runningSymbols.end(), symbol) != runningSymbols.end();
+            if (isRunning) {
                 runningIndicator = " *ACTIVE*";
             }
             
             std::cout << symbol << runningIndicator << ": ";
+            
+            // Check connection status for running symbols
+            if (isRunning) {
+                auto& factory = model_manager::ModelManagerFactory::getInstance();
+                auto model = factory.getModelManager(symbol);
+                if (model) {
+                    std::string connStatus = model->isConnected() ? 
+                        "CONNECTED (API)" : "NOT CONNECTED";
+                    std::cout << "[" << connStatus << "] ";
+                }
+            }
             
             // Handle special case for placeholder entries
             if (entry.contains("note")) {
@@ -457,6 +480,7 @@ void InputManager::printCurrentInputs() const {
         
         // Add a legend for the active indicator
         std::cout << "\n* ACTIVE indicates symbol has a running processing thread" << std::endl;
+        std::cout << "* CONNECTED (API) indicates symbol has an active IBKR API connection" << std::endl;
     }
 }
 
@@ -493,6 +517,12 @@ void InputManager::waitForKeypress() const {
 // *     "timestamp": 12345678901  // Unix timestamp when processed            *
 // *   }                                                                       *
 // * }                                                                         *
+// *                                                                           *
+// * CONNECTION ARCHITECTURE:                                                  *
+// * Each symbol has its own ModelManager with its own direct IBKR connection  *
+// * This allows parallel processing of market data for multiple symbols.      *
+// * The connections are established automatically in each ModelManager's      *
+// * thread for maximum isolation and fault tolerance.                         *
 // *                                                                           *
 // *****************************************************************************
 // Process the internal output JSON
@@ -578,6 +608,7 @@ void InputManager::processOutput() {
         // to see if there's an issue with the callback mechanism
         std::cout << "\n===== DIRECT MODEL PROCESSING =====" << std::endl;
         std::cout << "Direct processing with " << m_outputJson.size() << " symbols" << std::endl;
+        std::cout << "NOTE: Each symbol will establish its own IBKR connection in a separate thread" << std::endl;
         
         try {
             // Process each symbol in the standardized JSON structure
@@ -644,7 +675,13 @@ void InputManager::processOutput() {
                         auto& appState = app_state::AppState::getInstance();
                         if (!appState.hasRunningThread(symbol)) {
                             // Only register a thread if one isn't already running for this symbol
+                            std::cout << "[DEBUG] Registering thread for symbol: " << symbol << std::endl;
+                            std::cout << "[DEBUG] Thread will automatically establish IBKR connection" << std::endl;
                             appState.registerModelThread(symbol, model);
+                        } else {
+                            std::cout << "[DEBUG] Thread already running for symbol: " << symbol << std::endl;
+                            std::cout << "[DEBUG] Connection status: " << 
+                                (model->isConnected() ? "CONNECTED" : "NOT CONNECTED") << std::endl;
                         }
                     }
                     
@@ -659,6 +696,8 @@ void InputManager::processOutput() {
                         std::cout << "  ╔═══════════════════════════════════════════════════════════╗" << std::endl;
                         std::cout << "  ║ ModelManager (for symbol: " << std::left << std::setw(30) << symbol + ")" << "  ║" << std::endl;
                         std::cout << "  ║ Address: " << std::left << std::setw(48) << model.get() << " ║" << std::endl;
+                        std::cout << "  ║ Connection Status: " << std::left << std::setw(15) << 
+                                   (model->isConnected() ? "CONNECTED" : "NOT CONNECTED") << "                         ║" << std::endl;
                         std::cout << "  ║ ┌───────────────────────────────────────────────────────┐ ║" << std::endl;
                         std::cout << "  ║ │ Contains:                                             │ ║" << std::endl;
                         std::cout << "  ║ │ 1. RawDataModel (shared_ptr)                          │ ║" << std::endl;
@@ -680,6 +719,10 @@ void InputManager::processOutput() {
                             case model_manager::TimeWindowUnit::HOURS: std::cout << "HOURS"; break;
                         }
                         std::cout << "                      │ ║" << std::endl;
+                        std::cout << "  ║ │                                                       │ ║" << std::endl;
+                        std::cout << "  ║ │ 3. Own IBKR API Connection                           │ ║" << std::endl;
+                        std::cout << "  ║ │    - Direct connection to IBKR API                   │ ║" << std::endl;
+                        std::cout << "  ║ │    - Fetches data specifically for " << std::left << std::setw(16) << symbol << "         │ ║" << std::endl;
                         std::cout << "  ║ └───────────────────────────────────────────────────────┘ ║" << std::endl;
                         std::cout << "  ╚═══════════════════════════════════════════════════════════╝" << std::endl;
                         
@@ -738,7 +781,13 @@ void InputManager::processOutput() {
             
             std::cout << "Currently running " << runningSymbols.size() << " symbol threads:" << std::endl;
             for (const auto& sym : runningSymbols) {
-                std::cout << "  - " << sym << std::endl;
+                auto& factory = model_manager::ModelManagerFactory::getInstance();
+                auto model = factory.getModelManager(sym);
+                
+                std::string connStatus = model && model->isConnected() ? 
+                    "CONNECTED" : "NOT CONNECTED";
+                
+                std::cout << "  - " << sym << " [" << connStatus << "]" << std::endl;
             }
             std::cout << "=================================" << std::endl;
         }
@@ -749,8 +798,6 @@ void InputManager::processOutput() {
             std::cout << "[ERROR] Unknown exception in trade callback" << std::endl;
         }
         std::cout << "===== END DIRECT PROCESSING =====" << std::endl;
-        
-        // print out the whole MODEL MANAGER SHAPE here
     }
 }
 // *****************************************************************************

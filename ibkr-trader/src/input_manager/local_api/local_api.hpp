@@ -13,6 +13,10 @@ namespace input_manager {
     class InputManager;
 }
 
+namespace model_manager {
+    class ModelManager;
+}
+
 namespace local_api {
 
 class LocalAPI {
@@ -74,6 +78,7 @@ private:
     void httpServerThread();
     void handleHttpRequest(int clientSocket);
     std::string processHttpRequest(const std::string& request);
+    std::string buildHttpResponse(int statusCode, const std::string& responseBody, const std::string& contentType);
     
     // Request processing
     bool validateRequest(const nlohmann::json& request) const;
@@ -92,6 +97,10 @@ private:
     bool m_isRunning;
     int m_logLevel;
     bool m_autoConfirm;
+    
+    // Connection status tracking
+    nlohmann::json m_lastConnectionResults;
+    bool m_hasConnectionIssues;
     
     // Callbacks
     std::function<void(const nlohmann::json&)> m_tradeCallback;

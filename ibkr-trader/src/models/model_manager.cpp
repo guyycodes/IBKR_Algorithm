@@ -1,7 +1,150 @@
 #include "model_manager.hpp"
 #include "../util/app_state/app_state.hpp"
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <random>
 
 namespace model_manager {
+
+//
+// ApiCallback implementation
+//
+
+ApiCallback::ApiCallback(connection::IBKRTrader& trader, ModelManager& manager, const std::string& symbol)
+    : API_Functions(trader), m_manager(manager), m_symbol(symbol), m_requestId(-1), m_lastPrice(0.0) {
+    std::cout << "[ApiCallback] Created for symbol: " << symbol << std::endl;
+}
+
+void ApiCallback::handleTickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) {
+    // Check if this is for our symbol's request ID
+    if (tickerId != m_requestId) return;
+    
+    std::string fieldName;
+    
+    switch (field) {
+        case TickType::BID: fieldName = "BID"; break;
+        case TickType::ASK: fieldName = "ASK"; break;
+        case TickType::LAST: fieldName = "LAST"; break;
+        case TickType::HIGH: fieldName = "HIGH"; break;
+        case TickType::LOW: fieldName = "LOW"; break;
+        case TickType::CLOSE: fieldName = "CLOSE"; break;
+        case TickType::OPEN: fieldName = "OPEN"; break;
+        default: fieldName = "UNKNOWN_" + std::to_string(field); break;
+    }
+    
+    // Print live update with consistent formatting
+    std::time_t now = std::time(nullptr);
+    std::cout << "[" << std::put_time(std::localtime(&now), "%H:%M:%S") 
+              << "] (Thread " << m_symbol << ") Market Data - Field: " << std::setw(10) << fieldName 
+              << ", Price: " << std::fixed << std::setprecision(2) << price;
+    
+    if (field == TickType::BID || field == TickType::ASK) {
+        std::cout << (attrib.preOpen ? " (Pre-open)" : "");
+    }
+    std::cout << std::endl;
+    
+    // Store the last price we've seen
+    m_lastPrice = price;
+    
+    // If it's a price we care about (LAST, BID, ASK), route it to the model manager
+    if (field == TickType::LAST || field == TickType::BID || field == TickType::ASK) {
+        routeTickToModelManager(price, 0);  // Zero volume for price-only updates
+    }
+}
+
+void ApiCallback::handleTickSize(TickerId tickerId, TickType field, Decimal size) {
+    // Check if this is for our symbol's request ID
+    if (tickerId != m_requestId) return;
+    
+    std::string fieldName;
+    
+    switch (field) {
+        case TickType::BID_SIZE: fieldName = "BID_SIZE"; break;
+        case TickType::ASK_SIZE: fieldName = "ASK_SIZE"; break;
+        case TickType::LAST_SIZE: fieldName = "LAST_SIZE"; break;
+        case TickType::VOLUME: fieldName = "VOLUME"; break;
+        default: fieldName = "UNKNOWN_SIZE_" + std::to_string(field); break;
+    }
+    
+    double sizeValue = static_cast<double>(size);
+    
+    // Print live update with consistent formatting
+    std::time_t now = std::time(nullptr);
+    std::cout << "[" << std::put_time(std::localtime(&now), "%H:%M:%S") 
+              << "] (Thread " << m_symbol << ") Market Data - Field: " << std::setw(10) << fieldName 
+              << ", Size: " << std::fixed << std::setw(8) << sizeValue 
+              << std::endl;
+    
+    // If we have last price and this is volume, we can update with volume information
+    if (field == TickType::VOLUME && m_lastPrice > 0) {
+        routeTickToModelManager(m_lastPrice, sizeValue);
+    }
+    
+    // If it's LAST_SIZE, we might want to update with that size
+    if (field == TickType::LAST_SIZE && m_lastPrice > 0) {
+        routeTickToModelManager(m_lastPrice, sizeValue);
+    }
+}
+
+void ApiCallback::handleTickByTickAllLast(int reqId, int tickType, time_t time, double price, 
+                                     Decimal size, const TickAttribLast& tickAttribLast, 
+                                     const std::string& exchange, const std::string& specialConditions) {
+    // Check if this is for our symbol's request ID
+    if (reqId != m_requestId) return;
+    
+    std::string tickTypeStr = tickType == 1 ? "LAST" : "ALLAST";
+    int sizeInt = static_cast<int>(size);
+    
+    // Format time
+    char timeStr[20];
+    std::strftime(timeStr, sizeof(timeStr), "%H:%M:%S", std::localtime(&time));
+    
+    // Print live update with consistent formatting
+    std::cout << "[" << timeStr << "] (Thread " << m_symbol << ") Tick-by-Tick - Type: " << std::setw(6) << tickTypeStr
+              << ", Exchange: " << std::setw(6) << exchange
+              << ", Price: " << std::fixed << std::setprecision(2) << std::setw(8) << price
+              << ", Size: " << std::setw(6) << sizeInt;
+    
+    if (!specialConditions.empty()) {
+        std::cout << ", Conditions: " << specialConditions;
+    }
+    std::cout << std::endl;
+    
+    // Store the last price we've seen
+    m_lastPrice = price;
+    
+    // Tick-by-tick data is perfect for our ModelManager - most granular and includes both price and size
+    // Create timestamp from the provided time_t
+    uint64_t timestamp = static_cast<uint64_t>(time) * 1000; // Convert to ms
+    routeTickToModelManager(price, sizeInt, timestamp);
+}
+
+void ApiCallback::handleError(int id, int errorCode, const std::string& errorString) {
+    // Even if not for our request ID, log all errors for diagnostic purposes
+    std::cerr << "[ERROR] (Thread " << m_symbol << ") Error " << errorCode 
+              << " for request " << id << ": " << errorString << std::endl;
+}
+
+void ApiCallback::setRequestId(int requestId) {
+    m_requestId = requestId;
+}
+
+void ApiCallback::routeTickToModelManager(double price, double volume, uint64_t timestamp) {
+    // If timestamp is 0, use current time
+    if (timestamp == 0) {
+        timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+    }
+    
+    // Create a MarketDataTick object
+    raw_data_model::MarketDataTick tick;
+    tick.price = price;
+    tick.volume = volume;
+    tick.timestamp = timestamp;
+    
+    // Add to our model manager
+    m_manager.addTick(tick);
+}
 
 //
 // ModelManager implementation
@@ -14,11 +157,182 @@ namespace model_manager {
  * and establishes the time window settings for data retention.
  */
 ModelManager::ModelManager(const std::string& symbol, size_t windowSize, TimeWindowUnit windowUnit)
-    : m_windowSize(windowSize), m_windowUnit(windowUnit), m_lastPruneTime(std::chrono::system_clock::now()) {
+    : m_windowSize(windowSize), m_windowUnit(windowUnit), m_lastPruneTime(std::chrono::system_clock::now()),
+      m_requestId(-1), m_connected(false), m_connectionAttempts(0), 
+      m_lastConnectionAttempt(std::chrono::system_clock::now()) {
     
     // Get the raw data model from the raw data manager singleton
     // This ensures we're using the same data model instance across the application
     m_rawDataModel = raw_data_model::RawDataModelManager::getInstance().getModel(symbol);
+    
+    // Initialize connection objects
+    m_connManager = std::make_unique<connection_manager::ConnectionManager>();
+    
+    std::cout << "[ModelManager] Created for symbol: " << symbol << std::endl;
+}
+
+/**
+ * Destructor - ensure all connections are properly closed
+ */
+ModelManager::~ModelManager() {
+    // Disconnect from IBKR API if still connected
+    disconnectFromIBKR();
+    
+    std::cout << "[ModelManager] Destroyed for symbol: " << getSymbol() << std::endl;
+}
+
+/**
+ * Connect to IBKR API and subscribe to market data for this symbol
+ * @return True if connection successful, false otherwise
+ */
+bool ModelManager::connectToIBKR() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    
+    // If already connected, return success
+    if (m_connected) {
+        return true;
+    }
+    
+    // Check if we've exceeded max connection attempts
+    if (m_connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
+        std::cerr << "[ModelManager] Maximum connection attempts (" << MAX_CONNECTION_ATTEMPTS << ") reached for symbol: " 
+                  << getSymbol() << ". Giving up." << std::endl;
+        return false;
+    }
+    
+    // Check if we should wait before retrying
+    auto now = std::chrono::system_clock::now();
+    if (m_connectionAttempts > 0) {
+        auto timeSinceLastAttempt = std::chrono::duration_cast<std::chrono::seconds>(
+            now - m_lastConnectionAttempt).count();
+            
+        if (timeSinceLastAttempt < CONNECTION_RETRY_DELAY_SECONDS) {
+            // Too soon to retry
+            return false;
+        }
+    }
+    
+    // Increment connection attempt counter and record timestamp
+    m_connectionAttempts++;
+    m_lastConnectionAttempt = now;
+    
+    try {
+        // Establish connection to IBKR
+        std::cout << "[ModelManager] Connection attempt " << m_connectionAttempts << "/" 
+                  << MAX_CONNECTION_ATTEMPTS << " for symbol: " << getSymbol() << std::endl;
+        
+        if (!m_connManager->connect()) {
+            std::cerr << "[ModelManager] Failed to connect to IBKR API for symbol: " << getSymbol() << std::endl;
+            return false;
+        }
+        
+        // Create API callback that will route data to this ModelManager
+        m_apiCallback = std::make_shared<ApiCallback>(m_connManager->getTrader(), *this, getSymbol());
+        
+        // Get IBKR API instance from connection manager
+        auto api = m_connManager->getAPI();
+        
+        // PAPER TRADING SETUP:
+        // Note: Connection to paper trading is handled in connection.cpp which uses port 4002
+        // We're already connected to the paper trading environment
+        
+        // Set market data type to DELAYED_FROZEN_DATA (3) for data outside market hours
+        // For live data during market hours, use REALTIME (1)
+        // Options: 1 = Live, 2 = Frozen, 3 = Delayed, 4 = Delayed+Frozen
+        std::cout << "[ModelManager] Setting market data type for " << getSymbol() << std::endl;
+        api->getClient()->reqMarketDataType(3); // Using delayed data for testing
+        
+        // Generate a random request ID (to prevent conflicts with other instances)
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> distrib(10000, 99999);
+        m_requestId = distrib(gen);
+        
+        // Set the request ID in our callback so it knows which data to process
+        m_apiCallback->setRequestId(m_requestId);
+        
+        // Create a contract for the symbol
+        Contract contract;
+        contract.symbol = getSymbol();
+        contract.secType = "STK";
+        contract.currency = "USD";
+        contract.exchange = "SMART";
+        
+        // Subscribe to tick-by-tick data (most granular) 
+        api->requestTickByTickData(m_requestId, contract, "AllLast", 0, true);
+        
+        std::cout << "[ModelManager] Connected to IBKR API for symbol: " << getSymbol() 
+                  << " with request ID: " << m_requestId << std::endl;
+        
+        // Reset connection attempts on success
+        m_connectionAttempts = 0;
+        
+        // Mark as connected
+        m_connected = true;
+        return true;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "[ModelManager] Exception connecting to IBKR for symbol " 
+                  << getSymbol() << ": " << e.what() << std::endl;
+        return false;
+    }
+}
+
+/**
+ * Disconnect from IBKR API and cancel market data subscription
+ */
+void ModelManager::disconnectFromIBKR() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    
+    if (!m_connected) {
+        return;
+    }
+    
+    try {
+        // Cancel the market data subscription
+        if (m_requestId >= 0) {
+            auto api = m_connManager->getAPI();
+            api->cancelTickByTickData(m_requestId);
+        }
+        
+        // Disconnect from IBKR
+        m_connManager->disconnect();
+        
+        std::cout << "[ModelManager] Disconnected from IBKR API for symbol: " << getSymbol() << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "[ModelManager] Exception disconnecting from IBKR for symbol " 
+                  << getSymbol() << ": " << e.what() << std::endl;
+    }
+    
+    // Reset connection state
+    m_connected = false;
+    m_requestId = -1;
+    m_apiCallback.reset();
+}
+
+/**
+ * Check if currently connected to IBKR API
+ * @return True if connected, false otherwise
+ */
+bool ModelManager::isConnected() const {
+    return m_connected;
+}
+
+/**
+ * Get the connection status string
+ * @return String describing connection status
+ */
+std::string ModelManager::getConnectionStatus() const {
+    std::stringstream ss;
+    
+    if (m_connected) {
+        ss << "Connected to IBKR API (Request ID: " << m_requestId << ")";
+    } else {
+        ss << "Not connected to IBKR API";
+    }
+    
+    return ss.str();
 }
 
 /**
@@ -263,6 +577,19 @@ void ModelManager::setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit) {
  * @return Number of items actually processed
  */
 size_t ModelManager::processQueueData(size_t maxItems) {
+    // Check if we need to attempt connection
+    if (!isConnected()) {
+        // Don't attempt to connect if max retries have been reached
+        if (m_connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
+            connectToIBKR();
+        } else if (m_connectionAttempts == MAX_CONNECTION_ATTEMPTS) {
+            // Only print this message once when we hit the limit
+            std::cerr << "[ModelManager] Max connection attempts reached for " << getSymbol() 
+                      << ". Will continue processing without market data." << std::endl;
+            m_connectionAttempts++; // Increment to avoid printing this message again
+        }
+    }
+    
     // Get the queue
     auto* queue = m_rawDataModel->getStockQueue();
     if (!queue) return 0;
@@ -422,6 +749,13 @@ bool ModelManagerFactory::removeModel(const std::string& symbol) {
     // Stop and remove the thread for this symbol
     app_state::AppState::getInstance().removeModelThread(symbol);
     
+    // Get the manager before removing it to disconnect from IBKR
+    auto it = m_managers.find(symbol);
+    if (it != m_managers.end()) {
+        // Disconnect from IBKR API
+        it->second->disconnectFromIBKR();
+    }
+    
     // Remove the model from our map
     return m_managers.erase(symbol) > 0;
 }
@@ -445,6 +779,11 @@ std::vector<std::string> ModelManagerFactory::getAllSymbols() const {
  */
 void ModelManagerFactory::clearAll() {
     std::lock_guard<std::mutex> lock(m_mutex);
+    
+    // Disconnect all connections
+    for (auto& pair : m_managers) {
+        pair.second->disconnectFromIBKR();
+    }
     
     // Stop all running threads
     app_state::AppState::getInstance().stopAllThreads();

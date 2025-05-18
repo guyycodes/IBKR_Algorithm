@@ -8,6 +8,8 @@
 #include <thread>
 #include <atomic>
 #include <string>
+#include <chrono>
+#include <future>
 #include "../../models/model_manager.hpp"
 
 namespace app_state {
@@ -24,6 +26,9 @@ private:
     
     // Flag for each thread to indicate if it should continue running
     std::map<std::string, std::atomic<bool>> m_threadRunFlags;
+    
+    // Track whether we're in emergency shutdown mode
+    std::atomic<bool> m_emergencyShutdown{false};
     
     // Mutex for thread operations
     mutable std::mutex m_threadMutex;
@@ -51,11 +56,17 @@ public:
     // Stop all threads
     void stopAllThreads();
     
+    // Emergency stop all threads, including forceful termination of hanging threads
+    void emergencyStopAllThreads(int timeoutMs = 1000);
+    
     // Check if a thread is running for a symbol
     bool hasRunningThread(const std::string& symbol) const;
     
     // Get a list of all symbols with running threads
     std::vector<std::string> getRunningSymbols() const;
+    
+    // Check if we're in emergency shutdown mode
+    bool isEmergencyShutdown() const { return m_emergencyShutdown.load(); }
     
     // Destructor - ensure all threads are stopped
     ~AppState();

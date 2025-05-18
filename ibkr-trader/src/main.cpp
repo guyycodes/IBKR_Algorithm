@@ -2,9 +2,44 @@
 
 #include "tests/test_input_manager.hpp"
 #include "input_manager/input_manager.hpp"
+#include "util/app_state/app_state.hpp"
 #include <iostream>
 #include <string>
 #include <memory>
+#include <signal.h>
+#include <atomic>
+#include <thread>
+#include <chrono>
+#include <unistd.h> // For _exit()
+
+// Global reference to input manager for signal handling
+std::shared_ptr<input_manager::InputManager> g_inputManager;
+std::atomic<bool> g_shutdownRequested(false);
+
+// Signal handler for graceful shutdown
+void signalHandler(int signum) {
+    std::cout << "\nReceived signal " << signum << " (CTRL+C). Initiating graceful shutdown..." << std::endl;
+    
+    // Set shutdown flag
+    g_shutdownRequested.store(true);
+    
+    // Create a watchdog thread that will force exit if normal shutdown takes too long
+    std::thread([=]() {
+        // Wait 5 seconds maximum for graceful shutdown
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::cout << "Shutdown timeout exceeded. Forcing exit..." << std::endl;
+        _exit(signum);  // Force immediate termination if still running
+    }).detach();
+    
+    // Continue with normal shutdown
+    app_state::AppState::getInstance().emergencyStopAllThreads(1500);
+    
+    if (g_inputManager) {
+        g_inputManager->emergencyStop();
+    }
+    
+    // Don't exit here - let the program exit naturally after cleanup or be forced by the watchdog
+}
 
 void printUsage(const char* programName) {
     std::cout << "Usage: " << programName << " [options]" << std::endl;
@@ -20,6 +55,10 @@ void printUsage(const char* programName) {
 int main(int argc, char* argv[]) {
     std::cout << "IBKR Trading System" << std::endl;
     std::cout << "=================\n" << std::endl;
+    
+    // Register signal handler for CTRL+C
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
     
     // Parse command line arguments
     bool useCliMode = true;         // Default to CLI mode
@@ -67,23 +106,28 @@ int main(int argc, char* argv[]) {
         }
     } else {
         // Use InputManager directly
-        auto inputManager = std::make_shared<input_manager::InputManager>();
+        g_inputManager = std::make_shared<input_manager::InputManager>();
         
         // Set logging level
-        inputManager->setLogLevel(2);
+        g_inputManager->setLogLevel(2);
         
         // Initialize the input manager
-        if (!inputManager->initialize()) {
+        if (!g_inputManager->initialize()) {
             std::cerr << "Failed to initialize InputManager" << std::endl;
             return 1;
         }
         
         // Run appropriate mode
         if (useCliMode) {
-            inputManager->runCli();
+            g_inputManager->runCli();
         } else {
-            inputManager->runApiServer(apiPort);
+            g_inputManager->runApiServer(apiPort);
         }
+    }
+    
+    // Ensure any remaining cleanup happens
+    if (g_shutdownRequested.load()) {
+        std::cout << "Cleanup complete. Exiting..." << std::endl;
     }
     
     return 0;
