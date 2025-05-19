@@ -7,6 +7,7 @@
 #include <memory>
 #include <thread>
 #include <atomic>
+#include <mutex>
 
 // Forward declaration
 namespace input_manager {
@@ -69,7 +70,14 @@ public:
     
     // Utility functions
     void setLogLevel(int level);
+    
+    // Emergency stop functionality
+    
+    // Emergency stop handler - force close the server and clean up
     void emergencyStop();
+    
+    // Handle the /emergency-stop HTTP endpoint
+    void handleEmergencyStop(int clientSocket);
     
 private:
     // HTTP server functionality
@@ -98,6 +106,9 @@ private:
     int m_logLevel;
     bool m_autoConfirm;
     
+    // Mutex for thread-safe queue operations
+    std::mutex m_queueMutex;
+    
     // Connection status tracking
     nlohmann::json m_lastConnectionResults;
     bool m_hasConnectionIssues;
@@ -111,6 +122,9 @@ private:
     std::atomic<bool> m_serverRunning;
     int m_serverSocket;
     int m_serverPort;
+    
+    // Flag to track if emergency stop is in progress
+    bool m_isEmergencyStop = false;
 };
 
 } // namespace local_api

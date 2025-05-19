@@ -237,7 +237,7 @@ void CliTool::submitInputs() {
     // Call the submit callback with the current inputs
     m_submitCallback(m_jsonInputs);
     
-    // Clear inputs after submission
+    // Clear local inputs after submission - they are now stored in InputManager
     m_jsonInputs.clear();
     
     std::cout << "\nInputs submitted and cleared." << std::endl;

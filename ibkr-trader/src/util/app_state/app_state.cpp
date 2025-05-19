@@ -1,13 +1,24 @@
 // // app_state.cpp
 
 #include "app_state.hpp"
+#include "../../models/model_manager.hpp"
 #include <iostream>
+#include <iomanip>
 
 namespace app_state {
 
 // Initialize static members
 std::unique_ptr<AppState> AppState::s_instance = nullptr;
 std::mutex AppState::s_instanceMutex;
+
+// Constructor initializes all member variables
+AppState::AppState() 
+    : m_emergencyShutdown(false)
+    , m_shutdownInProgress(false)
+    , m_shutdownInitiator("none")
+{
+    std::cout << "[AppState] Initializing" << std::endl;
+}
 
 // Get singleton instance with thread-safe initialization
 AppState& AppState::getInstance() {
@@ -80,7 +91,7 @@ void AppState::registerModelThread(const std::string& symbol,
     
     // If a thread is already running for this symbol, stop it first
     if (m_modelThreads.find(symbol) != m_modelThreads.end()) {
-        removeModelThread(symbol);
+        _stopThread(symbol);
     }
     
     // Create a new run flag and set it to true
@@ -93,17 +104,28 @@ void AppState::registerModelThread(const std::string& symbol,
         std::ref(m_threadRunFlags[symbol])
     );
     
+    // Set thread state to RUNNING
+    m_threadStates[symbol] = ThreadState::RUNNING;
+    
     std::cout << "[AppState] Registered thread for symbol: " << symbol << std::endl;
 }
 
-// Stop and remove a thread for a symbol
-void AppState::removeModelThread(const std::string& symbol) {
-    std::lock_guard<std::mutex> lock(m_threadMutex);
+// Internal implementation of single thread stop
+void AppState::_stopThread(const std::string& symbol) {
+    // WARNING: This method should ONLY be called when m_threadMutex is already locked!
     
     auto threadIt = m_modelThreads.find(symbol);
     auto flagIt = m_threadRunFlags.find(symbol);
+    auto stateIt = m_threadStates.find(symbol);
     
     if (threadIt != m_modelThreads.end() && flagIt != m_threadRunFlags.end()) {
+        // Update state to STOPPING
+        if (stateIt != m_threadStates.end()) {
+            stateIt->second = ThreadState::STOPPING;
+        } else {
+            m_threadStates[symbol] = ThreadState::STOPPING;
+        }
+        
         // Signal the thread to stop
         flagIt->second = false;
         
@@ -116,17 +138,23 @@ void AppState::removeModelThread(const std::string& symbol) {
         m_modelThreads.erase(threadIt);
         m_threadRunFlags.erase(flagIt);
         
+        // Remove from states or mark as completed
+        if (stateIt != m_threadStates.end()) {
+            m_threadStates.erase(stateIt);
+        }
+        
         std::cout << "[AppState] Removed thread for symbol: " << symbol << std::endl;
     }
 }
 
-// Stop all threads
-void AppState::stopAllThreads() {
-    std::lock_guard<std::mutex> lock(m_threadMutex);
+// Internal implementation of all threads stop
+void AppState::_stopAllThreads() {
+    // WARNING: This method should ONLY be called when m_threadMutex is already locked!
     
-    // Signal all threads to stop
+    // Signal all threads to stop and update states
     for (auto& pair : m_threadRunFlags) {
         pair.second = false;
+        m_threadStates[pair.first] = ThreadState::STOPPING;
     }
     
     // Join all threads
@@ -139,33 +167,14 @@ void AppState::stopAllThreads() {
     // Clear maps
     m_modelThreads.clear();
     m_threadRunFlags.clear();
+    m_threadStates.clear();
     
     std::cout << "[AppState] Stopped all threads" << std::endl;
 }
 
-// Check if a thread is running for a symbol
-bool AppState::hasRunningThread(const std::string& symbol) const {
-    std::lock_guard<std::mutex> lock(m_threadMutex);
-    return m_modelThreads.find(symbol) != m_modelThreads.end();
-}
-
-// Get a list of all symbols with running threads
-std::vector<std::string> AppState::getRunningSymbols() const {
-    std::lock_guard<std::mutex> lock(m_threadMutex);
-    
-    std::vector<std::string> symbols;
-    symbols.reserve(m_modelThreads.size());
-    
-    for (const auto& pair : m_modelThreads) {
-        symbols.push_back(pair.first);
-    }
-    
-    return symbols;
-}
-
-// Implement emergency stop for all threads with forceful termination of hanging threads
-void AppState::emergencyStopAllThreads(int timeoutMs) {
-    std::cout << "[AppState] EMERGENCY STOP of all threads with " << timeoutMs << "ms timeout" << std::endl;
+// Internal implementation of emergency stop
+void AppState::_emergencyStopThreads(int timeoutMs) {
+    // WARNING: This method should ONLY be called when m_threadMutex is already locked!
     
     // Set emergency shutdown flag
     m_emergencyShutdown.store(true);
@@ -173,19 +182,22 @@ void AppState::emergencyStopAllThreads(int timeoutMs) {
     // Get a list of symbols with active threads
     std::vector<std::string> activeSymbols;
     
-    {
-        std::lock_guard<std::mutex> lock(m_threadMutex);
+    // Get list of active symbols and signal all threads to stop
+    for (const auto& pair : m_modelThreads) {
+        activeSymbols.push_back(pair.first);
         
-        // Get list of active symbols
-        for (const auto& pair : m_modelThreads) {
-            activeSymbols.push_back(pair.first);
-        }
-        
-        // Signal all threads to stop
-        for (auto& pair : m_threadRunFlags) {
-            pair.second.store(false);
-        }
+        // Update state to STOPPING
+        m_threadStates[pair.first] = ThreadState::STOPPING;
     }
+     
+     
+    // Signal all threads to stop
+    for (auto& pair : m_threadRunFlags) {
+        pair.second.store(false);
+    }
+    
+    // Unlock mutex while waiting for threads to join
+    m_threadMutex.unlock();
     
     // Calculate timeout time
     auto endTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
@@ -230,21 +242,41 @@ void AppState::emergencyStopAllThreads(int timeoutMs) {
         }
     }
     
-    // Clean up the maps
-    {
-        std::lock_guard<std::mutex> lock(m_threadMutex);
+    // Re-lock mutex for the clean up phase
+    m_threadMutex.lock();
+    
+    // Update states and remove all joined threads
+    for (const auto& symbol : joinedThreads) {
+        auto threadIt = m_modelThreads.find(symbol);
+        auto flagIt = m_threadRunFlags.find(symbol);
         
-        // Remove all joined threads
-        for (const auto& symbol : joinedThreads) {
-            m_modelThreads.erase(symbol);
-            m_threadRunFlags.erase(symbol);
+        if (threadIt != m_modelThreads.end()) {
+            m_modelThreads.erase(threadIt);
         }
         
-        // Remove all detached threads
-        for (const auto& symbol : detachedThreads) {
-            m_modelThreads.erase(symbol);
-            m_threadRunFlags.erase(symbol);
+        if (flagIt != m_threadRunFlags.end()) {
+            m_threadRunFlags.erase(flagIt);
         }
+        
+        // Remove from states
+        m_threadStates.erase(symbol);
+    }
+    
+    // Update states and remove all detached threads
+    for (const auto& symbol : detachedThreads) {
+        auto threadIt = m_modelThreads.find(symbol);
+        auto flagIt = m_threadRunFlags.find(symbol);
+        
+        if (threadIt != m_modelThreads.end()) {
+            m_modelThreads.erase(threadIt);
+        }
+        
+        if (flagIt != m_threadRunFlags.end()) {
+            m_threadRunFlags.erase(flagIt);
+        }
+        
+        // Mark as DETACHED in states
+        m_threadStates[symbol] = ThreadState::DETACHED;
     }
     
     std::cout << "[AppState] Emergency stop completed: " << joinedThreads.size() 
@@ -252,10 +284,186 @@ void AppState::emergencyStopAllThreads(int timeoutMs) {
               << " threads detached due to timeout" << std::endl;
 }
 
+// Public API: Request to stop a single thread by symbol
+bool AppState::requestThreadStop(const std::string& symbol, const std::string& requestor) {
+    std::lock_guard<std::mutex> lock(m_threadMutex);
+    
+    auto threadIt = m_modelThreads.find(symbol);
+    auto stateIt = m_threadStates.find(symbol);
+    
+    // Check if thread exists
+    if (threadIt == m_modelThreads.end()) {
+        std::cout << "[AppState] Thread for symbol " << symbol 
+                  << " not found (requested by " << requestor << ")" << std::endl;
+        return false;
+    }
+    
+    // Check if thread is already stopping
+    if (stateIt != m_threadStates.end() && stateIt->second == ThreadState::STOPPING) {
+        std::cout << "[AppState] Thread for symbol " << symbol 
+                  << " is already stopping (new request by " << requestor << ")" << std::endl;
+        return false;
+    }
+    
+    std::cout << "[AppState] Stopping thread for symbol " << symbol 
+              << " (requested by " << requestor << ")" << std::endl;
+    
+    // Stop the thread
+    _stopThread(symbol);
+    return true;
+}
+
+// Public API: Request to stop all threads
+bool AppState::requestAllThreadsStop(const std::string& requestor) {
+    std::lock_guard<std::mutex> lock(m_threadMutex);
+    
+    // Check if shutdown is already in progress
+    if (m_shutdownInProgress.load()) {
+        std::cout << "[AppState] Shutdown already in progress (initiated by " 
+                  << m_shutdownInitiator << ", new request by " << requestor << ")" << std::endl;
+        return false;
+    }
+    
+    // Set shutdown flag and initiator
+    m_shutdownInProgress.store(true);
+    m_shutdownInitiator = requestor;
+    
+    std::cout << "[AppState] Stopping all threads (requested by " << requestor << ")" << std::endl;
+    
+    // Stop all threads
+    _stopAllThreads();
+    
+    // Reset shutdown flag
+    m_shutdownInProgress.store(false);
+    
+    return true;
+}
+
+// Public API: Request emergency stop of all threads
+bool AppState::requestEmergencyStop(int timeoutMs, const std::string& requestor) {
+    std::unique_lock<std::mutex> lock(m_threadMutex);
+    
+    // Check if emergency shutdown is already in progress
+    if (m_emergencyShutdown.load()) {
+        std::cout << "[AppState] Emergency shutdown already in progress (initiated by " 
+                  << m_shutdownInitiator << ", new request by " << requestor << ")" << std::endl;
+        return false;
+    }
+    
+    // Set shutdown flags and initiator
+    m_shutdownInProgress.store(true);
+    m_shutdownInitiator = requestor;
+    
+    std::cout << "[AppState] EMERGENCY STOP of all threads with " << timeoutMs << "ms timeout "
+              << "(requested by " << requestor << ")" << std::endl;
+    
+    // Perform emergency stop (this will handle the mutex unlock/lock internally)
+    _emergencyStopThreads(timeoutMs);
+    
+    // Reset shutdown flag but keep emergency flag set for polling threads
+    m_shutdownInProgress.store(false);
+    
+    return true;
+}
+
+// Get current state of a thread
+ThreadState AppState::getThreadState(const std::string& symbol) const {
+    std::lock_guard<std::mutex> lock(m_threadMutex);
+    
+    auto stateIt = m_threadStates.find(symbol);
+    if (stateIt != m_threadStates.end()) {
+        return stateIt->second;
+    }
+    
+    // If not found in states but exists in threads, consider it RUNNING
+    if (m_modelThreads.find(symbol) != m_modelThreads.end()) {
+        return ThreadState::RUNNING;
+    }
+    
+    // Default - not found
+    return ThreadState::DETACHED;
+}
+
+// Check if a thread is in any active state
+bool AppState::hasRunningThread(const std::string& symbol) const {
+    std::lock_guard<std::mutex> lock(m_threadMutex);
+    
+    // First check if it's in the thread map
+    if (m_modelThreads.find(symbol) != m_modelThreads.end()) {
+        return true;
+    }
+    
+    // Then check if it's in the states map as DETACHED
+    auto stateIt = m_threadStates.find(symbol);
+    if (stateIt != m_threadStates.end() && stateIt->second == ThreadState::DETACHED) {
+        return true;
+    }
+    
+    return false;
+}
+
+// Get list of all symbols with threads in any state
+std::vector<std::string> AppState::getRunningSymbols() const {
+    std::lock_guard<std::mutex> lock(m_threadMutex);
+    
+    std::vector<std::string> symbols;
+    
+    // First add all active threads
+    for (const auto& pair : m_modelThreads) {
+        symbols.push_back(pair.first);
+    }
+    
+    // Then add any detached threads
+    for (const auto& pair : m_threadStates) {
+        if (std::find(symbols.begin(), symbols.end(), pair.first) == symbols.end()) {
+            symbols.push_back(pair.first);
+        }
+    }
+    
+    return symbols;
+}
+
+// Get detailed thread state information for logging/debugging
+std::map<std::string, std::string> AppState::getThreadStateInfo() const {
+    std::lock_guard<std::mutex> lock(m_threadMutex);
+    
+    std::map<std::string, std::string> info;
+    
+    // Process all registered symbols
+    for (const auto& pair : m_threadStates) {
+        const std::string& symbol = pair.first;
+        ThreadState state = pair.second;
+        
+        std::string stateStr;
+        switch (state) {
+            case ThreadState::RUNNING:  stateStr = "RUNNING"; break;
+            case ThreadState::STOPPING: stateStr = "STOPPING"; break;
+            case ThreadState::DETACHED: stateStr = "DETACHED"; break;
+            default:                    stateStr = "UNKNOWN"; break;
+        }
+        
+        // Check if thread is in thread map
+        bool inThreadMap = (m_modelThreads.find(symbol) != m_modelThreads.end());
+        
+        // Check if runflag exists and its value
+        bool hasRunFlag = (m_threadRunFlags.find(symbol) != m_threadRunFlags.end());
+        bool runFlagValue = hasRunFlag ? m_threadRunFlags.at(symbol).load() : false;
+        
+        // Format the info string
+        std::string infoStr = "State: " + stateStr + 
+                             ", Has Thread: " + std::string(inThreadMap ? "YES" : "NO") +
+                             ", RunFlag: " + (hasRunFlag ? (runFlagValue ? "TRUE" : "FALSE") : "NONE");
+        
+        info[symbol] = infoStr;
+    }
+    
+    return info;
+}
+
 // Destructor - ensure all threads are stopped
 AppState::~AppState() {
     // Use emergency stop to ensure all threads are stopped, even hanging ones
-    emergencyStopAllThreads(2000); // 2 second timeout
+    requestEmergencyStop(2000, "destructor");
 }
 
 } // namespace app_state

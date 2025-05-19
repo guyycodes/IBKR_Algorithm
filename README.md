@@ -5,51 +5,54 @@
 ### Architecture Diagram
 
 ```
-          +----------------+        +-----------------+
-          |     CLI Tool   |        |   .CSV File(s)  |
-          +--------+-------+        +--------+--------+
-                   |                         |
-                   | (commands & symbols)    |
-                   v                         |
-          +----------------+  (user input)   |
-          | Input Manager  | <---------------+
-          +--------+-------+
-                   |
-                   | (Pub/Sub: config/symbol updates)
-                   v
-      +-----------------------+
-      |   Raw_Data_q Manager    |
-      +----------+------------+
-                 |
-                 | (market data events)
-                 v
-        +-------------------+
-        | Metrics Calc.     |  <---- External Market Data API (feeds raw data)
-        +--------+----------+
-                 | (metrics)
-                 v
-        +-------------------+ (aggregates metrics)
-        | Metrics.q        |
-        |   Manager         |
-        +--------+----------+
-                 |
-                 | (aggregated metrics, states)
-                 v
-        +-------------------+
-        | Position Monitor  | (filters good positions)
-        +--------+----------+
-                 |
-                 | (Map<Symbol,Set<Position>>)
-                 v
-        +-------------------+
-        | Position Manager  |
-        +--------+----------+
-                 |
-                 | (final positions, results)
-                 v
-           +--------------+
-           |  Results/UI  |
-           +--------------+
++----------------+                                  +------------------+
+|    CLI Tool    |                                  |   HTTP Client    |
++-------+--------+                                  +--------+---------+
+        |                                                    |
+        | (commands)                                   (API requests)
+        v                                                    v
++-------+---------+         +-------------------+    +------+---------+
+|  Input Manager  | <-------+ Signal Handler    |    |    Local API   |
++-------+---------+         | (CTRL+C, SIGTERM) |    +------+---------+
+        |                   +-------------------+           |
+        |                             |                     |
+        |                             v                     |
+        |                   +---------+---------------------+------+
+        |                   |                                      |
+        |                   |              AppState                |
+        |                   |     (Thread Management Hub)          |
+        |                   |                                      |
+        |                   +------+---------------------------+---+
+        |                          |                           |
+        v                          |                           |
++-------+---------+     registerModelThread()                  |
+| Model Manager   |     requestThreadStop()                    |
+|    Factory      |     requestAllThreadsStop()                |
++-------+---------+     requestEmergencyStop()                 |
+        |                                                      |
+        | creates                                              | manages
+        v                                                      v
++-----------------------+                             +------------------+
+|    Model Manager      |<--------------------------- | Model Threads    |
+|    (per symbol)       |         runs in             | (per symbol)     |
+|                       |                             +------------------+
+| +-------------------+ |
+| |  Connection Mgr   | |                         
+| +-------------------+ |
+| |                   | |
+| |  STK_Q (Stock     | |                            +------------------+
+| |  Queue)           +-------------------------------->  TWS / Gateway |
+| |                   | |                            +------------------+
+| +-------------------+ |
+| |                   | |
+| |  API Callbacks    | |
+| |                   | |
+| +-------------------+ |
+| |                   | |
+| |  Raw Data Model   | |
+| |                   | |
+| +-------------------+ |
++-----------------------+
 
 ```
 

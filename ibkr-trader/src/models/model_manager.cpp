@@ -1,4 +1,5 @@
 #include "model_manager.hpp"
+#include "model_manager_factory.hpp"
 #include "../util/app_state/app_state.hpp"
 #include <iostream>
 #include <iomanip>
@@ -12,11 +13,11 @@ namespace model_manager {
 //
 
 ApiCallback::ApiCallback(connection::IBKRTrader& trader, ModelManager& manager, const std::string& symbol)
-    : API_Functions(trader), m_manager(manager), m_symbol(symbol), m_requestId(-1), m_lastPrice(0.0) {
+    : m_manager(manager), m_symbol(symbol), m_requestId(-1), m_lastPrice(0.0), m_trader(trader) {
     std::cout << "[ApiCallback] Created for symbol: " << symbol << std::endl;
 }
 
-void ApiCallback::handleTickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) {
+void ApiCallback::tickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) {
     // Check if this is for our symbol's request ID
     if (tickerId != m_requestId) return;
     
@@ -53,7 +54,7 @@ void ApiCallback::handleTickPrice(TickerId tickerId, TickType field, double pric
     }
 }
 
-void ApiCallback::handleTickSize(TickerId tickerId, TickType field, Decimal size) {
+void ApiCallback::tickSize(TickerId tickerId, TickType field, Decimal size) {
     // Check if this is for our symbol's request ID
     if (tickerId != m_requestId) return;
     
@@ -87,9 +88,9 @@ void ApiCallback::handleTickSize(TickerId tickerId, TickType field, Decimal size
     }
 }
 
-void ApiCallback::handleTickByTickAllLast(int reqId, int tickType, time_t time, double price, 
-                                     Decimal size, const TickAttribLast& tickAttribLast, 
-                                     const std::string& exchange, const std::string& specialConditions) {
+void ApiCallback::tickByTickAllLast(int reqId, int tickType, time_t time, double price, 
+                                Decimal size, const TickAttribLast& tickAttribLast, 
+                                const std::string& exchange, const std::string& specialConditions) {
     // Check if this is for our symbol's request ID
     if (reqId != m_requestId) return;
     
@@ -120,10 +121,16 @@ void ApiCallback::handleTickByTickAllLast(int reqId, int tickType, time_t time, 
     routeTickToModelManager(price, sizeInt, timestamp);
 }
 
-void ApiCallback::handleError(int id, int errorCode, const std::string& errorString) {
+void ApiCallback::error(int id, time_t errorTime, int errorCode, const std::string& errorString, 
+                         const std::string& advancedOrderRejectJson) {
     // Even if not for our request ID, log all errors for diagnostic purposes
     std::cerr << "[ERROR] (Thread " << m_symbol << ") Error " << errorCode 
               << " for request " << id << ": " << errorString << std::endl;
+              
+    // Log advanced order reject if provided
+    if (!advancedOrderRejectJson.empty()) {
+        std::cerr << "[ERROR] Advanced order reject info: " << advancedOrderRejectJson << std::endl;
+    }
 }
 
 void ApiCallback::setRequestId(int requestId) {
@@ -229,18 +236,17 @@ bool ModelManager::connectToIBKR() {
         // Create API callback that will route data to this ModelManager
         m_apiCallback = std::make_shared<ApiCallback>(m_connManager->getTrader(), *this, getSymbol());
         
-        // Get IBKR API instance from connection manager
-        auto api = m_connManager->getAPI();
+        // Get IBKR API client from connection manager and set the callback
+        auto client = m_connManager->getTrader().getClient();
+        client->setServerLogLevel(5); // Set to most detailed log level
         
         // PAPER TRADING SETUP:
         // Note: Connection to paper trading is handled in connection.cpp which uses port 4002
-        // We're already connected to the paper trading environment
-        
         // Set market data type to DELAYED_FROZEN_DATA (3) for data outside market hours
         // For live data during market hours, use REALTIME (1)
         // Options: 1 = Live, 2 = Frozen, 3 = Delayed, 4 = Delayed+Frozen
         std::cout << "[ModelManager] Setting market data type for " << getSymbol() << std::endl;
-        api->getClient()->reqMarketDataType(3); // Using delayed data for testing
+        client->reqMarketDataType(3); // Using delayed data for testing
         
         // Generate a random request ID (to prevent conflicts with other instances)
         std::random_device rd;
@@ -259,7 +265,7 @@ bool ModelManager::connectToIBKR() {
         contract.exchange = "SMART";
         
         // Subscribe to tick-by-tick data (most granular) 
-        api->requestTickByTickData(m_requestId, contract, "AllLast", 0, true);
+        client->reqMktData(m_requestId, contract, "", false, false, TagValueListSPtr());
         
         std::cout << "[ModelManager] Connected to IBKR API for symbol: " << getSymbol() 
                   << " with request ID: " << m_requestId << std::endl;
@@ -291,8 +297,8 @@ void ModelManager::disconnectFromIBKR() {
     try {
         // Cancel the market data subscription
         if (m_requestId >= 0) {
-            auto api = m_connManager->getAPI();
-            api->cancelTickByTickData(m_requestId);
+            auto client = m_connManager->getTrader().getClient();
+            client->cancelMktData(m_requestId);
         }
         
         // Disconnect from IBKR
@@ -622,174 +628,6 @@ size_t ModelManager::processQueueData(size_t maxItems) {
     }
     
     return processedCount;
-}
-
-//
-// ModelManagerFactory implementation
-//
-
-// Initialize static members for the singleton pattern
-std::unique_ptr<ModelManagerFactory> ModelManagerFactory::s_instance = nullptr;
-std::mutex ModelManagerFactory::s_instanceMutex;
-
-/**
- * Get the singleton instance of the factory
- * 
- * This follows the thread-safe singleton pattern to ensure only one instance exists.
- */
-ModelManagerFactory& ModelManagerFactory::getInstance() {
-    std::lock_guard<std::mutex> lock(s_instanceMutex);
-    if (!s_instance) {
-        s_instance = std::unique_ptr<ModelManagerFactory>(new ModelManagerFactory());
-    }
-    return *s_instance;
-}
-
-/**
- * Create a new model manager for a symbol with specified time window
- * 
- * This creates a new ModelManager instance and adds it to the managers map.
- * If a manager already exists for the symbol, it will be replaced.
- */
-std::shared_ptr<ModelManager> ModelManagerFactory::createModelManager(
-    const std::string& symbol, 
-    size_t windowSize, 
-    TimeWindowUnit windowUnit
-) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    
-    // Create new model manager with the specified symbol and time window
-    auto manager = std::make_shared<ModelManager>(symbol, windowSize, windowUnit);
-    m_managers[symbol] = manager;
-    
-    // Register this manager with AppState to run on its own thread
-    app_state::AppState::getInstance().registerModelThread(symbol, manager);
-    
-    return manager;
-}
-
-/**
- * Get an existing model manager for a symbol
- * 
- * Returns nullptr if no manager exists for the specified symbol.
- */
-std::shared_ptr<ModelManager> ModelManagerFactory::getModelManager(const std::string& symbol) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    
-    auto it = m_managers.find(symbol);
-    if (it != m_managers.end()) {
-        return it->second;
-    }
-    
-    return nullptr;
-}
-
-/**
- * Initialize a model from JSON data, creating it if it doesn't exist
- * 
- * This method gets or creates a model manager and initializes it with the JSON data.
- * It also ensures that the model has a thread registered with AppState,
- * which is crucial when reusing an existing model after its thread was previously stopped.
- */
-bool ModelManagerFactory::initModelFromJson(
-    const std::string& symbol, 
-    const nlohmann::json& jsonData, 
-    size_t windowSize, 
-    TimeWindowUnit windowUnit
-) {
-    // Get or create the model manager
-    std::shared_ptr<ModelManager> manager;
-    bool isNewManager = false;
-    
-    {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        auto it = m_managers.find(symbol);
-        if (it != m_managers.end()) {
-            manager = it->second;
-        } else {
-            // Create a new manager if one doesn't exist
-            manager = std::make_shared<ModelManager>(symbol, windowSize, windowUnit);
-            m_managers[symbol] = manager;
-            isNewManager = true;
-        }
-    }
-    
-    // Initialize the manager with JSON data
-    bool success = manager->initFromJson(jsonData);
-    
-    // IMPORTANT: Regardless of whether the model is new or reused,
-    // we need to ensure it has a thread registered with AppState.
-    // If the model was previously cleared, its thread was removed
-    // but the ModelManager itself remained in our map.
-    auto& appState = app_state::AppState::getInstance();
-    if (success && !appState.hasRunningThread(symbol)) {
-        // Only register a thread if one isn't already running for this symbol
-        appState.registerModelThread(symbol, manager);
-    }
-    
-    return success;
-}
-
-/**
- * Check if a model exists for a given symbol
- */
-bool ModelManagerFactory::hasModel(const std::string& symbol) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    return m_managers.find(symbol) != m_managers.end();
-}
-
-/**
- * Remove a model for a given symbol
- * 
- * Returns true if a model was removed, false if no model existed.
- */
-bool ModelManagerFactory::removeModel(const std::string& symbol) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    
-    // Stop and remove the thread for this symbol
-    app_state::AppState::getInstance().removeModelThread(symbol);
-    
-    // Get the manager before removing it to disconnect from IBKR
-    auto it = m_managers.find(symbol);
-    if (it != m_managers.end()) {
-        // Disconnect from IBKR API
-        it->second->disconnectFromIBKR();
-    }
-    
-    // Remove the model from our map
-    return m_managers.erase(symbol) > 0;
-}
-
-/**
- * Get all symbols that have model managers
- */
-std::vector<std::string> ModelManagerFactory::getAllSymbols() const {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    std::vector<std::string> symbols;
-    for (const auto& pair : m_managers) {
-        symbols.push_back(pair.first);
-    }
-    return symbols;
-}
-
-/**
- * Clear all model managers
- * 
- * This removes all model managers from the factory.
- */
-void ModelManagerFactory::clearAll() {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    
-    // Disconnect all connections
-    for (auto& pair : m_managers) {
-        pair.second->disconnectFromIBKR();
-    }
-    
-    // Stop all running threads
-    app_state::AppState::getInstance().stopAllThreads();
-    
-    // Clear all models
-    m_managers.clear();
 }
 
 } // namespace model_manager 

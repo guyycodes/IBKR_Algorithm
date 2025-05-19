@@ -1,6 +1,7 @@
 #include "local_api.hpp"
 #include "../input_manager.hpp"
 #include "../../models/model_manager.hpp"
+#include "../../models/model_manager_factory.hpp"
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -662,46 +663,71 @@ void LocalAPI::setLogLevel(int level) {
     m_logLevel = level;
 }
 
-// Emergency stop all trading activity
+// Emergency stop handler for HTTP server - force close everything
 void LocalAPI::emergencyStop() {
-    logMessage(0, "EMERGENCY STOP TRIGGERED");
+    std::cout << "[LocalAPI] Emergency stop triggered" << std::endl;
     
-    // Forcefully close server socket to unblock accept() immediately
+    // Set the server running flag to false to stop the main loop
+    m_serverRunning = false;
+    
+    // Close the server socket to force accept() to return with an error
     if (m_serverSocket >= 0) {
-        logMessage(0, "Forcefully closing server socket");
-        #ifdef _WIN32
-        // Windows
-        closesocket(m_serverSocket);
-        #else
-        // Unix/Linux
+        std::cout << "[LocalAPI] Forcibly closing server socket" << std::endl;
         close(m_serverSocket);
-        #endif
         m_serverSocket = -1;
     }
     
-    // Set server running flag to false to stop the server thread
-    m_serverRunning = false;
-    
-    // Clear all pending requests
-    m_requestQueue.clear();
-    m_pendingQueue.clear();
-    
-    // Signal threads to stop
-    auto& appState = app_state::AppState::getInstance();
-    appState.emergencyStopAllThreads(1000);
-    
-    // Call error callback to notify of emergency stop
-    m_errorCallback("emergency_stop", "Emergency stop triggered");
-    
-    // Try to propagate emergency stop to input manager if available
-    auto inputManager = m_inputManager.lock();
-    if (inputManager) {
-        // Avoid potential infinite loop by not calling emergencyStop again
-        // Just notify that we've already handled it
-        logMessage(0, "Notifying InputManager of emergency stop");
+    // Clear all pending requests to avoid starting new operations
+    {
+        std::lock_guard<std::mutex> lock(m_queueMutex);
+        m_requestQueue.clear();
+        m_pendingQueue.clear();
     }
     
-    logMessage(0, "Emergency stop completed");
+    // Request emergency stop of all threads via AppState
+    auto& appState = app_state::AppState::getInstance();
+    appState.requestEmergencyStop(1000, "LocalAPI::emergencyStop");
+    
+    // Notify the InputManager of the emergency stop if not already handling one
+    if (!m_isEmergencyStop) {
+        m_isEmergencyStop = true;
+        std::cout << "[LocalAPI] Notifying InputManager of emergency stop" << std::endl;
+        auto inputManager = m_inputManager.lock();
+        if (inputManager) {
+            inputManager->emergencyStop();
+        }
+    }
+    
+    std::cout << "[LocalAPI] Emergency stop actions completed" << std::endl;
+}
+
+// Handle the /emergency-stop endpoint
+void LocalAPI::handleEmergencyStop(int clientSocket) {
+    std::cout << "[LocalAPI] Received emergency stop request via HTTP endpoint" << std::endl;
+    
+    // Create JSON response
+    nlohmann::json response = {
+        {"status", "success"},
+        {"message", "Emergency stop triggered"}
+    };
+    
+    // Send success response before stopping
+    std::string responseStr = "HTTP/1.1 200 OK\r\n";
+    responseStr += "Content-Type: application/json\r\n";
+    responseStr += "Connection: close\r\n";
+    responseStr += "Content-Length: " + std::to_string(response.dump().length()) + "\r\n\r\n";
+    responseStr += response.dump();
+    
+    // Send the response
+    if (clientSocket >= 0) {
+        send(clientSocket, responseStr.c_str(), responseStr.length(), 0);
+        close(clientSocket);
+    }
+    
+    // Trigger emergency stop (this will close sockets and stop threads)
+    emergencyStop();
+    
+    // No need to call AppState emergency stop again as it's already called in emergencyStop()
 }
 
 // Get all current requests in a format compatible with InputManager's output JSON
@@ -881,12 +907,25 @@ bool LocalAPI::clearSymbol(const std::string& symbol) {
     std::string upperSymbol = symbol;
     std::transform(upperSymbol.begin(), upperSymbol.end(), upperSymbol.begin(), ::toupper);
     
+    // Access ModelManagerFactory to check if the model already exists
+    auto& factory = model_manager::ModelManagerFactory::getInstance();
+    
+    // Try to get the model before removing it to ensure it's properly cleared
+    auto model = factory.getModelManager(upperSymbol);
+    
     // Remove all requests for this symbol from the main queue
     auto it = m_requestQueue.begin();
     while (it != m_requestQueue.end()) {
-        if (it->contains("symbol") && (*it)["symbol"].get<std::string>() == upperSymbol) {
-            it = m_requestQueue.erase(it);
-            found = true;
+        if (it->contains("symbol")) {
+            std::string reqSymbol = (*it)["symbol"].get<std::string>();
+            std::transform(reqSymbol.begin(), reqSymbol.end(), reqSymbol.begin(), ::toupper);
+            
+            if (reqSymbol == upperSymbol) {
+                it = m_requestQueue.erase(it);
+                found = true;
+            } else {
+                ++it;
+            }
         } else {
             ++it;
         }
@@ -895,9 +934,16 @@ bool LocalAPI::clearSymbol(const std::string& symbol) {
     // Also check and remove from the pending queue
     auto pendingIt = m_pendingQueue.begin();
     while (pendingIt != m_pendingQueue.end()) {
-        if (pendingIt->contains("symbol") && (*pendingIt)["symbol"].get<std::string>() == upperSymbol) {
-            pendingIt = m_pendingQueue.erase(pendingIt);
-            found = true;
+        if (pendingIt->contains("symbol")) {
+            std::string reqSymbol = (*pendingIt)["symbol"].get<std::string>();
+            std::transform(reqSymbol.begin(), reqSymbol.end(), reqSymbol.begin(), ::toupper);
+            
+            if (reqSymbol == upperSymbol) {
+                pendingIt = m_pendingQueue.erase(pendingIt);
+                found = true;
+            } else {
+                ++pendingIt;
+            }
         } else {
             ++pendingIt;
         }
@@ -906,10 +952,19 @@ bool LocalAPI::clearSymbol(const std::string& symbol) {
     // Thread Management: Stop and remove the running thread if it exists
     // We access AppState directly instead of going through InputManager to avoid circular references
     auto& appState = app_state::AppState::getInstance();
+    
+    // Check if the thread is running
     if (appState.hasRunningThread(upperSymbol)) {
-        appState.removeModelThread(upperSymbol);
+        appState.requestThreadStop(upperSymbol, "LocalAPI::clearSymbol");
         found = true;
-        logMessage(0, "Thread for symbol " + upperSymbol + " stopped and removed");
+        logMessage(0, "Thread stop requested for symbol " + upperSymbol);
+    }
+    
+    // Ensure the model is fully removed from the factory to reset connection attempts
+    // This forces a new ModelManager to be created next time this symbol is used
+    if (factory.hasModel(upperSymbol)) {
+        factory.removeModel(upperSymbol);
+        found = true;
     }
     
     // IMPORTANT: We do NOT call back to InputManager::clearSymbol here
@@ -946,11 +1001,11 @@ void LocalAPI::clearAllRequests() {
     // Also clear the pending queue
     m_pendingQueue.clear();
     
-    // Thread Management: Stop ALL running threads
+    // Thread Management: Request all threads to stop using proper request API
     // We access AppState directly instead of going through InputManager
     auto& appState = app_state::AppState::getInstance();
-    appState.stopAllThreads();
-    logMessage(0, "All model threads stopped");
+    appState.requestAllThreadsStop("LocalAPI::clearAllRequests");
+    logMessage(0, "Stop request sent for all model threads");
     
     // IMPORTANT: We do NOT call back to InputManager::clearAllInputs here
     // This would create an infinite recursion:
@@ -960,7 +1015,7 @@ void LocalAPI::clearAllRequests() {
     // Notify input manager of changes
     notifyRequestQueueChanged();
     
-    logMessage(0, "All requests cleared from queues and all threads stopped");
+    logMessage(0, "All requests cleared from queues and all threads stop requested");
 }
 
 // Process a trading request (for backward compatibility)

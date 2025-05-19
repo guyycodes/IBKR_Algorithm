@@ -16,29 +16,42 @@
 std::shared_ptr<input_manager::InputManager> g_inputManager;
 std::atomic<bool> g_shutdownRequested(false);
 
-// Signal handler for graceful shutdown
+// Signal handler for CTRL+C
 void signalHandler(int signum) {
-    std::cout << "\nReceived signal " << signum << " (CTRL+C). Initiating graceful shutdown..." << std::endl;
+    std::cout << "\n[main] Received signal " << signum << " (CTRL+C)" << std::endl;
+    std::cout << "[main] Initiating graceful shutdown sequence..." << std::endl;
     
-    // Set shutdown flag
-    g_shutdownRequested.store(true);
+    // Use AppState requestEmergencyStop to handle thread shutdown
+    auto& appState = app_state::AppState::getInstance();
+    appState.requestEmergencyStop(5000, "signalHandler");
     
-    // Create a watchdog thread that will force exit if normal shutdown takes too long
-    std::thread([=]() {
-        // Wait 5 seconds maximum for graceful shutdown
+    // Set up a watchdog timer to force exit if shutdown takes too long
+    std::thread watchdogThread([]() {
+        std::cout << "[main] Started watchdog timer (5 seconds) for shutdown" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(5));
-        std::cout << "Shutdown timeout exceeded. Forcing exit..." << std::endl;
-        _exit(signum);  // Force immediate termination if still running
-    }).detach();
+        
+        // Check if shutdown is still in progress
+        auto& appState = app_state::AppState::getInstance();
+        if (appState.isShutdownInProgress()) {
+            // Shutdown is still in progress, force exit
+            std::cout << "[main] Watchdog timer expired, forcing exit" << std::endl;
+            // Use _exit instead of exit to ensure immediate termination without cleanup
+            _exit(1);
+        } else {
+            std::cout << "[main] Shutdown completed gracefully before watchdog timeout" << std::endl;
+            // Force exit even if shutdown completed gracefully
+            _exit(0);
+        }
+    });
     
-    // Continue with normal shutdown
-    app_state::AppState::getInstance().emergencyStopAllThreads(1500);
+    // Detach the watchdog thread so it runs independently
+    watchdogThread.detach();
     
-    if (g_inputManager) {
-        g_inputManager->emergencyStop();
-    }
+    // Log that graceful shutdown is in progress
+    std::cout << "[main] Graceful shutdown in progress (watchdog will force exit in 5s if needed)" << std::endl;
     
-    // Don't exit here - let the program exit naturally after cleanup or be forced by the watchdog
+    // Set global shutdown flag to signal other components
+    g_shutdownRequested.store(true);
 }
 
 void printUsage(const char* programName) {

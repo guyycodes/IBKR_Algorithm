@@ -43,13 +43,11 @@ public:
     
     // Symbol management
     
-    // Clear a specific symbol from processing
-    // The shouldCallApi parameter prevents infinite recursion between InputManager and LocalAPI
-    bool clearSymbol(const std::string& symbol, bool shouldCallApi = true);
+    // Clear a specific symbol and stop its thread
+    bool clearSymbol(const std::string& symbol);
     
-    // Clear all symbols and stop all threads
-    // The shouldCallApi parameter prevents infinite recursion between InputManager and LocalAPI
-    void clearAllInputs(bool shouldCallApi = true);
+    // Clear all inputs and stop all threads
+    void clearAllInputs();
     
     // Callback registration
     void registerTradeCallback(std::function<void(const nlohmann::json&)> callback);

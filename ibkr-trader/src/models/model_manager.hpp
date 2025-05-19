@@ -11,6 +11,11 @@
 #include <map>
 #include <atomic>
 
+// Forward declaration to avoid circular dependency
+namespace connection_manager {
+    class ConnectionManager;
+}
+
 /**
  * @file model_manager.hpp
  * 
@@ -56,58 +61,58 @@
  * 4. ModelManager automatically prunes old data outside the time window
  * 5. Client code can always access only the data within the specified time window
  */
-
 namespace model_manager {
 
-// Forward declaration of ApiCallback
-class ApiCallback;
-
-/**
- * Time window units for specifying how long data should be retained
- */
+// Enum to specify the unit for the time window
 enum class TimeWindowUnit {
-    SECONDS,  // Keep data for a specified number of seconds
-    MINUTES,  // Keep data for a specified number of minutes
-    HOURS     // Keep data for a specified number of hours
+    SECONDS,
+    MINUTES,
+    HOURS
+};
+
+// Forward declarations
+class ModelManager;
+
+// API Callback class to handle events from the IBKR API
+class ApiCallback : public DefaultEWrapper {
+private:
+    ModelManager& m_manager;
+    std::string m_symbol;
+    int m_requestId;
+    double m_lastPrice;
+    connection::IBKRTrader& m_trader;
+    
+    void routeTickToModelManager(double price, double volume, uint64_t timestamp = 0);
+    
+public:
+    ApiCallback(connection::IBKRTrader& trader, ModelManager& manager, const std::string& symbol);
+    
+    // Override DefaultEWrapper methods
+    void tickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) override;
+    void tickSize(TickerId tickerId, TickType field, Decimal size) override;
+    void tickByTickAllLast(int reqId, int tickType, time_t time, double price, Decimal size, 
+                       const TickAttribLast& tickAttribLast, const std::string& exchange, 
+                       const std::string& specialConditions) override;
+    void error(int id, time_t errorTime, int errorCode, const std::string& errorString, const std::string& advancedOrderRejectJson = "") override;
+    void setRequestId(int requestId);
 };
 
 /**
- * @class ModelManager
- * @brief Manages a single model with a sliding time window to limit data retention
+ * ModelManager class
  * 
- * This class wraps a RawDataModel and ensures that only data within a specified
- * time window is kept, preventing unbounded memory growth as new ticks arrive.
+ * This class manages a model for a specific trading symbol (e.g., "AAPL").
+ * It wraps a RawDataModel with time window functionality to maintain a limited
+ * history of market data. The history length is controlled by the windowSize and
+ * windowUnit parameters.
  * 
- * Each ModelManager maintains its own connection to IBKR API and is responsible
- * for fetching data for its assigned symbol.
+ * Key features:
+ *   1. Time-window based data management (e.g., keep last 5 minutes of data)
+ *   2. Automatic pruning of old data
+ *   3. Direct connection to IBKR API for real-time data
+ *   4. Integration with AppState for thread management
+ *      - Fetches data specifically for its assigned symbol
+ *   4. Methods to manipulate and access the data model
  */
-//
-// ModelManager class - Manages market data for a specific trading symbol
-//
-// This class is responsible for:
-// 1. Maintaining a reference to the underlying RawDataModel for a symbol
-// 2. Managing time window settings for historical data retention
-// 3. Actively pruning the STK_Q in RawDataModel to maintain the time window
-// 4. Maintaining its own connection to IBKR API to fetch data for its symbol
-//
-// DESIGN NOTE: Market data ticks are stored ONLY in the STK_Q in RawDataModel,
-// not in the vector of ticks. The ModelManager automatically prunes old data
-// from the queue whenever new data is added, keeping only data within the 
-// specified time window.
-//
-// STRUCTURE:
-// ModelManager contains:
-//   1. A shared_ptr to a RawDataModel
-//      - The RawDataModel stores the actual trading parameters (lots, margin, etc.)
-//      - The RawDataModel contains a thread-safe STK_Q for stock data (ticks)
-//   2. Time window configuration 
-//      - Size and unit (e.g., 60 minutes)
-//      - Used to actively prune the queue to maintain the time window
-//   3. Connection to IBKR API
-//      - Each ModelManager has its own connection to IBKR API
-//      - Fetches data specifically for its assigned symbol
-//   4. Methods to manipulate and access the data model
-//
 class ModelManager {
 private:
     // The underlying raw data model that stores the actual data
@@ -153,92 +158,12 @@ public:
      * @param windowSize Size of the time window
      * @param windowUnit Unit for the time window (seconds, minutes, hours)
      */
-    ModelManager(const std::string& symbol, size_t windowSize, TimeWindowUnit windowUnit);
+    ModelManager(const std::string& symbol, size_t windowSize = 60, TimeWindowUnit windowUnit = TimeWindowUnit::MINUTES);
     
     /**
      * Destructor
-     * Ensures proper cleanup of API connections
      */
     ~ModelManager();
-    
-    /**
-     * Initialize model parameters from JSON configuration
-     * @param jsonData JSON data containing model parameters
-     * @return True if initialization succeeded, false otherwise
-     */
-    bool initFromJson(const nlohmann::json& jsonData);
-    
-    /**
-     * Add a new market data tick and immediately prune the queue
-     * 
-     * This method adds the tick to the RawDataModel's queue and then
-     * calls pruneOldData() to remove any data points that fall outside
-     * the specified time window. This ensures the queue size is constantly
-     * managed and prevents unbounded memory growth.
-     * 
-     * @param tick The new market data tick to add
-     */
-    void addTick(const raw_data_model::MarketDataTick& tick);
-    
-    /**
-     * Get the underlying raw data model (for advanced operations)
-     * @return Shared pointer to the raw data model
-     */
-    std::shared_ptr<raw_data_model::RawDataModel> getRawDataModel() const;
-    
-    /**
-     * Get the symbol this model is for
-     * @return The symbol string (e.g., "AAPL")
-     */
-    std::string getSymbol() const;
-    
-    /**
-     * Get the trading parameters for this model
-     * @return Reference to the trading parameters
-     */
-    const raw_data_model::TradingParams& getParams() const;
-    
-    /**
-     * Get all ticks that fall within the current time window
-     * @return Vector of market data ticks within the time window
-     */
-    std::vector<raw_data_model::MarketDataTick> getTicksInWindow() const;
-    
-    /**
-     * Get the most recent market data tick
-     * @return Pointer to the latest tick, or nullptr if no ticks available
-     */
-    const raw_data_model::MarketDataTick* getLatestTick() const;
-    
-    /**
-     * Get the total number of ticks currently stored
-     * @return Count of ticks
-     */
-    size_t getTickCount() const;
-    
-    /**
-     * Clear all stored ticks (trading parameters are preserved)
-     */
-    void clearTicks();
-    
-    /**
-     * Get the current time window settings
-     * @return Pair containing window size and unit
-     */
-    std::pair<size_t, TimeWindowUnit> getTimeWindow() const;
-    
-    /**
-     * Update the time window settings and prune data accordingly
-     * @param windowSize New window size
-     * @param windowUnit New window unit
-     */
-    void setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit);
-    
-    /**
-     * Process data from the queue (called from the thread)
-     * Returns the number of items processed
-     */
-    size_t processQueueData(size_t maxItems = 10);
     
     /**
      * Connect to IBKR API and subscribe to market data for this symbol
@@ -264,180 +189,95 @@ public:
     std::string getConnectionStatus() const;
     
     /**
-     * Get the number of connection attempts made
-     * @return Number of connection attempts
+     * Initialize the model from JSON configuration data
+     * @param jsonData JSON object containing configuration data
+     * @return True if successfully initialized, false otherwise
+     */
+    bool initFromJson(const nlohmann::json& jsonData);
+    
+    /**
+     * Add a new market data tick and immediately prune the queue
+     * @param tick The new market data tick to add
+     */
+    void addTick(const raw_data_model::MarketDataTick& tick);
+    
+    /**
+     * Get the underlying raw data model for advanced operations
+     * @return Shared pointer to the raw data model
+     */
+    std::shared_ptr<raw_data_model::RawDataModel> getRawDataModel() const;
+    
+    /**
+     * Get the symbol this model is for
+     * @return Symbol string (e.g., "AAPL")
+     */
+    std::string getSymbol() const;
+    
+    /**
+     * Get the trading parameters for this model
+     * @return Reference to the trading parameters
+     */
+    const raw_data_model::TradingParams& getParams() const;
+    
+    /**
+     * Get all ticks that fall within the current time window
+     * @return Vector of market data ticks
+     */
+    std::vector<raw_data_model::MarketDataTick> getTicksInWindow() const;
+    
+    /**
+     * Get the most recent market data tick
+     * @return Pointer to the latest tick, or nullptr if none
+     */
+    const raw_data_model::MarketDataTick* getLatestTick() const;
+    
+    /**
+     * Get the total number of ticks currently stored in the queue
+     * @return Count of ticks in the queue
+     */
+    size_t getTickCount() const;
+    
+    /**
+     * Clear all stored ticks (trading parameters are preserved)
+     */
+    void clearTicks();
+    
+    /**
+     * Get the current time window settings
+     * @return Pair of window size and unit
+     */
+    std::pair<size_t, TimeWindowUnit> getTimeWindow() const;
+    
+    /**
+     * Update the time window settings and prune data accordingly
+     * @param windowSize New window size
+     * @param windowUnit New window unit
+     */
+    void setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit);
+    
+    /**
+     * Process a batch of data items from the queue
+     * @param maxItems Maximum number of items to process in one batch
+     * @return Number of items actually processed
+     */
+    size_t processQueueData(size_t maxItems);
+    
+    /**
+     * Get the number of connection attempts made so far
+     * @return Connection attempt count
      */
     int getConnectionAttempts() const { return m_connectionAttempts; }
     
     /**
      * Get the maximum number of connection attempts
-     * @return Maximum number of connection attempts
+     * @return Maximum connection attempts
      */
     static int getMaxConnectionAttempts() { return MAX_CONNECTION_ATTEMPTS; }
 };
 
-/**
- * @class ApiCallback
- * @brief Custom callback class for handling IBKR API events for a specific symbol
- * 
- * This class is used by ModelManager to handle IBKR API callbacks for its assigned symbol.
- * It filters market data and routes it to the appropriate ModelManager instance.
- */
-class ApiCallback : public ibkr_api_functions::API_Functions {
-public:
-    /**
-     * Constructor
-     * @param trader Reference to IBKRTrader instance
-     * @param manager Reference to ModelManager that owns this callback
-     * @param symbol Symbol to filter for
-     */
-    ApiCallback(connection::IBKRTrader& trader, 
-                ModelManager& manager, 
-                const std::string& symbol);
-    
-    /**
-     * Handle tick price callback
-     * @param tickerId Ticker ID for the callback
-     * @param field Type of price (bid, ask, last, etc.)
-     * @param price Price value
-     * @param attrib Additional attributes
-     */
-    void handleTickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib);
-    
-    /**
-     * Handle tick size callback
-     * @param tickerId Ticker ID for the callback
-     * @param field Type of size (bidSize, askSize, volume, etc.)
-     * @param size Size value
-     */
-    void handleTickSize(TickerId tickerId, TickType field, Decimal size);
-    
-    /**
-     * Handle tick-by-tick all last callback (most granular data)
-     * @param reqId Request ID
-     * @param tickType Type of tick
-     * @param time Timestamp
-     * @param price Price value
-     * @param size Size value
-     * @param tickAttribLast Additional attributes
-     * @param exchange Exchange name
-     * @param specialConditions Special conditions
-     */
-    void handleTickByTickAllLast(int reqId, int tickType, time_t time, double price, 
-                            Decimal size, const TickAttribLast& tickAttribLast, 
-                            const std::string& exchange, const std::string& specialConditions);
-    
-    /**
-     * Handle error callback
-     * @param id Request ID
-     * @param errorCode Error code
-     * @param errorString Error message
-     */
-    void handleError(int id, int errorCode, const std::string& errorString);
-    
-    /**
-     * Set request ID for this callback
-     * @param requestId Request ID to use
-     */
-    void setRequestId(int requestId);
-    
-private:
-    // Reference to the ModelManager that owns this callback
-    ModelManager& m_manager;
-    
-    // Symbol to filter for
-    std::string m_symbol;
-    
-    // Request ID for market data subscription
-    int m_requestId;
-    
-    // Last seen price (for volume-only updates)
-    double m_lastPrice;
-    
-    // Route market data tick to the ModelManager
-    void routeTickToModelManager(double price, double volume, uint64_t timestamp = 0);
-};
-
-//
-// ModelManagerFactory - Singleton manager of ModelManager instances
-//
-// This class is responsible for creating, storing, and managing ModelManager instances.
-// It ensures that only one ModelManager exists per symbol (singleton per symbol).
-//
-// ARCHITECTURE:
-// - ModelManagerFactory (Singleton)
-//   |
-//   ├── Map<symbol, ModelManager>
-//   |    |
-//   |    ├── ModelManager for symbol "AAPL"
-//   |    |    ├── Contains RawDataModel for "AAPL"
-//   |    |    └── Contains own IBKR connection
-//   |    |
-//   |    ├── ModelManager for symbol "MSFT" 
-//   |    |    ├── Contains RawDataModel for "MSFT"
-//   |    |    └── Contains own IBKR connection
-//   |    |
-//   |    └── ... (more symbols)
-//   |
-//   └── Methods to create/get/manage ModelManagers
-//
-class ModelManagerFactory {
-private:
-    // Static singleton instance
-    static std::unique_ptr<ModelManagerFactory> s_instance;
-    static std::mutex s_instanceMutex; // For thread-safe initialization
-    
-    // Map of symbol to ModelManager instances
-    // This is the core data structure that maintains all model managers
-    std::map<std::string, std::shared_ptr<ModelManager>> m_managers;
-    mutable std::mutex m_mutex; // For thread-safe operations on the map
-    
-    // Private constructor (singleton pattern)
-    ModelManagerFactory() {}
-    
-public:
-    // Delete copy constructor and assignment (singleton pattern)
-    ModelManagerFactory(const ModelManagerFactory&) = delete;
-    ModelManagerFactory& operator=(const ModelManagerFactory&) = delete;
-    
-    // Get the singleton instance of the factory
-    // This is the only way to access the factory
-    static ModelManagerFactory& getInstance();
-    
-    // Create a new model manager for a symbol
-    // If a manager already exists for the symbol, it will be replaced.
-    std::shared_ptr<ModelManager> createModelManager(
-        const std::string& symbol, 
-        size_t windowSize, 
-        TimeWindowUnit windowUnit
-    );
-    
-    // Get an existing model manager for a symbol
-    // Returns nullptr if no manager exists for the symbol
-    std::shared_ptr<ModelManager> getModelManager(const std::string& symbol);
-    
-    // Initialize a model from JSON data
-    // Will create the model if it doesn't exist
-    bool initModelFromJson(
-        const std::string& symbol, 
-        const nlohmann::json& jsonData, 
-        size_t windowSize, 
-        TimeWindowUnit windowUnit
-    );
-    
-    // Check if a model exists for a given symbol
-    bool hasModel(const std::string& symbol);
-    
-    // Remove a model for a given symbol
-    bool removeModel(const std::string& symbol);
-    
-    // Get all symbols that have model managers
-    std::vector<std::string> getAllSymbols() const;
-    
-    // Clear all model managers
-    void clearAll();
-};
+// Include ModelManagerFactory
+// #include "model_manager_factory.hpp"
 
 } // namespace model_manager
 
-#endif 
+#endif // MODEL_MANAGER_HPP 

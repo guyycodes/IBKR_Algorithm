@@ -1,5 +1,6 @@
 #include "input_manager.hpp"
 #include "../models/model_manager.hpp"
+#include "../models/model_manager_factory.hpp"
 #include "../util/app_state/app_state.hpp"
 #include <iostream>
 #include <fstream>
@@ -34,9 +35,9 @@ InputManager::~InputManager() {
     // Make sure to stop before destroying
     stop();
     
-    // Ensure all threads are stopped
+    // Request all threads to stop instead of directly calling stopAllThreads
     auto& appState = app_state::AppState::getInstance();
-    appState.stopAllThreads();
+    appState.requestAllThreadsStop("InputManager::destructor");
     
     logMessage(0, "InputManager instance destroyed");
 }
@@ -59,8 +60,22 @@ bool InputManager::initialize(const std::string& configPath) {
     
     // Set up the submit callback for CliTool
     m_cliTool->setSubmitCallback([this](const nlohmann::json& inputs) {
-        // Update our output JSON with the CLI inputs directly
-        m_outputJson = inputs;
+        // Update our output JSON with the CLI inputs by merging rather than replacing
+        for (auto it = inputs.begin(); it != inputs.end(); ++it) {
+            std::string symbol = it.key();
+            nlohmann::json params = it.value();
+            
+            // Check if existing entry is already a standardized object
+            if (m_outputJson.contains(symbol) && 
+                m_outputJson[symbol].is_object() && 
+                m_outputJson[symbol].contains("params")) {
+                // Update just the params part of the existing structure to avoid nesting
+                m_outputJson[symbol]["params"] = params;
+            } else {
+                // First time seeing this symbol, set the raw params
+                m_outputJson[symbol] = params;
+            }
+        }
         
         // Process the output (this is the common bottleneck function for both CLI and API)
         processOutput();
@@ -190,30 +205,22 @@ bool InputManager::processBatchRequests(const std::vector<nlohmann::json>& reque
     return allSuccessful;
 }
 
-// Clear a symbol from both CLI and API
-//
-// This method performs several important operations:
-// 1. Removes the symbol from the InputManager's JSON data
-// 2. Optionally calls the LocalAPI to clear the symbol from its queues
-// 3. Stops and removes the thread associated with the symbol
-//
-// Parameters:
-// - symbol: The trading symbol to clear (e.g., "AAPL")
-// - shouldCallApi: Controls whether to call LocalAPI::clearSymbol
-//
-// The shouldCallApi parameter prevents infinite recursion:
-// - When called directly by user code: shouldCallApi=true (default)
-// - When called by LocalAPI: shouldCallApi=false
-//
-// Without this parameter, we'd have an infinite loop:
-//   InputManager::clearSymbol -> LocalAPI::clearSymbol -> InputManager::clearSymbol -> ...
-bool InputManager::clearSymbol(const std::string& symbol, bool shouldCallApi) {
-    logMessage(1, "Clearing symbol: " + symbol);
+// Clear a specific symbol and stop its thread
+bool InputManager::clearSymbol(const std::string& symbol) {
+    // Log this action
+    std::cout << "[InputManager] Clearing symbol: " << symbol << std::endl;
     
-    bool apiResult = true;
-    if (m_activeSource == InputSource::API && shouldCallApi) {
-        apiResult = m_localApi->clearSymbol(symbol);
+    auto& appState = app_state::AppState::getInstance();
+    auto& factory = model_manager::ModelManagerFactory::getInstance();
+    
+    // First, stop any thread for this symbol
+    if (appState.hasRunningThread(symbol)) {
+        // Use the new request API instead of direct removal
+        appState.requestThreadStop(symbol, "InputManager::clearSymbol");
     }
+    
+    // Remove the model from ModelManagerFactory
+    factory.removeModel(symbol);
     
     // Remove from output JSON
     std::string upperSymbol = symbol;
@@ -224,49 +231,31 @@ bool InputManager::clearSymbol(const std::string& symbol, bool shouldCallApi) {
         m_outputJson.erase(upperSymbol);
         jsonResult = true;
     }
-
-    // Thread Management: Stop and remove the thread for this symbol if it's running
-    // We access AppState directly to ensure the thread is properly stopped
-    auto& appState = app_state::AppState::getInstance();
-    if (appState.hasRunningThread(upperSymbol)) {
-        logMessage(0, "Stopping and removing thread for symbol: " + upperSymbol);
-        appState.removeModelThread(upperSymbol);
-        return true;
-    }
     
-    return apiResult || jsonResult;
+    return jsonResult;
 }
 
-// Clear all inputs from both CLI and API
-//
-// This method performs several important operations:
-// 1. Clears all symbols from the InputManager's JSON data
-// 2. Optionally calls the LocalAPI to clear all symbols from its queues
-// 3. Stops ALL running model threads via AppState
-//
-// Parameters:
-// - shouldCallApi: Controls whether to call LocalAPI::clearAllRequests
-//
-// The shouldCallApi parameter prevents infinite recursion:
-// - When called directly by user code: shouldCallApi=true (default)
-// - When called by LocalAPI: shouldCallApi=false
-//
-// Without this parameter, we'd have an infinite loop:
-//   InputManager::clearAllInputs -> LocalAPI::clearAllRequests -> InputManager::clearAllInputs -> ...
-void InputManager::clearAllInputs(bool shouldCallApi) {
-    logMessage(0, "Clearing all inputs and stopping all threads");
+// Clear all inputs and stop all threads
+void InputManager::clearAllInputs() {
+    std::cout << "[InputManager] Clearing all inputs" << std::endl;
     
-    if (m_activeSource == InputSource::API && shouldCallApi) {
-        m_localApi->clearAllRequests();
-    }
+    auto& appState = app_state::AppState::getInstance();
+    auto& factory = model_manager::ModelManagerFactory::getInstance();
+    
+    // Get a list of all currently running symbols
+    std::vector<std::string> symbols = appState.getRunningSymbols();
+    
+    // Request to stop all threads instead of direct call
+    appState.requestAllThreadsStop("InputManager::clearAllInputs");
+    
+    // Clear all models from ModelManagerFactory
+    factory.clearAll();
     
     // Clear output JSON
     m_outputJson.clear();
     
     // Thread Management: Stop ALL running threads
     // We access AppState directly to ensure all threads are properly stopped
-    auto& appState = app_state::AppState::getInstance();
-    appState.stopAllThreads();
     logMessage(0, "All model threads stopped");
 }
 
@@ -300,30 +289,26 @@ void InputManager::setLogLevel(int level) {
     m_localApi->setLogLevel(level);
 }
 
-// Emergency stop
+// Emergency stop implementation
 void InputManager::emergencyStop() {
-    logMessage(0, "EMERGENCY STOP TRIGGERED");
+    std::cout << "[InputManager] Emergency stop triggered" << std::endl;
     
-    // Stop both input sources
+    // Stop all input sources first
     stop();
     
-    // Explicitly stop all threads first with timeout for hanging threads
-    auto& appState = app_state::AppState::getInstance();
-    appState.emergencyStopAllThreads(1500);
+    // Clear all inputs and stop threads
+    clearAllInputs();
     
-    // Clear all inputs
-    clearAllInputs(false); // Don't call the API again since we're already in emergency stop
-    
-    // Call the emergency stop on LocalAPI
+    // Emergency stop the API server
     m_localApi->emergencyStop();
     
-    // Call error callback
-    m_errorCallback("emergency_stop", "Emergency stop triggered");
+    // Give threads a chance to complete cleanup
+    std::cout << "[InputManager] Waiting for threads to clean up..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     
-    // Give threads a moment to complete cleanup
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    
-    logMessage(0, "Emergency stop completed");
+    // Let AppState handle the emergency stop of threads
+    auto& appState = app_state::AppState::getInstance();
+    appState.requestEmergencyStop(1000, "InputManager::emergencyStop");
 }
 
 // Get the current active input source
@@ -539,16 +524,22 @@ void InputManager::processOutput() {
             std::string symbol = it.key();
             nlohmann::json params = it.value();
             
-            // Create a standardized request format that matches API output
-            nlohmann::json standardizedRequest = {
-                {"symbol", symbol},
-                {"params", params},
-                {"status", "executed"},
-                {"timestamp", std::chrono::system_clock::now().time_since_epoch().count()}
-            };
-            
-            // Add to our standardized output
-            standardizedOutput[symbol] = standardizedRequest;
+            // Check if params is already a standardized object
+            if (params.is_object() && params.contains("params") && params.contains("status") && params.contains("timestamp")) {
+                // Already standardized, just use it directly
+                standardizedOutput[symbol] = params;
+            } else {
+                // Create a standardized request format that matches API output
+                nlohmann::json standardizedRequest = {
+                    {"symbol", symbol},
+                    {"params", params},
+                    {"status", "executed"},
+                    {"timestamp", std::chrono::system_clock::now().time_since_epoch().count()}
+                };
+                
+                // Add to our standardized output
+                standardizedOutput[symbol] = standardizedRequest;
+            }
         }
     } else if (m_activeSource == InputSource::API) {
         std::cout << "\n===== INPUT FROM API =====" << std::endl;
@@ -659,33 +650,18 @@ void InputManager::processOutput() {
                     std::cout << "Properly structured JSON for RawDataModel:" << std::endl;
                     std::cout << properJson.dump(2) << std::endl;
 
-                    // Get or create model
-                    auto model = factory.getModelManager(symbol);
-                    if (!model) {
-                        model = factory.createModelManager(symbol, windowSize, windowUnit);
-                    }
+                    // Use ModelManagerFactory's backward compatibility method
+                    // which handles both creation and thread management
+                    std::cout << "[DEBUG] Using backward compatibility method to get/create model..." << std::endl;
+                    auto model = factory.getModelManager(
+                        symbol,         // symbol to process
+                        true,           // should start thread
+                        tradeData       // trade parameters
+                    );
                     
-                    // Initialize with properly structured JSON
-                    bool success = model ? model->initFromJson(properJson) : false;
+                    bool success = model != nullptr;
                     
-                    // IMPORTANT: Ensure that the model has a thread registered with AppState
-                    // If the model was previously cleared, its thread was removed
-                    // but the ModelManager itself remained in the factory
-                    if (success) {
-                        auto& appState = app_state::AppState::getInstance();
-                        if (!appState.hasRunningThread(symbol)) {
-                            // Only register a thread if one isn't already running for this symbol
-                            std::cout << "[DEBUG] Registering thread for symbol: " << symbol << std::endl;
-                            std::cout << "[DEBUG] Thread will automatically establish IBKR connection" << std::endl;
-                            appState.registerModelThread(symbol, model);
-                        } else {
-                            std::cout << "[DEBUG] Thread already running for symbol: " << symbol << std::endl;
-                            std::cout << "[DEBUG] Connection status: " << 
-                                (model->isConnected() ? "CONNECTED" : "NOT CONNECTED") << std::endl;
-                        }
-                    }
-                    
-                    std::cout << "[DEBUG] Model initialization " << (success ? "successful" : "failed") << std::endl;
+                    std::cout << "[DEBUG] Model " << (success ? "successfully" : "failed to be") << " initialized" << std::endl;
                     
                     // Retrieve the model instance to display information and verify singleton behavior
                     std::cout << "[DEBUG] Getting model manager for symbol: " << symbol << std::endl;
