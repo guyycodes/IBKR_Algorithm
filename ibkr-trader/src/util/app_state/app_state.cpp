@@ -4,6 +4,7 @@
 #include "../../models/model_manager.hpp"
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 namespace app_state {
 
@@ -34,17 +35,22 @@ AppState& AppState::getInstance() {
 void runModelManagerThread(std::shared_ptr<model_manager::ModelManager> manager, 
                           std::atomic<bool>& runFlag) {
     const std::string symbol = manager->getSymbol();
-    std::cout << "[Thread] Started for symbol: " << symbol << std::endl;
+    
+    // Get thread ID for logging
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    
+    std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Started for symbol: " << symbol << std::endl;
     
     // Connect to IBKR API 
-    std::cout << "[Thread] Connecting to IBKR API for symbol: " << symbol << std::endl;
+    std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Connecting to IBKR API for symbol: " << symbol << std::endl;
     bool connected = manager->connectToIBKR();
     
     if (connected) {
-        std::cout << "[Thread] Successfully connected to IBKR API for symbol: " << symbol << std::endl;
+        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Successfully connected to IBKR API for symbol: " << symbol << std::endl;
     } else {
-        std::cout << "[Thread] Warning: Failed to connect to IBKR API for symbol: " << symbol << std::endl;
-        std::cout << "[Thread] Will continue running but no live data will be received." << std::endl;
+        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Warning: Failed to connect to IBKR API for symbol: " << symbol << std::endl;
+        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Will continue running but no live data will be received." << std::endl;
     }
     
     // Get reference to AppState for emergency shutdown check
@@ -55,33 +61,33 @@ void runModelManagerThread(std::shared_ptr<model_manager::ModelManager> manager,
         // Process a batch of ticks from the queue 
         // The processQueueData method handles filtering old data
         // and applying the trading logic
-        size_t processed = manager->processQueueData(20);
+        // size_t processed = manager->processQueueData(20);
         
-        // If we processed items, log it
-        if (processed > 0) {
-            std::cout << "[Thread] Symbol " << symbol 
-                      << " processed " << processed << " queue items" << std::endl;
-        }
+        // If we processed items, log it - now logged directly in processQueueData
+        //if (processed > 0) {
+        //    std::cout << "[Thread] Symbol " << symbol 
+        //              << " processed " << processed << " queue items" << std::endl;
+        //}
         
         // If no items were processed, sleep to avoid busy-waiting
-        if (processed == 0) {
+        // if (processed == 0) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
+        // }
         
         // Check for emergency shutdown again
         if (appState.isEmergencyShutdown()) {
-            std::cout << "[Thread] Emergency shutdown detected for symbol: " << symbol << std::endl;
+            std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Emergency shutdown detected for symbol: " << symbol << std::endl;
             break;
         }
     }
     
     // Disconnect from IBKR API when thread is stopping
     if (connected) {
-        std::cout << "[Thread] Disconnecting from IBKR API for symbol: " << symbol << std::endl;
+        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Disconnecting from IBKR API for symbol: " << symbol << std::endl;
         manager->disconnectFromIBKR();
     }
     
-    std::cout << "[Thread] Stopped for symbol: " << symbol << std::endl;
+    std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Stopped for symbol: " << symbol << std::endl;
 }
 
 // Register a new thread for a ModelManager and start it

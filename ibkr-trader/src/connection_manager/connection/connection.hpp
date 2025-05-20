@@ -15,10 +15,15 @@
 #include "ibkr/cppclient/client/EReader.h"
 #include "ibkr/cppclient/client/Contract.h"   // For Contract definition
 
+// Forward declaration
+namespace model_manager {
+    class ModelManager;
+}
+
 namespace connection {
 
     // Connection constants
-    extern const int client_id;
+    extern int client_id;
     extern const char* HOST;
     extern int PORT;
 
@@ -48,6 +53,12 @@ namespace connection {
         
         // For order placement or tracking your next valid ID
         OrderId m_nextOrderId = -1;
+        
+        // Model manager reference to receive market data directly
+        model_manager::ModelManager* m_modelManager = nullptr;
+        int m_requestId = -1;
+        double m_lastPrice = 0.0;
+        std::string m_symbol;
 
     public:
         // Constructor / Destructor
@@ -55,10 +66,16 @@ namespace connection {
         ~IBKRTrader();
 
         // Connection methods
-        bool connect();
+        bool connect(int clientId = -1);
         void disconnect();
         bool isConnected() const { return m_client->isConnected(); }
         EClientSocket* getClient() { return m_client; }
+        
+        // Set the model manager to receive market data and store symbol
+        void setModelManager(model_manager::ModelManager* modelManager, const std::string& symbol);
+        
+        // Set the request ID for market data
+        void setRequestId(int requestId) { m_requestId = requestId; }
 
         // Create a reader and start reading incoming messages
         std::unique_ptr<EReader> createReader();
@@ -76,6 +93,22 @@ namespace connection {
         void connectAck() override;
         void connectionClosed() override;
         void currentTime(long time) override;
+        
+        // Tick data callbacks
+        void tickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) override;
+        void tickSize(TickerId tickerId, TickType field, Decimal size) override;
+        void tickString(TickerId tickerId, TickType field, const std::string& value) override;
+        void tickGeneric(TickerId tickerId, TickType field, double value) override;
+        void managedAccounts(const std::string& accountsList) override;
+        
+        // Tick by tick callbacks
+        void tickByTickAllLast(int reqId, int tickType, time_t time, double price, 
+                              Decimal size, const TickAttribLast& tickAttribLast, 
+                              const std::string& exchange, const std::string& specialConditions) override;
+        
+    private:
+        // Helper method to route market data to the model manager
+        void routeTickToModelManager(double price, double volume, uint64_t timestamp = 0);
     };
 
 } // namespace connection

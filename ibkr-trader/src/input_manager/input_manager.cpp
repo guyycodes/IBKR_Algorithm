@@ -685,7 +685,11 @@ void InputManager::processOutput() {
                         std::cout << "  ║ │      * Address: " << std::left << std::setw(35) << rawModel->getStockQueue() << "        │ ║" << std::endl;
                         std::cout << "  ║ │      * Queue size: " << std::left << std::setw(5) << rawModel->getQueueSize() << "                               │ ║" << std::endl;
                         std::cout << "  ║ │                                                       │ ║" << std::endl;
-                        std::cout << "  ║ │ 2. Time Window Configuration                          │ ║" << std::endl;
+                        std::cout << "  ║ │ 2. TechnicalCalculator                                │ ║" << std::endl;
+                        std::cout << "  ║ │    - Processes queue data for metrics and signals     │ ║" << std::endl;
+                        std::cout << "  ║ │    - Calculates in the same thread as queue processing│ ║" << std::endl;
+                        std::cout << "  ║ │                                                       │ ║" << std::endl;
+                        std::cout << "  ║ │ 3. Time Window Configuration                          │ ║" << std::endl;
                         auto window = model->getTimeWindow();
                         std::cout << "  ║ │    - Window Size: " << std::left << std::setw(5) << window.first << "                                │ ║" << std::endl;
                         std::cout << "  ║ │    - Window Unit: " << std::left << std::setw(10);
@@ -696,7 +700,7 @@ void InputManager::processOutput() {
                         }
                         std::cout << "                      │ ║" << std::endl;
                         std::cout << "  ║ │                                                       │ ║" << std::endl;
-                        std::cout << "  ║ │ 3. Own IBKR API Connection                           │ ║" << std::endl;
+                        std::cout << "  ║ │ 4. Own IBKR API Connection                           │ ║" << std::endl;
                         std::cout << "  ║ │    - Direct connection to IBKR API                   │ ║" << std::endl;
                         std::cout << "  ║ │    - Fetches data specifically for " << std::left << std::setw(16) << symbol << "         │ ║" << std::endl;
                         std::cout << "  ║ └───────────────────────────────────────────────────────┘ ║" << std::endl;
@@ -902,6 +906,7 @@ void InputManager::printApiHelpInfo(int port) const {
     std::cout << "  GET  /status      - Get server status" << std::endl;
     std::cout << "  GET  /trades      - Get current trades" << std::endl;
     std::cout << "  GET  /pending     - Get pending (queued) trades" << std::endl;
+    std::cout << "  GET  /queue-data?symbol=AAPL - Get all market data ticks for a symbol" << std::endl;
     std::cout << "  POST /trade       - Queue a trade request" << std::endl;
     std::cout << "  POST /confirm     - Confirm all queued requests" << std::endl;
     std::cout << "  POST /clear       - Clear a symbol" << std::endl;
@@ -913,6 +918,7 @@ void InputManager::printApiHelpInfo(int port) const {
     std::cout << "  curl -X GET http://localhost:" << port << "/status" << std::endl;
     std::cout << "  curl -X GET http://localhost:" << port << "/trades" << std::endl;
     std::cout << "  curl -X GET http://localhost:" << port << "/pending" << std::endl;
+    std::cout << "  curl -X GET http://localhost:" << port << "/queue-data?symbol=AAPL" << std::endl;
     std::cout << "  curl -X POST -H \"Content-Type: application/json\" -d '{\"symbol\":\"AAPL\",\"params\":{\"lots\":5,\"margin\":\".10\",\"stopLoss\":\".05\",\"maxTrades\":10,\"lossThreshold\":3,\"winThreshold\":5,\"minWinRate\":\".50\",\"maxHoldSeconds\":3600}}' http://localhost:" << port << "/trade" << std::endl;
     std::cout << "  curl -X POST http://localhost:" << port << "/confirm" << std::endl;
     std::cout << "  curl -X POST -H \"Content-Type: application/json\" -d '{\"symbol\":\"AAPL\"}' http://localhost:" << port << "/clear" << std::endl;

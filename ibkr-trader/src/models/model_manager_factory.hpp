@@ -38,17 +38,20 @@ Flow of Model Creation and Thread Management:
 4. AppState creates thread in m_modelThreads map running runModelManagerThread()
 5. Thread connects to IBKR and processes data until signaled to stop
 
-Flow of Model/Thread Removal:
-1. InputManager calls factory.removeModel(symbol)
-2. Factory removes ModelManager from m_managers map after disconnecting
-3. InputManager calls appState.requestThreadStop(symbol)
-4. AppState signals thread to stop via m_threadRunFlags[symbol] = false
-5. Thread completes cleanup and exits, AppState joins thread
-
-This design separates concerns:
-- ModelManagerFactory: Manages model objects and their lifecycle
-- AppState: Manages threads and their execution state
-- InputManager: Coordinates between the two
+ * FLOW:
+ * 1. InputManager requests a ModelManager for a symbol from the factory
+ * 2. Factory creates or returns existing ModelManager for that symbol
+ * 3. ModelManager connects to IBKR API in its own thread
+ * 4. Market data is received and stored in the queue
+ * 5. TechnicalCalculator analyzes data in the same thread as the ModelManager
+ * 6. Client code can access data and metrics via the ModelManager
+ *
+ * DESIGN SEPARATION:
+ * - Factory: Only responsible for creation and tracking of ModelManagers
+ * - ModelManager: Handles connection, data storage, and time window management
+ * - RawDataModel: Pure data storage without connection logic
+ * - TechnicalCalculator: Embedded in each ModelManager for data analysis
+ * - AppState: Maintains global application state including thread info
 */
 namespace app_state {
     enum class ThreadState;

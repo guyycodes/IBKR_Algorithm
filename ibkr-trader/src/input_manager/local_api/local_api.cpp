@@ -316,6 +316,33 @@ std::string LocalAPI::processHttpRequest(const std::string& request) {
             responseBody = getPendingRequests().dump(2);
             statusCode = 200;
         }
+        // GET /queue-data?symbol=XYZ - Return queue data for a specific symbol
+        else if (path.find("/queue-data") == 0) {
+            // Extract symbol from query string
+            size_t symbolPos = request.find("symbol=");
+            if (symbolPos != std::string::npos) {
+                // Extract the symbol parameter value
+                std::string symbol;
+                size_t valueStart = symbolPos + 7; // length of "symbol="
+                size_t valueEnd = request.find(" ", valueStart);
+                if (valueEnd == std::string::npos) {
+                    valueEnd = request.find("\r", valueStart);
+                }
+                if (valueEnd != std::string::npos) {
+                    symbol = request.substr(valueStart, valueEnd - valueStart);
+                    
+                    // Get queue data for the symbol
+                    responseBody = getSymbolQueueData(symbol).dump(2);
+                    statusCode = 200;
+                } else {
+                    responseBody = "{\"status\": \"error\", \"message\": \"Invalid symbol parameter\"}";
+                    statusCode = 400;
+                }
+            } else {
+                responseBody = "{\"status\": \"error\", \"message\": \"Missing symbol parameter\"}";
+                statusCode = 400;
+            }
+        }
     }
     else if (method == "POST") {
         // Find the request body
@@ -1076,6 +1103,109 @@ bool LocalAPI::processBatchRequests(const std::vector<nlohmann::json>& requests)
     }
     
     return allSuccessful;
+}
+
+// Get queue data for a specific symbol
+nlohmann::json LocalAPI::getSymbolQueueData(const std::string& symbol) const {
+    nlohmann::json queueData;
+    queueData["symbol"] = symbol;
+    queueData["ticks"] = nlohmann::json::array();
+    
+    try {
+        // Convert symbol to uppercase
+        std::string upperSymbol = symbol;
+        std::transform(upperSymbol.begin(), upperSymbol.end(), upperSymbol.begin(), ::toupper);
+        
+        // Get model manager for this symbol
+        auto& factory = model_manager::ModelManagerFactory::getInstance();
+        auto model = factory.getModelManager(upperSymbol);
+        
+        if (model) {
+            // Log initial information
+            std::cout << "[LocalAPI] Getting queue data for symbol: " << upperSymbol 
+                      << ", Connected: " << (model->isConnected() ? "Yes" : "No")
+                      << ", Request ID: " << (model->isConnected() ? "Valid" : "None") << std::endl;
+                      
+            // Add connection status to response
+            queueData["connection_status"] = model->getConnectionStatus();
+            
+            // First try the normal way - get all ticks in the time window
+            auto ticks = model->getTicksInWindow();
+            
+            // If no ticks in window, try getting direct queue size
+            size_t queueSize = model->getTickCount();
+            queueData["queue_size"] = queueSize;
+            
+            // If window method returned ticks, use them
+            if (!ticks.empty()) {
+                std::cout << "[LocalAPI] Found " << ticks.size() << " ticks in time window for symbol: " << upperSymbol << std::endl;
+                queueData["tick_count"] = ticks.size();
+                
+                // Add individual ticks to the response
+                for (const auto& tick : ticks) {
+                    nlohmann::json tickData;
+                    tickData["price"] = tick.price;
+                    tickData["volume"] = tick.volume;
+                    tickData["timestamp"] = tick.timestamp;
+                    queueData["ticks"].push_back(tickData);
+                }
+            } 
+            // If window is empty but queue has data, try alternative approach
+            else if (queueSize > 0) {
+                std::cout << "[LocalAPI] Window returned no ticks but queue has " << queueSize 
+                          << " items. Using direct queue access for symbol: " << upperSymbol << std::endl;
+                
+                // Get direct access to the raw data model's queue for diagnostic purposes
+                auto rawModel = model->getRawDataModel();
+                if (rawModel) {
+                    auto* stockQueue = rawModel->getStockQueue();
+                    if (stockQueue) {
+                        std::cout << "[LocalAPI] Direct queue access shows " << stockQueue->size() 
+                                  << " items in queue" << std::endl;
+                        
+                        // Get the latest tick as a fallback
+                        raw_data_model::MarketDataTick latestTick;
+                        if (rawModel->getLatestTickFromQueue(latestTick)) {
+                            std::cout << "[LocalAPI] Found latest tick - adding to response" << std::endl;
+                            
+                            // Add at least the latest tick to the response
+                            nlohmann::json tickData;
+                            tickData["price"] = latestTick.price;
+                            tickData["volume"] = latestTick.volume;
+                            tickData["timestamp"] = latestTick.timestamp;
+                            queueData["ticks"].push_back(tickData);
+                            queueData["tick_count"] = 1;
+                            queueData["note"] = "Using latest tick as fallback";
+                        } else {
+                            queueData["tick_count"] = 0;
+                            queueData["note"] = "Queue has data but couldn't extract items";
+                        }
+                    }
+                }
+            } else {
+                // Truly empty queue
+                queueData["tick_count"] = 0;
+                queueData["note"] = "Queue is completely empty";
+            }
+            
+            // Add timestamp to response
+            queueData["request_timestamp"] = std::chrono::system_clock::now().time_since_epoch().count();
+            
+            // Add current time window settings for diagnostics
+            auto timeWindow = model->getTimeWindow();
+            queueData["window_settings"] = {
+                {"size", timeWindow.first},
+                {"unit", (timeWindow.second == model_manager::TimeWindowUnit::SECONDS ? "seconds" : 
+                          (timeWindow.second == model_manager::TimeWindowUnit::MINUTES ? "minutes" : "hours"))}
+            };
+        } else {
+            queueData["error"] = "Symbol not found or no model available";
+        }
+    } catch (const std::exception& e) {
+        queueData["error"] = std::string("Exception while retrieving queue data: ") + e.what();
+    }
+    
+    return queueData;
 }
 
 } // namespace local_api

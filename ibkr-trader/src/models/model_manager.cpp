@@ -9,151 +9,6 @@
 namespace model_manager {
 
 //
-// ApiCallback implementation
-//
-
-ApiCallback::ApiCallback(connection::IBKRTrader& trader, ModelManager& manager, const std::string& symbol)
-    : m_manager(manager), m_symbol(symbol), m_requestId(-1), m_lastPrice(0.0), m_trader(trader) {
-    std::cout << "[ApiCallback] Created for symbol: " << symbol << std::endl;
-}
-
-void ApiCallback::tickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) {
-    // Check if this is for our symbol's request ID
-    if (tickerId != m_requestId) return;
-    
-    std::string fieldName;
-    
-    switch (field) {
-        case TickType::BID: fieldName = "BID"; break;
-        case TickType::ASK: fieldName = "ASK"; break;
-        case TickType::LAST: fieldName = "LAST"; break;
-        case TickType::HIGH: fieldName = "HIGH"; break;
-        case TickType::LOW: fieldName = "LOW"; break;
-        case TickType::CLOSE: fieldName = "CLOSE"; break;
-        case TickType::OPEN: fieldName = "OPEN"; break;
-        default: fieldName = "UNKNOWN_" + std::to_string(field); break;
-    }
-    
-    // Print live update with consistent formatting
-    std::time_t now = std::time(nullptr);
-    std::cout << "[" << std::put_time(std::localtime(&now), "%H:%M:%S") 
-              << "] (Thread " << m_symbol << ") Market Data - Field: " << std::setw(10) << fieldName 
-              << ", Price: " << std::fixed << std::setprecision(2) << price;
-    
-    if (field == TickType::BID || field == TickType::ASK) {
-        std::cout << (attrib.preOpen ? " (Pre-open)" : "");
-    }
-    std::cout << std::endl;
-    
-    // Store the last price we've seen
-    m_lastPrice = price;
-    
-    // If it's a price we care about (LAST, BID, ASK), route it to the model manager
-    if (field == TickType::LAST || field == TickType::BID || field == TickType::ASK) {
-        routeTickToModelManager(price, 0);  // Zero volume for price-only updates
-    }
-}
-
-void ApiCallback::tickSize(TickerId tickerId, TickType field, Decimal size) {
-    // Check if this is for our symbol's request ID
-    if (tickerId != m_requestId) return;
-    
-    std::string fieldName;
-    
-    switch (field) {
-        case TickType::BID_SIZE: fieldName = "BID_SIZE"; break;
-        case TickType::ASK_SIZE: fieldName = "ASK_SIZE"; break;
-        case TickType::LAST_SIZE: fieldName = "LAST_SIZE"; break;
-        case TickType::VOLUME: fieldName = "VOLUME"; break;
-        default: fieldName = "UNKNOWN_SIZE_" + std::to_string(field); break;
-    }
-    
-    double sizeValue = static_cast<double>(size);
-    
-    // Print live update with consistent formatting
-    std::time_t now = std::time(nullptr);
-    std::cout << "[" << std::put_time(std::localtime(&now), "%H:%M:%S") 
-              << "] (Thread " << m_symbol << ") Market Data - Field: " << std::setw(10) << fieldName 
-              << ", Size: " << std::fixed << std::setw(8) << sizeValue 
-              << std::endl;
-    
-    // If we have last price and this is volume, we can update with volume information
-    if (field == TickType::VOLUME && m_lastPrice > 0) {
-        routeTickToModelManager(m_lastPrice, sizeValue);
-    }
-    
-    // If it's LAST_SIZE, we might want to update with that size
-    if (field == TickType::LAST_SIZE && m_lastPrice > 0) {
-        routeTickToModelManager(m_lastPrice, sizeValue);
-    }
-}
-
-void ApiCallback::tickByTickAllLast(int reqId, int tickType, time_t time, double price, 
-                                Decimal size, const TickAttribLast& tickAttribLast, 
-                                const std::string& exchange, const std::string& specialConditions) {
-    // Check if this is for our symbol's request ID
-    if (reqId != m_requestId) return;
-    
-    std::string tickTypeStr = tickType == 1 ? "LAST" : "ALLAST";
-    int sizeInt = static_cast<int>(size);
-    
-    // Format time
-    char timeStr[20];
-    std::strftime(timeStr, sizeof(timeStr), "%H:%M:%S", std::localtime(&time));
-    
-    // Print live update with consistent formatting
-    std::cout << "[" << timeStr << "] (Thread " << m_symbol << ") Tick-by-Tick - Type: " << std::setw(6) << tickTypeStr
-              << ", Exchange: " << std::setw(6) << exchange
-              << ", Price: " << std::fixed << std::setprecision(2) << std::setw(8) << price
-              << ", Size: " << std::setw(6) << sizeInt;
-    
-    if (!specialConditions.empty()) {
-        std::cout << ", Conditions: " << specialConditions;
-    }
-    std::cout << std::endl;
-    
-    // Store the last price we've seen
-    m_lastPrice = price;
-    
-    // Tick-by-tick data is perfect for our ModelManager - most granular and includes both price and size
-    // Create timestamp from the provided time_t
-    uint64_t timestamp = static_cast<uint64_t>(time) * 1000; // Convert to ms
-    routeTickToModelManager(price, sizeInt, timestamp);
-}
-
-void ApiCallback::error(int id, time_t errorTime, int errorCode, const std::string& errorString, 
-                         const std::string& advancedOrderRejectJson) {
-    // Even if not for our request ID, log all errors for diagnostic purposes
-    std::cerr << "[ERROR] (Thread " << m_symbol << ") Error " << errorCode 
-              << " for request " << id << ": " << errorString << std::endl;
-              
-    // Log advanced order reject if provided
-    if (!advancedOrderRejectJson.empty()) {
-        std::cerr << "[ERROR] Advanced order reject info: " << advancedOrderRejectJson << std::endl;
-    }
-}
-
-void ApiCallback::setRequestId(int requestId) {
-    m_requestId = requestId;
-}
-
-void ApiCallback::routeTickToModelManager(double price, double volume, uint64_t timestamp) {
-    // If timestamp is 0, use current time
-    if (timestamp == 0) {
-        timestamp = std::chrono::system_clock::now().time_since_epoch().count();
-    }
-    
-    // Create a MarketDataTick object
-    raw_data_model::MarketDataTick tick;
-    tick.price = price;
-    tick.volume = volume;
-    tick.timestamp = timestamp;
-    
-    // Add to our model manager
-    m_manager.addTick(tick);
-}
-
-//
 // ModelManager implementation
 //
 
@@ -175,7 +30,11 @@ ModelManager::ModelManager(const std::string& symbol, size_t windowSize, TimeWin
     // Initialize connection objects
     m_connManager = std::make_unique<connection_manager::ConnectionManager>();
     
-    std::cout << "[ModelManager] Created for symbol: " << symbol << std::endl;
+    std::cout << "[ModelManager] Created for symbol: " << symbol 
+              << " with time window: " << m_windowSize << " " 
+              << (m_windowUnit == TimeWindowUnit::SECONDS ? "seconds" : 
+                 (m_windowUnit == TimeWindowUnit::MINUTES ? "minutes" : "hours"))
+              << std::endl;
 }
 
 /**
@@ -228,23 +87,43 @@ bool ModelManager::connectToIBKR() {
         std::cout << "[ModelManager] Connection attempt " << m_connectionAttempts << "/" 
                   << MAX_CONNECTION_ATTEMPTS << " for symbol: " << getSymbol() << std::endl;
         
-        if (!m_connManager->connect()) {
+        // Generate a unique client ID for this symbol's connection
+        // Use a simple hash of the symbol to create a unique client ID
+        std::string symbol = getSymbol();
+        int clientId = 0;
+        
+        // Simple hash: sum ASCII values and add a constant offset to avoid client ID 0
+        for (char c : symbol) {
+            clientId += static_cast<int>(c);
+        }
+        clientId = (clientId % 9000) + 1000; // Ensure clientId is between 1000-9999
+        
+        std::cout << "[ModelManager] Using client ID: " << clientId << " for symbol: " << getSymbol() << std::endl;
+        
+        if (!m_connManager->connect(clientId)) {
             std::cerr << "[ModelManager] Failed to connect to IBKR API for symbol: " << getSymbol() << std::endl;
             return false;
         }
         
-        // Create API callback that will route data to this ModelManager
-        m_apiCallback = std::make_shared<ApiCallback>(m_connManager->getTrader(), *this, getSymbol());
+        // Wait for connection to fully establish
+        std::cout << "[ModelManager] Waiting for connection to fully establish..." << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        // Check if still connected after wait
+        if (!m_connManager->getTrader().isConnected()) {
+            std::cerr << "[ModelManager] Connection lost during initialization" << std::endl;
+            return false;
+        }
+
+        // Set this ModelManager directly on the IBKRTrader
+        m_connManager->getTrader().setModelManager(this, getSymbol());
         
-        // Get IBKR API client from connection manager and set the callback
+        // Get IBKR API client from connection manager
         auto client = m_connManager->getTrader().getClient();
         client->setServerLogLevel(5); // Set to most detailed log level
         
         // PAPER TRADING SETUP:
-        // Note: Connection to paper trading is handled in connection.cpp which uses port 4002
         // Set market data type to DELAYED_FROZEN_DATA (3) for data outside market hours
-        // For live data during market hours, use REALTIME (1)
-        // Options: 1 = Live, 2 = Frozen, 3 = Delayed, 4 = Delayed+Frozen
         std::cout << "[ModelManager] Setting market data type for " << getSymbol() << std::endl;
         client->reqMarketDataType(3); // Using delayed data for testing
         
@@ -254,8 +133,8 @@ bool ModelManager::connectToIBKR() {
         std::uniform_int_distribution<int> distrib(10000, 99999);
         m_requestId = distrib(gen);
         
-        // Set the request ID in our callback so it knows which data to process
-        m_apiCallback->setRequestId(m_requestId);
+        // Set the request ID directly on the IBKRTrader
+        m_connManager->getTrader().setRequestId(m_requestId);
         
         // Create a contract for the symbol
         Contract contract;
@@ -314,7 +193,6 @@ void ModelManager::disconnectFromIBKR() {
     // Reset connection state
     m_connected = false;
     m_requestId = -1;
-    m_apiCallback.reset();
 }
 
 /**
@@ -390,8 +268,24 @@ void ModelManager::pruneOldData() {
     auto* queue = m_rawDataModel->getStockQueue();
     if (!queue) return;
     
+    // Get size before pruning
+    size_t sizeBefore = queue->size();
+    
     // Prune the queue by removing items older than the cutoff time
     queue->removeOlderThan(cutoffMs);
+    
+    // Get size after pruning
+    size_t sizeAfter = queue->size();
+    
+    // Log pruning results if items were removed
+    if (sizeBefore != sizeAfter) {
+        std::stringstream threadIdStr;
+        threadIdStr << std::this_thread::get_id();
+        
+        std::cout << "[Prune][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+                  << "Pruned " << (sizeBefore - sizeAfter) << " old ticks, "
+                  << "new queue size: " << sizeAfter << std::endl;
+    }
     
     // Update last prune time
     m_lastPruneTime = now;
@@ -420,11 +314,40 @@ bool ModelManager::initFromJson(const nlohmann::json& jsonData) {
  * @param tick The new market data tick to add
  */
 void ModelManager::addTick(const raw_data_model::MarketDataTick& tick) {
+    // Get thread ID for logging
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    
+    // Get queue size before adding the tick
+    size_t queueSizeBefore = m_rawDataModel->getStockQueue()->size();
+    
+    // Format volume appropriately (scientific notation for very large values)
+    std::stringstream volumeStr;
+    if (tick.volume > 1.0e10) {
+        volumeStr << std::scientific << tick.volume << std::fixed;
+    } else {
+        volumeStr << tick.volume;
+    }
+    
     // Add the tick to the underlying model's queue
+    std::cout << "[Queue][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+              << "Adding tick - Price: " << tick.price 
+              << ", Volume: " << volumeStr.str() 
+              << ", Current queue size: " << queueSizeBefore << std::endl;
+              
     m_rawDataModel->addTick(tick);
     
+    // Get queue size after adding the tick
+    size_t queueSizeAfter = m_rawDataModel->getStockQueue()->size();
+    
+    // Print detailed tick information with thread ID
+    std::cout << "[Queue][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+              << "Added tick - Price: " << tick.price 
+              << ", Volume: " << volumeStr.str() 
+              << ", New queue size: " << queueSizeAfter 
+              << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;
+    
     // Prune old data immediately after adding a new tick
-    // This ensures we maintain the time window constraint
     pruneOldData();
 }
 
@@ -474,21 +397,42 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
     
     // Get access to the queue
     auto* queue = m_rawDataModel->getStockQueue();
-    if (!queue) return windowTicks;
+    if (!queue) {
+        std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Error: Queue is null" << std::endl;
+        return windowTicks;
+    }
+    
+    // Log queue status
+    size_t queueSize = queue->size();
+    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Queue size: " << queueSize 
+              << ", Time window: " << m_windowSize << " " 
+              << (m_windowUnit == TimeWindowUnit::SECONDS ? "seconds" : 
+                 (m_windowUnit == TimeWindowUnit::MINUTES ? "minutes" : "hours"))
+              << ", Cutoff time: " << cutoffMs << std::endl;
+    
+    if (queueSize == 0) {
+        std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Queue is empty" << std::endl;
+        return windowTicks;
+    }
     
     // Create a temporary queue to prevent modifying the original
     std::queue<stk_q::STK_Q_Data> tempQueue;
     stk_q::STK_Q_Data data;
     
     // Get a copy of the queue
-    auto queueSize = queue->size();
     windowTicks.reserve(queueSize); // Reserve space for efficiency
+    
+    // Track included and excluded items
+    int includedCount = 0;
+    int excludedCount = 0;
     
     // We'll create a temporary copy of the queue by popping and re-adding
     for (size_t i = 0; i < queueSize; i++) {
         if (queue->pop(data)) {
-            // Only include data within the time window
-            if (static_cast<uint64_t>(data.time) >= cutoffMs) {
+            // Check if data is within the time window
+            bool isWithinWindow = static_cast<uint64_t>(data.time) >= cutoffMs;
+            
+            if (isWithinWindow) {
                 // Convert queue data back to MarketDataTick
                 raw_data_model::MarketDataTick tick;
                 tick.price = data.price;
@@ -497,12 +441,33 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
                 
                 // Add to vector
                 windowTicks.push_back(tick);
+                includedCount++;
+                
+                // Log the data item we're including (limit to first 5 to avoid spam)
+                if (includedCount <= 5) {
+                    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Including tick: Price=" 
+                            << data.price << ", Time=" << data.time 
+                            << " (within cutoff " << cutoffMs << ")" << std::endl;
+                }
+            } else {
+                excludedCount++;
+                
+                // Log the first few items we're filtering out
+                if (excludedCount <= 5) {
+                    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Excluding tick: Price=" 
+                            << data.price << ", Time=" << data.time 
+                            << " (before cutoff " << cutoffMs << ")" << std::endl;
+                }
             }
             
             // Re-add to the original queue
             queue->push(data);
         }
     }
+    
+    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Finished processing. Included: " 
+              << includedCount << ", Excluded: " << excludedCount 
+              << ", Returning vector size: " << windowTicks.size() << std::endl;
     
     return windowTicks;
 }
@@ -605,26 +570,101 @@ size_t ModelManager::processQueueData(size_t maxItems) {
     
     // Process up to maxItems from the queue
     for (size_t i = 0; i < maxItems; i++) {
-        // Try to get the next item
-        if (!queue->pop(data)) {
-            break; // No more items in queue
-        }
-        
-        // Skip items outside our time window
-        auto now = std::chrono::system_clock::now();
-        auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now).time_since_epoch().count();
-        auto cutoffMs = nowMs - windowToMilliseconds();
-        
-        if (static_cast<uint64_t>(data.time) < cutoffMs) {
-            continue; // Skip old data
-        }
-        
         // Process this tick data according to trading rules
-        // In a real implementation, this would apply trading strategies,
-        // generate signals, etc.
-        
         // For now, just count it as processed
         processedCount++;
+    }
+    
+    // Run calculations using TechnicalCalculator if we have enough data
+    if (queue->size() > 10) {  // A minimal threshold, adjust as needed
+        try {
+            // Get ticks in the current time window
+            auto ticks = getTicksInWindow();
+            
+            // Skip if we don't have enough data
+            if (ticks.size() < 10) {
+                return processedCount;
+            }
+            
+            // Extract prices and volumes for analysis
+            std::vector<double> prices;
+            std::vector<double> volumes;
+            std::vector<double> highs;
+            std::vector<double> lows;
+            std::vector<double> closes;
+            
+            for (const auto& tick : ticks) {
+                // In our simplified model, we use the same price for high/low/close
+                double price = tick.price;
+                prices.push_back(price);
+                highs.push_back(price);
+                lows.push_back(price);
+                closes.push_back(price);
+                volumes.push_back(tick.volume);
+            }
+            
+            // 1. Calculate VWAP
+            double vwap = m_calculator.calculateVWAP(prices, volumes);
+            
+            // 2. Check if this is a valid trading candidate (initial filter)
+            bool isValid = m_calculator.isValidTradingCandidate(prices, volumes, vwap);
+            
+            // 3. Calculate advanced indicators
+            // These will be useful for ongoing monitoring and exit decisions
+            double chaikinValue = 0.0;
+            double almaValue = 0.0;
+            
+            if (isValid && prices.size() >= 10) {
+                // Calculate Chaikin Oscillator (helps detect money flow)
+                chaikinValue = m_calculator.calculateChaikinOscillator(
+                    highs, lows, closes, volumes, 3, 10);
+                
+                // Calculate ALMA (smooth moving average for trend)
+                almaValue = m_calculator.calculateALMA(closes, 9, 0.85, 6.0);
+                
+                // In debug mode, we'll print advanced insights
+                #ifdef DEBUG
+                double atr = m_calculator.calculateATR(highs, lows, closes, 3);
+                
+                std::cout << "[TechnicalAnalysis][Symbol: " << getSymbol() << "] "
+                          << "Latest price: " << prices.back() 
+                          << ", VWAP: " << vwap 
+                          << ", Valid candidate: " << (isValid ? "YES" : "NO") << std::endl;
+                
+                std::cout << "[AdvancedMetrics][Symbol: " << getSymbol() << "] "
+                          << "ATR: " << atr
+                          << ", Chaikin: " << chaikinValue 
+                          << ", ALMA: " << almaValue
+                          << ", Price vs ALMA: " << (prices.back() > almaValue ? "ABOVE" : "BELOW")
+                          << ", Money Flow: " << (chaikinValue > 0 ? "POSITIVE" : "NEGATIVE") << std::endl;
+                #endif
+                
+                // Entry indicator example (not triggering actual trades here, just logging)
+                bool strongMoneyFlow = (chaikinValue > 0);
+                bool aboveAlma = (prices.back() > almaValue);
+                
+                if (isValid && strongMoneyFlow && aboveAlma) {
+                    std::cout << "[SIGNAL][Symbol: " << getSymbol() << "] "
+                              << "*** BULL SIGNAL ACTIVE *** "
+                              << "Price: " << prices.back() 
+                              << ", Chaikin: " << chaikinValue << std::endl;
+                }
+            }
+        } catch (const std::exception& e) {
+            // Just log the error and continue - don't let calculation errors
+            // disrupt the main data processing pipeline
+            std::cerr << "[Calculator][Symbol: " << getSymbol() << "] "
+                      << "Error calculating metrics: " << e.what() << std::endl;
+        }
+    }
+    
+    // Get thread ID for logging
+    if (processedCount > 0) {
+        std::stringstream threadIdStr;
+        threadIdStr << std::this_thread::get_id();
+        
+        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+                  << "Processed " << processedCount << " queue items" << std::endl;
     }
     
     return processedCount;

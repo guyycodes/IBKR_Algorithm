@@ -2,6 +2,7 @@
 #define MODEL_MANAGER_HPP
 
 #include "raw_data_model/raw_data_model.hpp"
+#include "technical_calculator/technical_calculator.hpp"
 #include "../connection_manager/connection_manager.hpp"
 #include "../connection_manager/api_functions/api_functions.hpp"
 #include <chrono>
@@ -38,6 +39,9 @@ namespace connection_manager {
  *     │   │       ├── ... (only ticks within the last 5 minutes)
  *     │   │       └── Tick {price: 190.45, volume: 150, timestamp: 1633455899800}
  *     │   │
+ *     │   ├── Contains TechnicalCalculator
+ *     │   │   └── Processes queue data to calculate metrics, indicators and signals
+ *     │   │
  *     │   └── Contains own ConnectionManager with API connection to IBKR
  *     │       └── Feeds data directly to STK_Q queue for "AAPL"
  *     │
@@ -51,6 +55,9 @@ namespace connection_manager {
  *         │      ├── ... (only ticks within the last 5 minutes)
  *         │      └── Tick {price: 190.45, volume: 150, timestamp: 1633455899800}
  *         │ 
+ *         ├── Contains TechnicalCalculator
+ *         │   └── Processes queue data to calculate metrics, indicators and signals
+ *         │
  *         └── Contains own ConnectionManager with API connection to IBKR
  *             └── Feeds data directly to STK_Q queue for "MSFT"
  * 
@@ -59,7 +66,8 @@ namespace connection_manager {
  * 2. ModelManager establishes its own IBKR connection
  * 3. As ticks arrive from IBKR API, they are added via addTick()
  * 4. ModelManager automatically prunes old data outside the time window
- * 5. Client code can always access only the data within the specified time window
+ * 5. TechnicalCalculator processes the data in the queue to generate metrics
+ * 6. Client code can always access only the data within the specified time window
  */
 namespace model_manager {
 
@@ -73,30 +81,6 @@ enum class TimeWindowUnit {
 // Forward declarations
 class ModelManager;
 
-// API Callback class to handle events from the IBKR API
-class ApiCallback : public DefaultEWrapper {
-private:
-    ModelManager& m_manager;
-    std::string m_symbol;
-    int m_requestId;
-    double m_lastPrice;
-    connection::IBKRTrader& m_trader;
-    
-    void routeTickToModelManager(double price, double volume, uint64_t timestamp = 0);
-    
-public:
-    ApiCallback(connection::IBKRTrader& trader, ModelManager& manager, const std::string& symbol);
-    
-    // Override DefaultEWrapper methods
-    void tickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) override;
-    void tickSize(TickerId tickerId, TickType field, Decimal size) override;
-    void tickByTickAllLast(int reqId, int tickType, time_t time, double price, Decimal size, 
-                       const TickAttribLast& tickAttribLast, const std::string& exchange, 
-                       const std::string& specialConditions) override;
-    void error(int id, time_t errorTime, int errorCode, const std::string& errorString, const std::string& advancedOrderRejectJson = "") override;
-    void setRequestId(int requestId);
-};
-
 /**
  * ModelManager class
  * 
@@ -109,15 +93,20 @@ public:
  *   1. Time-window based data management (e.g., keep last 5 minutes of data)
  *   2. Automatic pruning of old data
  *   3. Direct connection to IBKR API for real-time data
- *   4. Integration with AppState for thread management
+ *   4. Embedded TechnicalCalculator for analyzing market data and generating metrics
+ *   5. Integration with AppState for thread management
  *      - Fetches data specifically for its assigned symbol
- *   4. Methods to manipulate and access the data model
+ *      - Calculator runs in the same thread as data processing
+ *   6. Methods to manipulate and access the data model
  */
 class ModelManager {
 private:
     // The underlying raw data model that stores the actual data
     // This is the primary data model that contains all trading parameters and market data
     std::shared_ptr<raw_data_model::RawDataModel> m_rawDataModel;
+    
+    // Technical calculator for this model
+    technical_calculator::TechnicalCalculator m_calculator;
     
     // Time window settings for historical data retention
     size_t m_windowSize;                // Size of the time window
@@ -126,7 +115,6 @@ private:
     
     // IBKR API connection objects
     std::unique_ptr<connection_manager::ConnectionManager> m_connManager;
-    std::shared_ptr<ApiCallback> m_apiCallback;
     int m_requestId; // Request ID for this symbol's market data
     std::atomic<bool> m_connected; // Flag indicating if we're connected to IBKR API
     
@@ -206,6 +194,14 @@ public:
      * @return Shared pointer to the raw data model
      */
     std::shared_ptr<raw_data_model::RawDataModel> getRawDataModel() const;
+    
+    /**
+     * Get the technical calculator for this model
+     * @return Reference to the technical calculator
+     */
+    technical_calculator::TechnicalCalculator& getCalculator() {
+        return m_calculator;
+    }
     
     /**
      * Get the symbol this model is for

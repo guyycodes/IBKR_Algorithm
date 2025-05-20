@@ -22,13 +22,13 @@ namespace connection_manager {
         }
     }
 
-    bool ConnectionManager::connect() {
+    bool ConnectionManager::connect(int clientId) {
         if (m_connected) {
             std::cout << "Already connected to IBKR API." << std::endl;
             return true;
         }
 
-        if (m_trader->connect()) {
+        if (m_trader->connect(clientId)) {
             m_reader = m_trader->createReader();
             // Instead of directly creating the thread, we'll request AppState to create and manage it
             // Only create the thread directly if m_threadId is not set (not registered with AppState)

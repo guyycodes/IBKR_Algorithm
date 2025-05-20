@@ -59,6 +59,7 @@ public:
     nlohmann::json getRequestStatus(const std::string& requestId) const;
     nlohmann::json getFormattedRequests() const;
     nlohmann::json getPendingRequests() const;
+    nlohmann::json getSymbolQueueData(const std::string& symbol) const;
     
     // Configuration
     void setAutoConfirm(bool autoConfirm);

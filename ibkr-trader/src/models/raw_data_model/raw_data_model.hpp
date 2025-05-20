@@ -15,7 +15,7 @@ namespace raw_data_model {
 // Structure for a single market data tick from IBKR
 struct MarketDataTick {
     double price;
-    int volume;
+    double volume;  // Changed from int to double to handle extremely large volume values from IBKR API
     uint64_t timestamp;
     // Add other tick data fields as needed
 };

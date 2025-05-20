@@ -28,22 +28,20 @@ namespace connection_manager {
         ConnectionManager();
         ~ConnectionManager();
 
-        // Connection management
-        bool connect();
+        // Connect with an optional client ID
+        bool connect(int clientId = -1);
         void disconnect();
         bool isConnected() const { return m_connected; }
 
-        // Access to the API functions
-        ibkr_api_functions::API_Functions* getAPI() const { return m_api_functions.get(); }
-
-        // Get trader instance
-        connection::IBKRTrader& getTrader() { return *m_trader; }
+        // Get the trader for direct access
+        connection::IBKRTrader& getTrader() const { return *m_trader; }
         
-        // Set thread ID for tracking in AppState
-        void setThreadId(const std::string& id) { m_threadId = id; }
+        // Get the api functions for making requests
+        ibkr_api_functions::API_Functions& getApiFunctions() const { return *m_api_functions; }
         
-        // Get thread ID
-        const std::string& getThreadId() const { return m_threadId; }
+        // Set thread ID for tracking by AppState
+        void setThreadId(const std::string& threadId) { m_threadId = threadId; }
+        std::string getThreadId() const { return m_threadId; }
     };
 
 } // namespace connection_manager

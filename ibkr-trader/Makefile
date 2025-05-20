@@ -21,6 +21,9 @@ SOURCES = $(wildcard $(SRCDIR)/*.cpp) \
           $(wildcard $(SRCDIR)/*/*/*.cpp) \
           $(wildcard $(IBKR_SRCDIR)/*.cpp) \
           $(wildcard $(IBKR_SRCDIR)/protobufUnix/*.cc)
+
+# Exclude official_example_connections directory
+SOURCES := $(filter-out $(SRCDIR)/connection_manager/official_example_connections/%.cpp, $(SOURCES))
           
 # Update OBJECTS to handle both src and include files
 OBJECTS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(filter $(SRCDIR)/%.cpp,$(SOURCES))) \
