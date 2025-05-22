@@ -11,7 +11,7 @@
 #include <chrono>
 #include <mutex>
 #include "../connection/connection.hpp"
-#include "../common_types/common_types.hpp"
+// #include "../common_types/common_types.hpp"
 
 namespace ibkr_api_functions {
 

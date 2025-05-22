@@ -16,6 +16,10 @@ RawDataModel::RawDataModel(const std::string& symbol)
     
     // Initialize the stock queue
     m_stockQueue = std::make_unique<stk_q::STK_Q>();
+
+    // Initialize stock data with default constructor
+    m_stockData = std::make_unique<stock_data_tick::StockData>();
+    m_stockData->symbol = symbol;
 }
 
 bool RawDataModel::initFromJson(const nlohmann::json& jsonData) {
@@ -48,31 +52,31 @@ bool RawDataModel::initFromJson(const nlohmann::json& jsonData) {
     }
 }
 
-// Convert MarketDataTick to STK_Q_Data
-stk_q::STK_Q_Data RawDataModel::convertTickToQueueData(const MarketDataTick& tick) const {
+// Convert StockData to STK_Q_Data
+stk_q::STK_Q_Data RawDataModel::convertTickToQueueData(const stock_data_tick::StockData& stockData) const {
     stk_q::STK_Q_Data queueData;
     queueData.symbol = m_symbol;
-    queueData.price = tick.price;
-    queueData.time = static_cast<long>(tick.timestamp);
-    queueData.size = tick.volume;
-    queueData.exchange = ""; // Can be populated with actual exchange if available
+    queueData.price = stockData.last;
+    queueData.time = static_cast<long>(stockData.timestamp);
+    queueData.size = stockData.volume;
+    queueData.exchange = stockData.exchange;
     return queueData;
 }
 
-// Add a market data tick - updates the queue only
+// Add stock data to the queue - updates the queue only
 // This is the core instance method that adds data directly to this model's queue
-void RawDataModel::addTick(const MarketDataTick& tick) {
+void RawDataModel::addTick(const stock_data_tick::StockData& stockData) {
     std::lock_guard<std::mutex> lock(m_mutex);
     
     // ********************************************************************
     // IMPORTANT DESIGN DECISION:
-    // Ticks are stored ONLY in the queue (STK_Q).
+    // Stock data is stored ONLY in the queue (STK_Q).
     // The ModelManager will prune the queue based on time window settings.
     // ********************************************************************
     
     // Store data in the queue
     if (m_stockQueue) {
-        stk_q::STK_Q_Data queueData = convertTickToQueueData(tick);
+        stk_q::STK_Q_Data queueData = convertTickToQueueData(stockData);
         m_stockQueue->push(std::move(queueData));
     }
 }
@@ -134,21 +138,31 @@ void RawDataModel::clearTicks() {
 }
 
 // Get the most recent tick directly from the queue (more accurate with current design)
-bool RawDataModel::getLatestTickFromQueue(MarketDataTick& outTick) const {
+bool RawDataModel::getLatestTickFromQueue(stock_data_tick::StockData& outTick) const {
     if (!m_stockQueue || m_stockQueue->empty()) {
         return false;
     }
     
     stk_q::STK_Q_Data data;
     if (m_stockQueue->peek(data)) {
-        // Convert queue data to tick format
-        outTick.price = data.price;
-        outTick.volume = data.size;
+        // Convert queue data to StockData format
+        outTick.symbol = m_symbol;
         outTick.timestamp = data.time;
+        outTick.exchange = data.exchange;
+        outTick.last = data.price;  // This is stockData->last
+        outTick.volume = data.size;  // This is stockData->volume
+        
+        // Calculate derived metrics
+        outTick.calculateDerivedMetrics();
+        
         return true;
     }
     
     return false;
+}
+
+stock_data_tick::StockData* RawDataModel::getStockData() const {
+    return m_stockData.get();
 }
 
 //
@@ -204,10 +218,11 @@ bool RawDataModelManager::initModelFromJson(const nlohmann::json& jsonData) {
 
 // Manager method to add a tick to a model identified by symbol
 // This is a convenience method that handles model lookup/creation
-bool RawDataModelManager::addTickToModel(const std::string& symbol, const MarketDataTick& tick) {
+bool RawDataModelManager::addTickToModel(const std::string& symbol, const stock_data_tick::StockData& stockData) {
     auto model = getModel(symbol);
     if (model) {
-        model->addTick(tick);  // Delegates to the instance method
+        // Pass the stock data directly to the model
+        model->addTick(stockData);
         return true;
     }
     return false;

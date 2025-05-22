@@ -1144,7 +1144,7 @@ nlohmann::json LocalAPI::getSymbolQueueData(const std::string& symbol) const {
                 // Add individual ticks to the response
                 for (const auto& tick : ticks) {
                     nlohmann::json tickData;
-                    tickData["price"] = tick.price;
+                    tickData["price"] = tick.last;
                     tickData["volume"] = tick.volume;
                     tickData["timestamp"] = tick.timestamp;
                     queueData["ticks"].push_back(tickData);
@@ -1164,13 +1164,13 @@ nlohmann::json LocalAPI::getSymbolQueueData(const std::string& symbol) const {
                                   << " items in queue" << std::endl;
                         
                         // Get the latest tick as a fallback
-                        raw_data_model::MarketDataTick latestTick;
+                        stock_data_tick::StockData latestTick;
                         if (rawModel->getLatestTickFromQueue(latestTick)) {
                             std::cout << "[LocalAPI] Found latest tick - adding to response" << std::endl;
                             
                             // Add at least the latest tick to the response
                             nlohmann::json tickData;
-                            tickData["price"] = latestTick.price;
+                            tickData["price"] = latestTick.last;
                             tickData["volume"] = latestTick.volume;
                             tickData["timestamp"] = latestTick.timestamp;
                             queueData["ticks"].push_back(tickData);

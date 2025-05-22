@@ -1,6 +1,7 @@
 #include "model_manager.hpp"
 #include "model_manager_factory.hpp"
 #include "../util/app_state/app_state.hpp"
+#include "../models/metrics_model/stock_data_tick.hpp"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -283,7 +284,7 @@ void ModelManager::pruneOldData() {
         threadIdStr << std::this_thread::get_id();
         
         std::cout << "[Prune][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-                  << "Pruned " << (sizeBefore - sizeAfter) << " old ticks, "
+                  << "Pruned " << (sizeBefore - sizeAfter) << " old StockData entries, "
                   << "new queue size: " << sizeAfter << std::endl;
     }
     
@@ -313,7 +314,19 @@ bool ModelManager::initFromJson(const nlohmann::json& jsonData) {
  * 
  * @param tick The new market data tick to add
  */
-void ModelManager::addTick(const raw_data_model::MarketDataTick& tick) {
+void ModelManager::addTick(const stock_data_tick::StockData& tick) {
+    // Validation print for incoming StockData
+    std::cout << "\n[VALIDATION][" << getSymbol() << "] StockData Received:" 
+              << "\n  Symbol: " << tick.symbol
+              << "\n  Timestamp: " << tick.timestamp
+              << "\n  Exchange: " << (!tick.exchange.empty() ? tick.exchange : "-")
+              << "\n  Price Data: Last=" << tick.last << " Bid=" << tick.bid << " Ask=" << tick.ask
+              << "\n  Size Data: BidSize=" << tick.bidSize << " AskSize=" << tick.askSize << " Volume=" << tick.volume
+              << "\n  OHLC: Open=" << tick.open << " High=" << tick.high << " Low=" << tick.low << " Close=" << tick.close
+              << "\n  WAP: " << tick.wap
+              << "\n  Mid: " << tick.mid << " Spread: " << tick.spread 
+              << "\n=========================================\n";
+    
     // Get thread ID for logging
     std::stringstream threadIdStr;
     threadIdStr << std::this_thread::get_id();
@@ -331,18 +344,20 @@ void ModelManager::addTick(const raw_data_model::MarketDataTick& tick) {
     
     // Add the tick to the underlying model's queue
     std::cout << "[Queue][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-              << "Adding tick - Price: " << tick.price 
+              << "Adding StockData - Price: " << tick.last 
               << ", Volume: " << volumeStr.str() 
               << ", Current queue size: " << queueSizeBefore << std::endl;
-              
+
+    // No need to create a new StockData object since we already have one
+    // Just pass it directly to the raw data model
     m_rawDataModel->addTick(tick);
     
     // Get queue size after adding the tick
     size_t queueSizeAfter = m_rawDataModel->getStockQueue()->size();
-    
+
     // Print detailed tick information with thread ID
     std::cout << "[Queue][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-              << "Added tick - Price: " << tick.price 
+              << "Added StockData - Price: " << tick.last 
               << ", Volume: " << volumeStr.str() 
               << ", New queue size: " << queueSizeAfter 
               << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;
@@ -382,7 +397,7 @@ const raw_data_model::TradingParams& ModelManager::getParams() const {
  * 
  * Note: This creates a copy of data and should be used sparingly.
  */
-std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() const {
+std::vector<stock_data_tick::StockData> ModelManager::getTicksInWindow() const {
     std::lock_guard<std::mutex> lock(m_mutex);
     
     // Get current time in milliseconds since epoch
@@ -393,7 +408,7 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
     auto cutoffMs = nowMs - windowToMilliseconds();
     
     // Create a vector to hold the filtered ticks
-    std::vector<raw_data_model::MarketDataTick> windowTicks;
+    std::vector<stock_data_tick::StockData> windowTicks;
     
     // Get access to the queue
     auto* queue = m_rawDataModel->getStockQueue();
@@ -433,11 +448,16 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
             bool isWithinWindow = static_cast<uint64_t>(data.time) >= cutoffMs;
             
             if (isWithinWindow) {
-                // Convert queue data back to MarketDataTick
-                raw_data_model::MarketDataTick tick;
-                tick.price = data.price;
-                tick.volume = data.size;
+                // Convert queue data to StockData
+                stock_data_tick::StockData tick;
+                tick.symbol = getSymbol();
                 tick.timestamp = data.time;
+                tick.exchange = data.exchange;
+                tick.last = data.price;   // This is stockData->last
+                tick.volume = data.size;  // This is stockData->volume
+                
+                // Calculate derived metrics
+                tick.calculateDerivedMetrics();
                 
                 // Add to vector
                 windowTicks.push_back(tick);
@@ -445,7 +465,7 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
                 
                 // Log the data item we're including (limit to first 5 to avoid spam)
                 if (includedCount <= 5) {
-                    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Including tick: Price=" 
+                    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Including StockData: Price=" 
                             << data.price << ", Time=" << data.time 
                             << " (within cutoff " << cutoffMs << ")" << std::endl;
                 }
@@ -454,7 +474,7 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
                 
                 // Log the first few items we're filtering out
                 if (excludedCount <= 5) {
-                    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Excluding tick: Price=" 
+                    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Excluding StockData: Price=" 
                             << data.price << ", Time=" << data.time 
                             << " (before cutoff " << cutoffMs << ")" << std::endl;
                 }
@@ -467,7 +487,7 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
     
     std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Finished processing. Included: " 
               << includedCount << ", Excluded: " << excludedCount 
-              << ", Returning vector size: " << windowTicks.size() << std::endl;
+              << ", Returning vector size of converted StockData: " << windowTicks.size() << std::endl;
     
     return windowTicks;
 }
@@ -480,8 +500,8 @@ std::vector<raw_data_model::MarketDataTick> ModelManager::getTicksInWindow() con
  * 
  * Note: This returns nullptr if the queue is empty or can't be accessed.
  */
-const raw_data_model::MarketDataTick* ModelManager::getLatestTick() const {
-    static raw_data_model::MarketDataTick latestTick;
+const stock_data_tick::StockData* ModelManager::getLatestTick() const {
+    static stock_data_tick::StockData latestTick;
     
     if (m_rawDataModel->getLatestTickFromQueue(latestTick)) {
         return &latestTick;
@@ -595,7 +615,7 @@ size_t ModelManager::processQueueData(size_t maxItems) {
             
             for (const auto& tick : ticks) {
                 // In our simplified model, we use the same price for high/low/close
-                double price = tick.price;
+                double price = tick.last;
                 prices.push_back(price);
                 highs.push_back(price);
                 lows.push_back(price);

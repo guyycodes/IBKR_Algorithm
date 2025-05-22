@@ -187,7 +187,7 @@ public:
      * Add a new market data tick and immediately prune the queue
      * @param tick The new market data tick to add
      */
-    void addTick(const raw_data_model::MarketDataTick& tick);
+    void addTick(const stock_data_tick::StockData& tick);
     
     /**
      * Get the underlying raw data model for advanced operations
@@ -219,13 +219,13 @@ public:
      * Get all ticks that fall within the current time window
      * @return Vector of market data ticks
      */
-    std::vector<raw_data_model::MarketDataTick> getTicksInWindow() const;
+    std::vector<stock_data_tick::StockData> getTicksInWindow() const;
     
     /**
      * Get the most recent market data tick
      * @return Pointer to the latest tick, or nullptr if none
      */
-    const raw_data_model::MarketDataTick* getLatestTick() const;
+    const stock_data_tick::StockData* getLatestTick() const;
     
     /**
      * Get the total number of ticks currently stored in the queue

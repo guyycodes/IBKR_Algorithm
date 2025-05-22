@@ -9,16 +9,17 @@
 #include <nlohmann/json.hpp>
 #include <mutex>
 #include "../../util/stk_q/stk_q.hpp"
+#include "../metrics_model/stock_data_tick.hpp"
 
 namespace raw_data_model {
 
-// Structure for a single market data tick from IBKR
-struct MarketDataTick {
-    double price;
-    double volume;  // Changed from int to double to handle extremely large volume values from IBKR API
-    uint64_t timestamp;
-    // Add other tick data fields as needed
-};
+// // Structure for a single market data tick from IBKR
+// struct MarketDataTick {
+//     double price;
+//     double volume;  // Changed from int to double to handle extremely large volume values from IBKR API
+//     uint64_t timestamp;
+//     // Add other tick data fields as needed
+// };
 
 // Trading parameters structure matching the JSON format
 struct TradingParams {
@@ -48,6 +49,9 @@ private:
     // Thread-safe queue for stock data
     // This allows efficient processing of real-time market data
     std::unique_ptr<stk_q::STK_Q> m_stockQueue;
+
+    // Stock data
+    std::unique_ptr<stock_data_tick::StockData> m_stockData;
     
     // Mutex for thread safety
     mutable std::mutex m_mutex;
@@ -59,14 +63,11 @@ public:
     // Initialize from JSON input
     bool initFromJson(const nlohmann::json& jsonData);
     
-    // Add a market data tick - updates the queue only
-    // This is the instance-level method that works directly on this model object
-    // Use this when you already have a reference to a specific RawDataModel instance
-    // For symbol-based access, use RawDataModelManager::addTickToModel instead
-    void addTick(const MarketDataTick& tick);
+    // Add stock data to the queue
+    void addTick(const stock_data_tick::StockData& stockData);
     
-    // Convert MarketDataTick to STK_Q_Data
-    stk_q::STK_Q_Data convertTickToQueueData(const MarketDataTick& tick) const;
+    // Convert StockData to STK_Q_Data
+    stk_q::STK_Q_Data convertTickToQueueData(const stock_data_tick::StockData& stockData) const;
     
     // Stock queue operations
     void pushToQueue(stk_q::STK_Q_Data& data);
@@ -83,7 +84,7 @@ public:
     const TradingParams& getParams() const;
     
     // Get the latest tick from queue (more accurate with current design)
-    bool getLatestTickFromQueue(MarketDataTick& outTick) const;
+    bool getLatestTickFromQueue(stock_data_tick::StockData& outTick) const;
     
     // Get queue size
     size_t getQueueSize() const;
@@ -93,6 +94,9 @@ public:
     
     // Clear the queue
     void clearQueue();
+    
+    // Get the stock data
+    stock_data_tick::StockData* getStockData() const;
 };
 
 // Singleton manager that handles creation and access to individual models
@@ -136,7 +140,7 @@ public:
     // 2. Then calls RawDataModel::addTick() on that model
     // Returns true if successful, false if the model couldn't be created
     // Use this when you only have a symbol name and not a model reference
-    bool addTickToModel(const std::string& symbol, const MarketDataTick& tick);
+    bool addTickToModel(const std::string& symbol, const stock_data_tick::StockData& stockData);
     
     // Check if a model exists
     bool hasModel(const std::string& symbol);
