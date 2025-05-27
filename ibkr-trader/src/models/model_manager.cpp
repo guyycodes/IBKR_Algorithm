@@ -2,6 +2,7 @@
 #include "model_manager_factory.hpp"
 #include "../util/app_state/app_state.hpp"
 #include "../models/metrics_model/stock_data_tick.hpp"
+#include "../util/time_ordered_tick_buffer/time_ordered_tick_buffer.hpp"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -20,8 +21,14 @@ namespace model_manager {
  * and establishes the time window settings for data retention.
  */
 ModelManager::ModelManager(const std::string& symbol, size_t windowSize, TimeWindowUnit windowUnit)
-    : m_windowSize(windowSize), m_windowUnit(windowUnit), m_lastPruneTime(std::chrono::system_clock::now()),
-      m_requestId(-1), m_connected(false), m_connectionAttempts(0), 
+    : m_windowSize(windowSize),
+      m_windowUnit(windowUnit),
+      m_lastPruneTime(std::chrono::system_clock::now()),
+      // Initialize with the correct window size from the start
+      m_timeOrderedBuffer(windowToMilliseconds()), 
+      m_requestId(-1),
+      m_connected(false),
+      m_connectionAttempts(0),
       m_lastConnectionAttempt(std::chrono::system_clock::now()) {
     
     // Get the raw data model from the raw data manager singleton
@@ -88,11 +95,24 @@ bool ModelManager::connectToIBKR() {
         std::cout << "[ModelManager] Connection attempt " << m_connectionAttempts << "/" 
                   << MAX_CONNECTION_ATTEMPTS << " for symbol: " << getSymbol() << std::endl;
         
+        ////////////////////////////////////////////////////////////////
         // Generate a unique client ID for this symbol's connection
         // Use a simple hash of the symbol to create a unique client ID
         std::string symbol = getSymbol();
         int clientId = 0;
-        
+
+        // Create a contract for the symbol
+        Contract contract;
+        contract.symbol = getSymbol();
+        contract.secType = "STK";
+        contract.currency = "USD";
+        contract.exchange = "SMART";
+
+        std::string genericTicks = "233,232,221"; // Request WAP (field code 14)
+        bool snapshot = false;           // Continuous updates instead of snapshot
+        bool regulatorySnapshot = false;
+        TagValueListSPtr mktDataOptions(new TagValueList());
+        ////////////////////////////////////////////////////////////////
         // Simple hash: sum ASCII values and add a constant offset to avoid client ID 0
         for (char c : symbol) {
             clientId += static_cast<int>(c);
@@ -101,14 +121,14 @@ bool ModelManager::connectToIBKR() {
         
         std::cout << "[ModelManager] Using client ID: " << clientId << " for symbol: " << getSymbol() << std::endl;
         
-        if (!m_connManager->connect(clientId)) {
+        if (!m_connManager->connect(clientId, getSymbol(), contract)) { // pass the contract all the way down model_manager->connection_manager->m_trader->connect(clientId, getSymbol(), contract)-> into the connection.cpp
             std::cerr << "[ModelManager] Failed to connect to IBKR API for symbol: " << getSymbol() << std::endl;
             return false;
         }
         
         // Wait for connection to fully establish
         std::cout << "[ModelManager] Waiting for connection to fully establish..." << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         // Check if still connected after wait
         if (!m_connManager->getTrader().isConnected()) {
@@ -120,13 +140,15 @@ bool ModelManager::connectToIBKR() {
         m_connManager->getTrader().setModelManager(this, getSymbol());
         
         // Get IBKR API client from connection manager
-        auto client = m_connManager->getTrader().getClient();
+        // this goes through the connection manager all the way down to the connection.hpp
+        auto client = m_connManager->getTrader().getClient(); // The IBKR client socket
+        
         client->setServerLogLevel(5); // Set to most detailed log level
         
         // PAPER TRADING SETUP:
-        // Set market data type to DELAYED_FROZEN_DATA (3) for data outside market hours
+        // Set market data type to live data (1)
         std::cout << "[ModelManager] Setting market data type for " << getSymbol() << std::endl;
-        client->reqMarketDataType(3); // Using delayed data for testing
+        client->reqMarketDataType(1); 
         
         // Generate a random request ID (to prevent conflicts with other instances)
         std::random_device rd;
@@ -137,15 +159,11 @@ bool ModelManager::connectToIBKR() {
         // Set the request ID directly on the IBKRTrader
         m_connManager->getTrader().setRequestId(m_requestId);
         
-        // Create a contract for the symbol
-        Contract contract;
-        contract.symbol = getSymbol();
-        contract.secType = "STK";
-        contract.currency = "USD";
-        contract.exchange = "SMART";
-        
-        // Subscribe to tick-by-tick data (most granular) 
-        client->reqMktData(m_requestId, contract, "", false, false, TagValueListSPtr());
+        // Make the initial market data request
+        // Subscribe to tick-by-tick data (most granular), wait 1 second and then start the data stream
+        client->reqMktData(m_requestId, contract, genericTicks, snapshot, regulatorySnapshot, mktDataOptions);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        m_connManager->getTrader().startDataStream();
         
         std::cout << "[ModelManager] Connected to IBKR API for symbol: " << getSymbol() 
                   << " with request ID: " << m_requestId << std::endl;
@@ -315,17 +333,43 @@ bool ModelManager::initFromJson(const nlohmann::json& jsonData) {
  * @param tick The new market data tick to add
  */
 void ModelManager::addTick(const stock_data_tick::StockData& tick) {
-    // Validation print for incoming StockData
-    std::cout << "\n[VALIDATION][" << getSymbol() << "] StockData Received:" 
-              << "\n  Symbol: " << tick.symbol
-              << "\n  Timestamp: " << tick.timestamp
-              << "\n  Exchange: " << (!tick.exchange.empty() ? tick.exchange : "-")
-              << "\n  Price Data: Last=" << tick.last << " Bid=" << tick.bid << " Ask=" << tick.ask
-              << "\n  Size Data: BidSize=" << tick.bidSize << " AskSize=" << tick.askSize << " Volume=" << tick.volume
-              << "\n  OHLC: Open=" << tick.open << " High=" << tick.high << " Low=" << tick.low << " Close=" << tick.close
-              << "\n  WAP: " << tick.wap
-              << "\n  Mid: " << tick.mid << " Spread: " << tick.spread 
-              << "\n=========================================\n";
+    // Calculate derived metrics
+    stock_data_tick::StockData enrichedTick = tick;
+    enrichedTick.calculateDerivedMetrics();
+
+    // Add to time-ordered buffer
+    m_timeOrderedBuffer.addTick(enrichedTick);
+    
+    // Get latest technical indicators
+    time_ordered_tick_buffer::TechnicalIndicators indicators = m_timeOrderedBuffer.calculateIndicators();
+    
+    // Enrich the tick with calculated indicators
+    enrichedTick.vwap = indicators.vwap;
+    // add the later
+    // enrichedTick.rsi = indicators.rsi;
+    // enrichedTick.ema9 = indicators.ema9;
+    // enrichedTick.ema26 = indicators.ema26;
+    // enrichedTick.alma = indicators.alma;
+    // enrichedTick.chaikin = indicators.chaikin;
+    
+    // Check trading conditions
+    bool isValidCandidate = false;
+    if (indicators.isValid()) {
+        // Convert candle data for technical analysis
+        std::vector<double> prices, volumes;
+        
+        // Here we would extract prices and volumes from recent candles
+        // For simplicity we can use our indicators directly
+        
+        // Check if this is a valid trading candidate
+        isValidCandidate = m_calculator.isValidTradingCandidate(
+            prices, volumes, indicators.vwap);
+        
+        if (isValidCandidate) {
+            std::cout << "[ModelManager] VALID TRADING CANDIDATE FOUND: " << enrichedTick.symbol << std::endl;
+            // Here you would trigger your trading logic
+        }
+    }
     
     // Get thread ID for logging
     std::stringstream threadIdStr;
@@ -334,34 +378,37 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
     // Get queue size before adding the tick
     size_t queueSizeBefore = m_rawDataModel->getStockQueue()->size();
     
-    // Format volume appropriately (scientific notation for very large values)
-    std::stringstream volumeStr;
-    if (tick.volume > 1.0e10) {
-        volumeStr << std::scientific << tick.volume << std::fixed;
-    } else {
-        volumeStr << tick.volume;
-    }
-    
     // Add the tick to the underlying model's queue
-    std::cout << "[Queue][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-              << "Adding StockData - Price: " << tick.last 
-              << ", Volume: " << volumeStr.str() 
-              << ", Current queue size: " << queueSizeBefore << std::endl;
+    // Validation print for incoming StockData
+    std::cout << "\n[ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] StockData Received:" 
+              << "\n[ModelManager-Queue] Current queue size before adding tick: " << queueSizeBefore 
+              << "\n=========================================" << std::endl;
 
     // No need to create a new StockData object since we already have one
-    // Just pass it directly to the raw data model
-    m_rawDataModel->addTick(tick);
+    // Just pass it directly to the raw data model with the enriched indicators
+    m_rawDataModel->addTick(enrichedTick);
     
     // Get queue size after adding the tick
     size_t queueSizeAfter = m_rawDataModel->getStockQueue()->size();
 
     // Print detailed tick information with thread ID
-    std::cout << "[Queue][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-              << "Added StockData - Price: " << tick.last 
-              << ", Volume: " << volumeStr.str() 
-              << ", New queue size: " << queueSizeAfter 
+    std::cout << "[ModelManager][VALIDATION][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+              << "\n  Symbol: " << enrichedTick.symbol
+              << "\n  Timestamp: " << enrichedTick.timestamp
+              << "\n  Exchange: " << (!enrichedTick.exchange.empty() ? enrichedTick.exchange : "-")
+              << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
+              << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
+              << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
+              << "\n  WAP: " << enrichedTick.wap
+              << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
+              << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
+              << "\n  Technical Indicators: RSI=" << indicators.rsi 
+              << " EMA9=" << indicators.ema9 << " EMA26=" << indicators.ema26
+              << " ALMA=" << indicators.alma << " Chaikin=" << indicators.chaikin
+              << "\n  Trading Candidate: " << (isValidCandidate ? "YES" : "NO")
+              << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
               << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;
-    
+
     // Prune old data immediately after adding a new tick
     pruneOldData();
 }

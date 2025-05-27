@@ -5,6 +5,7 @@
 #include <vector>
 #include <mutex>
 #include <cmath>
+#include <map>
 
 namespace technical_calculator {
 
@@ -19,7 +20,25 @@ namespace config {
     static constexpr double VOLUME_SURGE_THRESHOLD  = 1.5;  // e.g. 1.5 => 150%
     static constexpr double MIN_VWAP_DISTANCE_PCT   = 0.2;  // e.g. 0.2%
     static constexpr double MAX_VWAP_DISTANCE_PCT   = 1.0;  // e.g. 1.0%
-
+    
+    // -- RSI with SMA Overlay defaults --
+    static constexpr int    RSI_PERIOD              = 14;   // Standard 14-period RSI
+    static constexpr int    RSI_SMA_PERIOD          = 14;   // 14-period SMA of RSI
+    static constexpr double RSI_UPTREND_THRESHOLD   = 1.25; // 125% ratio threshold
+    
+    // -- EMA Cross defaults --
+    static constexpr int    FAST_EMA_PERIOD         = 9;    // 9-period EMA (faster)
+    static constexpr int    SLOW_EMA_PERIOD         = 26;   // 26-period EMA (slower)
+    
+    // -- Chaikin Oscillator defaults --
+    static constexpr int    CHAIKIN_FAST_PERIOD     = 3;    // 3-period EMA of A/D line (3 minutes)
+    static constexpr int    CHAIKIN_SLOW_PERIOD     = 10;   // 10-period EMA of A/D line (10 minutes)
+    
+    // -- ALMA defaults --
+    static constexpr int    ALMA_WINDOW_SIZE        = 9;    // 9-period window (9 one-minute bars)
+    static constexpr double ALMA_SIGMA              = 0.85; // Responsiveness control (range 0.1-1.0)
+    static constexpr double ALMA_OFFSET             = 6.0;  // Phase shift (range 0-10)
+    
     // -- EntrySignal defaults --
     static constexpr double MAX_SPREAD_THRESHOLD    = 0.03;   // e.g. 3 cents
     static constexpr double ORDERBOOK_IMBALANCE_PCT = 130.0;  // e.g. 130% => strong bullish imbalance
@@ -160,8 +179,46 @@ public:
     
     double calculateALMA(const std::vector<double>& prices,
                          int windowSize = 9,
-                         double offset = 0.85,
-                         double sigma = 6.0) const;
+                         double sigma = 0.85,
+                         double offset = 6.0) const;
+    
+    // New RSI-related methods
+    double calculateRSI(const std::vector<double>& closePrices, 
+                        int period = 14) const;
+    
+    double calculateSMA(const std::vector<double>& data, 
+                        int period) const;
+                        
+    // RSI with SMA overlay check
+    bool checkRSIwithSMAOverlay(const std::vector<double>& closePrices,
+                                double currentPrice,
+                                int rsiPeriod = 14,
+                                int smaPeriod = 14) const;
+                                
+    // Calculate multiple EMAs and return them in a map
+    std::map<int, double> calculateMultipleEMAs(
+        const std::vector<double>& prices,
+        const std::vector<int>& periods) const;
+        
+    // General-purpose EMA cross check
+    // Verifies if faster EMA is above slower EMA (bullish cross)
+    // Can be used for any analysis independent of the filtering pipeline
+    bool checkEmaCross(
+        const std::vector<double>& prices,
+        int fastPeriod = 9,
+        int slowPeriod = 26) const;
+    
+    // Format Chaikin Oscillator value in thousands (K) for display
+    std::string formatChaikinForDisplay(double chaikinValue) const;
+    
+    // Check if Chaikin Oscillator indicates positive momentum
+    bool isChaikinPositive(
+        const std::vector<double>& highPrices,
+        const std::vector<double>& lowPrices,
+        const std::vector<double>& closePrices,
+        const std::vector<double>& volumes,
+        int fastPeriod = 3,
+        int slowPeriod = 10) const;
 };
 
 /**
@@ -177,7 +234,12 @@ public:
                    int supertrendPeriod = 3,
                    double volumeSurgeThreshold = 1.5,
                    double minVWAPDistancePct = 0.2,
-                   double maxVWAPDistancePct = 1.0);
+                   double maxVWAPDistancePct = 1.0,
+                   int rsiPeriod = 14,
+                   int rsiSmaPeriod = 14,
+                   double rsiUptrendThreshold = 1.25,
+                   int fastEmaPeriod = 9,
+                   int slowEmaPeriod = 26);
     
     // Main filtering method
     bool passesInitialFilters(const std::vector<Candle>& candles, double vwap);
@@ -189,12 +251,25 @@ private:
     double m_volumeSurgeThreshold;
     double m_minVWAPDistancePct;
     double m_maxVWAPDistancePct;
+    int m_rsiPeriod;
+    int m_rsiSmaPeriod;
+    double m_rsiUptrendThreshold;
+    int m_fastEmaPeriod;
+    int m_slowEmaPeriod;
     
     // Filter methods
     bool checkShortPeriodSupertrend(const std::vector<Candle>& candles);
     double computeATR(const std::vector<Candle>& candles, int period);
     bool checkVolumeSurge(const std::vector<Candle>& candles);
     bool checkVWAPDistance(double currentPrice, double vwap);
+    bool checkRSIwithSMAOverlay(const std::vector<Candle>& candles);
+    
+    // Specialized EMA cross check for the filtering pipeline
+    // Uses the configured fast/slow EMA periods (typically 9/26)
+    bool checkEmaCross(const std::vector<Candle>& candles);
+    
+    // Check if ALMA is below both EMAs (ALMA < EMA9 & ALMA < EMA26)
+    bool checkAlmaBelowEmas(const std::vector<Candle>& candles);
 };
 
 /**

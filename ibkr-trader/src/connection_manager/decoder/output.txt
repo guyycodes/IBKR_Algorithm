@@ -1,0 +1,1243 @@
+       Cutoff time: Tue May 27 19:40:08 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378408981293388 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 56
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378408981293388
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.530000
+  Mid: 47.530000 Spread: 0.040000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=30.147057 EMA9=47.559219 EMA26=47.561078 ALMA=47.560000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 57 ✓
+[Size] ID:97131 LAST_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 5
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using last size decoder for tick type: 5
+[LastSizeDecoder] Analyzing last size value with flags: 0x31 0xc0
+[LastSizeDecoder] Non-zero byte at position 6 with value: 192
+[LastSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[LastSizeDecoder] Using standard lot size for flag 0x31
+[Cache] Current time: Tue May 27 20:40:08 2025
+       Cutoff time: Tue May 27 19:40:08 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378408981661096 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 57
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378408981661096
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.530000
+  Mid: 47.530000 Spread: 0.040000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=30.147057 EMA9=47.559219 EMA26=47.561078 ALMA=47.560000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 58 ✓
+[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 3
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:40:08 2025
+       Cutoff time: Tue May 27 19:40:08 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378408982138971 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 58
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378408982138971
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.530000
+  Mid: 47.530000 Spread: 0.040000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=30.147057 EMA9=47.559219 EMA26=47.561078 ALMA=47.560000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 59 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378409640;298927.0000000000000000;46.05005928;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378409640;298927.0000000000000000;46.05005928;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378410935;298927.0000000000000000;46.05005928;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378410935;298927.0000000000000000;46.05005928;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: 47.53;1.0000000000000000;1748378422117;298928.0000000000000000;46.05006424;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.53;1.0000000000000000;1748378422117;298928.0000000000000000;46.05006424;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378424119;298928.0000000000000000;46.05006424;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378424119;298928.0000000000000000;46.05006424;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378425120;298928.0000000000000000;46.05006424;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378425120;298928.0000000000000000;46.05006424;true
+[Price] ID:97131 ASK:47.540000
+[Cache] Current time: Tue May 27 20:40:25 2025
+       Cutoff time: Tue May 27 19:40:25 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378425241970923 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 59
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378425241970923
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.541968 EMA26=47.552843 ALMA=47.532127 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 60 ✓
+[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 3
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:40:25 2025
+       Cutoff time: Tue May 27 19:40:25 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378425242754465 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 60
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378425242754465
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.541968 EMA26=47.552843 ALMA=47.532127 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 61 ✓
+[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 3
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:40:25 2025
+       Cutoff time: Tue May 27 19:40:25 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378425243116548 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 61
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378425243116548
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.541968 EMA26=47.552843 ALMA=47.532127 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 62 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 33 (UNKNOWN_STRING_33)
+value: K
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 33, Value: K
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378425622;298928.0000000000000000;46.05006424;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378425622;298928.0000000000000000;46.05006424;true
+[Timer] Refreshing account data
+[INFO] Canceling previous account summary request with reqId: 9003
+[INFO] Requesting account summary with reqId: 9004
+[AccountSummary] reqId:9004 account:DUK837069 tag:AccountType value:INDIVIDUAL currency:
+[AccountSummary] reqId:9004 account:DUK837069 tag:Cushion value:1 currency:
+[AccountSummary] reqId:9004 account:DUK837069 tag:DayTradesRemaining value:-1 currency:
+[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadNextChange value:0 currency:
+[AccountSummary] reqId:9004 account:DUK837069 tag:AccruedCash value:2317.80 currency:USD
+[Account] DUK837069 AvailableFunds: 1000315.99 USD
+[Account] DUK837069 BuyingPower: 4001263.96 USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:EquityWithLoanValue value:1000315.99 currency:USD
+[Account] DUK837069 ExcessLiquidity: 1000315.99 USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:FullAvailableFunds value:1000315.99 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:FullExcessLiquidity value:1000315.99 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:FullInitMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:FullMaintMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:GrossPositionValue value:0.00 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:InitMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadAvailableFunds value:1000315.99 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadExcessLiquidity value:1000315.99 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadInitMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadMaintMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:MaintMarginReq value:0.00 currency:USD
+[Account] DUK837069 NetLiquidation: 1002633.79 USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:SMA value:1002633.79 currency:USD
+[AccountSummary] reqId:9004 account:DUK837069 tag:TotalCashValue value:1000315.99 currency:USD
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: 47.53;1.0000000000000000;1748378426622;298929.0000000000000000;46.0500692;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.53;1.0000000000000000;1748378426622;298929.0000000000000000;46.0500692;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378431377;298929.0000000000000000;46.0500692;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378431377;298929.0000000000000000;46.0500692;true
+[Price] ID:97131 ASK:47.550000
+[Cache] Current time: Tue May 27 20:40:31 2025
+       Cutoff time: Tue May 27 19:40:31 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378431497270843 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 62
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378431497270843
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.530000
+  Mid: 47.530000 Spread: 0.040000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.536128 EMA26=47.548134 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 63 ✓
+[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 3
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:40:31 2025
+       Cutoff time: Tue May 27 19:40:31 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378431498395759 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 63
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378431498395759
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.530000
+  Mid: 47.530000 Spread: 0.040000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.536128 EMA26=47.548134 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 64 ✓
+[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 3
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:40:31 2025
+       Cutoff time: Tue May 27 19:40:31 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378431499158218 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 64
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378431499158218
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.530000
+  Mid: 47.530000 Spread: 0.040000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.536128 EMA26=47.548134 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 65 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 33 (UNKNOWN_STRING_33)
+value: KP
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 33, Value: KP
+[Account] DUK837069 NetLiquidation: 1002633.79 USD
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 33 (UNKNOWN_STRING_33)
+value: KPZ
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 33, Value: KPZ
+[Price] ID:97131 ASK:47.540000
+[Cache] Current time: Tue May 27 20:40:33 2025
+       Cutoff time: Tue May 27 19:40:33 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378433458153260 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 65
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378433458153260
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.533137 EMA26=47.544395 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 66 ✓
+[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 3
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:40:33 2025
+       Cutoff time: Tue May 27 19:40:33 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378433458436927 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 66
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378433458436927
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.533137 EMA26=47.544395 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 67 ✓
+[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 3
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:40:33 2025
+       Cutoff time: Tue May 27 19:40:33 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378433458545760 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 67
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378433458545760
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.533137 EMA26=47.544395 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 68 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 33 (UNKNOWN_STRING_33)
+value: K
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 33, Value: K
+[Size] ID:97131 VOLUME:3584865303387213824.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 8
+[SizeHexDump] Value: 0x31 c0 00 00 00 04 90 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 36864, Low32: 299008, Mid32: 4
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x90 (Decimal: 144)
+  Byte 2: 0x40 (Decimal: 4)
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizePattern] Lower 32 bits contain value: 299008
+[SizeDecoder] Using volume decoder for tick type: 8
+[VolumeDecoder] Analyzing volume value with flags: 0x31 0xc0
+[VolumeDecoder] Found volume in low 32 bits: 299008
+[Cache] Current time: Tue May 27 20:40:34 2025
+       Cutoff time: Tue May 27 19:40:34 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378434457396636 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 68
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378434457396636
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.533137 EMA26=47.544395 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 69 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: 47.53;1.0000000000000000;1748378438139;298930.0000000000000000;46.05007415;false
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.53;1.0000000000000000;1748378438139;298930.0000000000000000;46.05007415;false
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378439639;298930.0000000000000000;46.05007415;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378439639;298930.0000000000000000;46.05007415;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378440639;298930.0000000000000000;46.05007415;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378440639;298930.0000000000000000;46.05007415;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378442142;298930.0000000000000000;46.05007415;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378442142;298930.0000000000000000;46.05007415;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: 47.53;1.0000000000000000;1748378445647;298931.0000000000000000;46.0500791;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.53;1.0000000000000000;1748378445647;298931.0000000000000000;46.0500791;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378452375;298931.0000000000000000;46.0500791;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378452375;298931.0000000000000000;46.0500791;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378453626;298931.0000000000000000;46.0500791;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378453626;298931.0000000000000000;46.0500791;true
+[Timer] Refreshing account data
+[INFO] Canceling previous account summary request with reqId: 9004
+[INFO] Requesting account summary with reqId: 9005
+[AccountSummary] reqId:9005 account:DUK837069 tag:AccountType value:INDIVIDUAL currency:
+[AccountSummary] reqId:9005 account:DUK837069 tag:Cushion value:1 currency:
+[AccountSummary] reqId:9005 account:DUK837069 tag:DayTradesRemaining value:-1 currency:
+[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadNextChange value:0 currency:
+[AccountSummary] reqId:9005 account:DUK837069 tag:AccruedCash value:2317.80 currency:USD
+[Account] DUK837069 AvailableFunds: 1000315.99 USD
+[Account] DUK837069 BuyingPower: 4001263.96 USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:EquityWithLoanValue value:1000315.99 currency:USD
+[Account] DUK837069 ExcessLiquidity: 1000315.99 USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:FullAvailableFunds value:1000315.99 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:FullExcessLiquidity value:1000315.99 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:FullInitMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:FullMaintMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:GrossPositionValue value:0.00 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:InitMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadAvailableFunds value:1000315.99 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadExcessLiquidity value:1000315.99 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadInitMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadMaintMarginReq value:0.00 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:MaintMarginReq value:0.00 currency:USD
+[Account] DUK837069 NetLiquidation: 1002633.79 USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:SMA value:1002633.79 currency:USD
+[AccountSummary] reqId:9005 account:DUK837069 tag:TotalCashValue value:1000315.99 currency:USD
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: 47.52;4.0000000000000000;1748378458382;298935.0000000000000000;46.05009879;false
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.52;4.0000000000000000;1748378458382;298935.0000000000000000;46.05009879;false
+[Size] ID:97131 VOLUME:3584865303387213824.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 8
+[SizeHexDump] Value: 0x31 c0 00 00 00 04 90 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 36864, Low32: 299008, Mid32: 4
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x90 (Decimal: 144)
+  Byte 2: 0x40 (Decimal: 4)
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizePattern] Lower 32 bits contain value: 299008
+[SizeDecoder] Using volume decoder for tick type: 8
+[VolumeDecoder] Analyzing volume value with flags: 0x31 0xc0
+[VolumeDecoder] Found volume in low 32 bits: 299008
+[Cache] Current time: Tue May 27 20:40:58 2025
+       Cutoff time: Tue May 27 19:40:58 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378458532642966 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 69
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378458532642966
+  Exchange: -
+  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.531285 EMA26=47.540581 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 70 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 45 (LAST_TIMESTAMP)
+value: 1748378458
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 45, Value: 1748378458
+[Price] ID:97131 LAST:47.520000
+[Cache] Current time: Tue May 27 20:40:58 2025
+       Cutoff time: Tue May 27 19:40:58 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.520000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378458533182508 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 70
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378458533182508
+  Exchange: -
+  Price Data: Last=47.520000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.531285 EMA26=47.540581 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 71 ✓
+[Size] ID:97131 LAST_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 5
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using last size decoder for tick type: 5
+[LastSizeDecoder] Analyzing last size value with flags: 0x31 0xc0
+[LastSizeDecoder] Non-zero byte at position 6 with value: 192
+[LastSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[LastSizeDecoder] Using standard lot size for flag 0x31
+[Cache] Current time: Tue May 27 20:40:58 2025
+       Cutoff time: Tue May 27 19:40:58 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.520000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378458533364133 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 71
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378458533364133
+  Exchange: -
+  Price Data: Last=47.520000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=9.905038 EMA9=47.531285 EMA26=47.540581 ALMA=47.530000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 72 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378459383;298935.0000000000000000;46.05009879;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378459383;298935.0000000000000000;46.05009879;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378460134;298935.0000000000000000;46.05009879;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378460134;298935.0000000000000000;46.05009879;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: 47.51;4.0000000000000000;1748378462136;298939.0000000000000000;46.05011833;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.51;4.0000000000000000;1748378462136;298939.0000000000000000;46.05011833;true
+[Size] ID:97131 VOLUME:3584865303387213824.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 8
+[SizeHexDump] Value: 0x31 c0 00 00 00 04 90 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 36864, Low32: 299008, Mid32: 4
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x90 (Decimal: 144)
+  Byte 2: 0x40 (Decimal: 4)
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizePattern] Lower 32 bits contain value: 299008
+[SizeDecoder] Using volume decoder for tick type: 8
+[VolumeDecoder] Analyzing volume value with flags: 0x31 0xc0
+[VolumeDecoder] Found volume in low 32 bits: 299008
+[Cache] Current time: Tue May 27 20:41:02 2025
+       Cutoff time: Tue May 27 19:41:02 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.520000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378462289476426 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 72
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378462289476426
+  Exchange: -
+  Price Data: Last=47.520000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=6.070583 EMA9=47.525778 EMA26=47.536338 ALMA=47.523138 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 73 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 45 (LAST_TIMESTAMP)
+value: 1748378462
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 45, Value: 1748378462
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 84 (UNKNOWN_STRING_84)
+value: D
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 84, Value: D
+[Price] ID:97131 LAST:47.510000
+[Cache] Current time: Tue May 27 20:41:02 2025
+       Cutoff time: Tue May 27 19:41:02 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.510000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378462290693468 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 73
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378462290693468
+  Exchange: -
+  Price Data: Last=47.510000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=6.070583 EMA9=47.525778 EMA26=47.536338 ALMA=47.523138 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 74 ✓
+[Size] ID:97131 LAST_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 5
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using last size decoder for tick type: 5
+[LastSizeDecoder] Analyzing last size value with flags: 0x31 0xc0
+[LastSizeDecoder] Non-zero byte at position 6 with value: 192
+[LastSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[LastSizeDecoder] Using standard lot size for flag 0x31
+[Cache] Current time: Tue May 27 20:41:02 2025
+       Cutoff time: Tue May 27 19:41:02 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.510000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378462291292260 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 74
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378462291292260
+  Exchange: -
+  Price Data: Last=47.510000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=6.070583 EMA9=47.525778 EMA26=47.536338 ALMA=47.523138 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 75 ✓
+[Size] ID:97131 LAST_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 5
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using last size decoder for tick type: 5
+[LastSizeDecoder] Analyzing last size value with flags: 0x31 0xc0
+[LastSizeDecoder] Non-zero byte at position 6 with value: 192
+[LastSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[LastSizeDecoder] Using standard lot size for flag 0x31
+[Cache] Current time: Tue May 27 20:41:02 2025
+       Cutoff time: Tue May 27 19:41:02 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.510000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378462291864176 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 75
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378462291864176
+  Exchange: -
+  Price Data: Last=47.510000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=6.070583 EMA9=47.525778 EMA26=47.536338 ALMA=47.523138 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 76 ✓
+[Size] ID:97131 VOLUME:3584865303387213824.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 8
+[SizeHexDump] Value: 0x31 c0 00 00 00 04 90 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 36864, Low32: 299008, Mid32: 4
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x90 (Decimal: 144)
+  Byte 2: 0x40 (Decimal: 4)
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizePattern] Lower 32 bits contain value: 299008
+[SizeDecoder] Using volume decoder for tick type: 8
+[VolumeDecoder] Analyzing volume value with flags: 0x31 0xc0
+[VolumeDecoder] Found volume in low 32 bits: 299008
+[Cache] Current time: Tue May 27 20:41:04 2025
+       Cutoff time: Tue May 27 19:41:04 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.510000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378464496403969 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 76
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378464496403969
+  Exchange: -
+  Price Data: Last=47.510000 Bid=47.510000 Ask=47.540000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.525000
+  Mid: 47.525000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=4.092053 EMA9=47.516463 EMA26=47.529359 ALMA=47.510709 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 77 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378468645;298939.0000000000000000;46.05011833;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378468645;298939.0000000000000000;46.05011833;true
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378469146;298939.0000000000000000;46.05011833;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378469146;298939.0000000000000000;46.05011833;true
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378496039367720
+  Exchange: -
+  Price Data: Last=47.550000 Bid=47.520000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.535000
+  Mid: 47.535000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=71.443862 EMA9=47.540208 EMA26=47.533760 ALMA=47.549988 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 88 ✓
+[Size] ID:97131 BID_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 0
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 0
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:41:36 2025
+       Cutoff time: Tue May 27 19:41:36 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.550000 B:47.520000 A:47.550000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378496039869761 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 88
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378496039869761
+  Exchange: -
+  Price Data: Last=47.550000 Bid=47.520000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.535000
+  Mid: 47.535000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=71.443862 EMA9=47.540208 EMA26=47.533760 ALMA=47.549988 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 89 ✓
+[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
+[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
+[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
+[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
+[SizeByteAnalysis] Individual bytes:
+  Byte 0: 0x00
+  Byte 1: 0x00
+  Byte 2: 0x00
+  Byte 3: 0x00
+  Byte 4: 0x00
+  Byte 5: 0x00
+  Byte 6: 0xc0 (Decimal: 192)
+  Byte 7: 0x31 (Decimal: 49)
+[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
+[SizeDecoder] Using bid/ask size decoder for tick type: 3
+[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
+[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
+[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
+[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
+[Cache] Current time: Tue May 27 20:41:36 2025
+       Cutoff time: Tue May 27 19:41:36 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+[Data][IONQ] L:47.550000 B:47.520000 A:47.550000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378496040918095 WAP:-
+ ready to send
+
+[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
+
+[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 89
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748378496040918095
+  Exchange: -
+  Price Data: Last=47.550000 Bid=47.520000 Ask=47.550000
+  Size Data: BidSize=100 AskSize=100 Volume=299008
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.535000
+  Mid: 47.535000 Spread: 0.030000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=71.443862 EMA9=47.540208 EMA26=47.533760 ALMA=47.549988 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 90 ✓
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 32 (UNKNOWN_STRING_32)
+value: K
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 32, Value: K
+
+===== TICK STRING DATA =====
+tickerId: 97131
+field (code): 48 (UNKNOWN_STRING_48)
+value: ;0E-16;1748378496667;298941.0000000000000000;46.05012827;true
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378496667;298941.0000000000000000;46.05012827;true
+
+
+  GET  /status      - Get server status
+  GET  /trades      - Get current trades
+  GET  /pending     - Get pending (queued) trades
+  GET  /queue-data?symbol=AAPL - Get all market data ticks for a symbol
+  POST /trade       - Queue a trade request
+  POST /confirm     - Confirm all queued requests
+  POST /clear       - Clear a symbol
+  POST /clear-all   - Clear all symbols
+  POST /emergency-stop - Trigger emergency stop
+  POST /set-auto-confirm - Enable/disable auto-confirmation
+
+Example curl commands:
+  curl -X GET http://localhost:8080/status
+  curl -X GET http://localhost:8080/trades
+  curl -X GET http://localhost:8080/pending
+  curl -X GET http://localhost:8080/queue-data?symbol=AAPL
+  curl -X POST -H "Content-Type: application/json" -d '{"symbol":"AAPL","params":{"lots":5,"margin":".10","stopLoss":".05","maxTrades":10,"lossThreshold":3,"winThreshold":5,"minWinRate":".50","maxHoldSeconds":3600}}' http://localhost:8080/trade
+  curl -X POST http://localhost:8080/confirm
+  curl -X POST -H "Content-Type: application/json" -d '{"symbol":"AAPL"}' http://localhost:8080/clear
+  curl -X POST http://localhost:8080/clear-all
+  curl -X POST http://localhost:8080/emergency-stop
+  curl -X POST -H "Content-Type: application/json" -d '{"autoConfirm":true}' http://localhost:8080/set-auto-confirm
+
+
+
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
+  Symbol: IONQ
+  Timestamp: 1748383156345567793
+  Exchange: -
+  Price Data: Last=47.460000 Bid=47.400000 Ask=47.440000
+  Size Data: BidSize=100 AskSize=100 Volume=100
+  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
+  WAP: 47.420000
+  Mid: 47.420000 Spread: 0.040000
+  Derived Metrics: VWAP=0.000000
+  Technical Indicators: RSI=0.000000 EMA9=47.460440 EMA26=47.464363 ALMA=47.460000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 40 ✓
+
+===== TICK STRING DATA =====
+tickerId: 75901
+field (code): 32 (UNKNOWN_STRING_32)
+value: PZ
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 75901, Field: 32, Value: PZ
+
+===== TICK STRING DATA =====
+tickerId: 75901
+field (code): 33 (UNKNOWN_STRING_33)
+value: T
+==========================
+[IBKRTrader::tickString] Raw callback - ID: 75901, Field: 33, Value: T
+[FrameAnalyzer] Processing field 48 tick string: ;0E-16;1748383158021;300676.0000000000000000;46.05946343;true
+[FrameAnalyzer] Analyzing tick string field 48 for volume/VWAP...
+[FrameAnalyzer] Raw value: ;0E-16;1748383158021;300676.0000000000000000;46.05946343;true
+[FrameAnalyzer] ===== VOLUME DATA EXTRACTED =====
+[FrameAnalyzer] Volume: 300676.0000000000000000
+[FrameAnalyzer] VWAP: 46.05946343
+[FrameAnalyzer] Price: 
+[FrameAnalyzer] Size: 0E-16
+[FrameAnalyzer] Timestamp: 1748383158021
+[FrameAnalyzer] Flag: true
+[FrameAnalyzer] ============================
+[FrameAnalyzer] CONFIRMED - Volume as double: 300676.000000
+[FrameAnalyzer] CONFIRMED - VWAP as double: 46.059463

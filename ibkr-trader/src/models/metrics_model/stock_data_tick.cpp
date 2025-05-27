@@ -35,9 +35,8 @@ void StockData::calculateDerivedMetrics() {
     } else {
         wap = mid;
     }
-    
-    // Calculate depth metrics if we have order book data
-    calculateDepthMetrics();
+
+    // Calculate signal metrics if we have order book data
 }
 
 void StockData::calculateDepthMetrics() {

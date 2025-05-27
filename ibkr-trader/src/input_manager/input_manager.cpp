@@ -8,6 +8,7 @@
 #include <thread>
 #include <chrono>
 #include <iomanip>
+#include <sstream>
 
 namespace input_manager {
 
@@ -667,11 +668,15 @@ void InputManager::processOutput() {
                     std::cout << "[DEBUG] Getting model manager for symbol: " << symbol << std::endl;
                     
                     if (model) {
-                        // Print detailed structure of the ModelManager
+                        // Get thread ID for the diagram
+                        std::stringstream threadIdStr;
+                        threadIdStr << std::this_thread::get_id();
+                        
                         std::cout << "\n[STRUCTURE] MODEL MANAGER OBJECT HIERARCHY:" << std::endl;
                         std::cout << "  ╔═══════════════════════════════════════════════════════════╗" << std::endl;
                         std::cout << "  ║ ModelManager (for symbol: " << std::left << std::setw(30) << symbol + ")" << "  ║" << std::endl;
                         std::cout << "  ║ Address: " << std::left << std::setw(48) << model.get() << " ║" << std::endl;
+                        std::cout << "  ║ ThreadID: " << threadIdStr.str() << " ║" << std::endl;
                         std::cout << "  ║ Connection Status: " << std::left << std::setw(15) << 
                                    (model->isConnected() ? "CONNECTED" : "NOT CONNECTED") << "                         ║" << std::endl;
                         std::cout << "  ║ ┌───────────────────────────────────────────────────────┐ ║" << std::endl;
@@ -685,7 +690,7 @@ void InputManager::processOutput() {
                         std::cout << "  ║ │      * Address: " << std::left << std::setw(35) << rawModel->getStockQueue() << "        │ ║" << std::endl;
                         std::cout << "  ║ │      * Queue size: " << std::left << std::setw(5) << rawModel->getQueueSize() << "                               │ ║" << std::endl;
                         std::cout << "  ║ │                                                       │ ║" << std::endl;
-                        std::cout << "  ║ │ 2. TechnicalCalculator                                │ ║" << std::endl;
+                        std::cout << "  ║ │ 2. TechnicalCalculator (ThreadID: " << threadIdStr.str() << ")│ ║" << std::endl;
                         std::cout << "  ║ │    - Processes queue data for metrics and signals     │ ║" << std::endl;
                         std::cout << "  ║ │    - Calculates in the same thread as queue processing│ ║" << std::endl;
                         std::cout << "  ║ │                                                       │ ║" << std::endl;

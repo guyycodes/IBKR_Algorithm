@@ -4,7 +4,7 @@
 #include "raw_data_model/raw_data_model.hpp"
 #include "technical_calculator/technical_calculator.hpp"
 #include "../connection_manager/connection_manager.hpp"
-#include "../connection_manager/api_functions/api_functions.hpp"
+#include "../util/time_ordered_tick_buffer/time_ordered_tick_buffer.hpp"
 #include <chrono>
 #include <memory>
 #include <string>
@@ -107,6 +107,9 @@ private:
     
     // Technical calculator for this model
     technical_calculator::TechnicalCalculator m_calculator;
+    
+    // Time-ordered buffer for technical analysis
+    time_ordered_tick_buffer::TimeOrderedTickBuffer m_timeOrderedBuffer;
     
     // Time window settings for historical data retention
     size_t m_windowSize;                // Size of the time window

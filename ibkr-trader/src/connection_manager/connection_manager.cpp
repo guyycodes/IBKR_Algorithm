@@ -13,7 +13,7 @@ namespace connection_manager {
         : m_trader(new connection::IBKRTrader())
         , m_connected(false)
     {
-        m_api_functions = std::make_unique<ibkr_api_functions::API_Functions>(*m_trader);
+
     }
 
     ConnectionManager::~ConnectionManager() {
@@ -22,13 +22,13 @@ namespace connection_manager {
         }
     }
 
-    bool ConnectionManager::connect(int clientId) {
+    bool ConnectionManager::connect(int clientId, const std::string& symbol, const Contract& contract) {
         if (m_connected) {
             std::cout << "Already connected to IBKR API." << std::endl;
             return true;
         }
 
-        if (m_trader->connect(clientId)) {
+        if (m_trader->connect(clientId, symbol, contract)) {
             m_reader = m_trader->createReader();
             // Instead of directly creating the thread, we'll request AppState to create and manage it
             // Only create the thread directly if m_threadId is not set (not registered with AppState)

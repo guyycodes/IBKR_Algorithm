@@ -68,7 +68,7 @@ namespace connection {
         int m_requestId = -1;
         double m_lastPrice = 0.0;
         std::string m_symbol;
-        
+        Contract m_contract;
         // Timing control for data updates
         bool m_stopDataStream = false;
         std::thread m_dataRefreshThread;
@@ -84,7 +84,7 @@ namespace connection {
         ~IBKRTrader();
 
         // Connection methods
-        bool connect(int clientId = -1);
+        bool connect(int clientId = -1, const std::string& symbol = "", const Contract& contract = Contract());
         void disconnect();
         bool isConnected() const { return m_client->isConnected(); }
         EClientSocket* getClient() { return m_client; }
@@ -96,37 +96,37 @@ namespace connection {
         void setRequestId(int requestId) { m_requestId = requestId; }
         
         // Get access to the account summary manager
-        const account_summary::AccountSummaryManager& getAccountSummaryManager() const { return m_accountSummaryManager; }
+        // const account_summary::AccountSummaryManager& getAccountSummaryManager() const { return m_accountSummaryManager; }
         
         // Print account summary data (useful for debugging)
-        void printAccountSummary() const { m_accountSummaryManager.printAllData(); }
+        // void printAccountSummary() const { m_accountSummaryManager.printAllData(); }
         
         // Cancel any active account summary requests to avoid hitting IBKR API limits
-        void cancelAccountSummaryRequests();
+        // void cancelAccountSummaryRequests();
 
         // Create a reader and start reading incoming messages
         std::unique_ptr<EReader> createReader();
         std::thread startMessageProcessing(std::unique_ptr<EReader>& reader);
 
         // Latency testing
-        int sendPing();
-        double measureAverageLatency(int numPings = 5);
+        // int sendPing();
+        // double measureAverageLatency(int numPings = 5);
 
         // EWrapper overrides for connection handling
-        void nextValidId(OrderId orderId) override;
+        // void nextValidId(OrderId orderId) override;
         void error(int id, long errorTime, int errorCode,
                    const std::string& errorString,
                    const std::string& advancedOrderRejectJson) override;
-        void connectAck() override;
-        void connectionClosed() override;
-        void currentTime(long time) override;
+        // void connectAck() override;
+        // void connectionClosed() override;
+        // void currentTime(long time) override;
         
         // Tick data callbacks
         void tickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) override;
         void tickSize(TickerId tickerId, TickType field, Decimal size) override;
         void tickString(TickerId tickerId, TickType field, const std::string& value) override;
         void tickGeneric(TickerId tickerId, TickType field, double value) override;
-        void managedAccounts(const std::string& accountsList) override;
+        // void managedAccounts(const std::string& accountsList) override;
         
         // Tick by tick callbacks
         void tickByTickAllLast(int reqId, int tickType, time_t time, double price, 
@@ -134,9 +134,9 @@ namespace connection {
                               const std::string& exchange, const std::string& specialConditions) override;
         
         // Add the new callback declarations to the class definition
-        virtual void tickByTickBidAsk(int reqId, time_t time, double bidPrice, double askPrice, 
-                                    Decimal bidSize, Decimal askSize, 
-                                    const TickAttribBidAsk& tickAttribBidAsk) override;
+        // virtual void tickByTickBidAsk(int reqId, time_t time, double bidPrice, double askPrice, 
+        //                             Decimal bidSize, Decimal askSize, 
+        //                             const TickAttribBidAsk& tickAttribBidAsk) override;
         
         // virtual void tickByTickMidPoint(int reqId, time_t time, double midPoint) override;
         
@@ -160,30 +160,30 @@ namespace connection {
         
         // Account and Portfolio methods
         void requestAccountSummary();
-        void requestPositions();
-        void requestPnL();
-        void requestAccountUpdates(const std::string& account = "");
+        // void requestPositions();
+        // void requestPnL();
+        // void requestAccountUpdates(const std::string& account = "");
         
         // Contract and Market Data methods
         // void requestContractDetails(const std::string& symbol, const std::string& secType = "STK", 
         //                            const std::string& currency = "USD", const std::string& exchange = "SMART");
         void requestMarketData(const std::string& symbol, const std::string& secType = "STK", 
                               const std::string& currency = "USD", const std::string& exchange = "SMART");
-        void cancelMarketData(TickerId tickerId);
+        // void cancelMarketData(TickerId tickerId);
         
         // Historical Data methods
-        void requestHistoricalData(const std::string& symbol, const std::string& duration = "1 D", 
-                                  const std::string& barSize = "1 min", const std::string& whatToShow = "TRADES");
+        // void requestHistoricalData(const std::string& symbol, const std::string& duration = "1 D", 
+        //                           const std::string& barSize = "1 min", const std::string& whatToShow = "TRADES");
         
         // Real-time Bar data method
         // void requestRealtimeBars(const std::string& symbol);
         
         // Options Data
-        void requestOptionChain(const std::string& symbol, const std::string& exchange = "SMART");
+        // void requestOptionChain(const std::string& symbol, const std::string& exchange = "SMART");
         
         // Additional tick-by-tick data methods
         void requestTickByTickData(TickerId reqId, const std::string& symbol, const std::string& tickType = "AllLast", 
-                                  int numberOfTicks = 0, bool ignoreSize = false);
+                                  int numberOfTicks = 0, bool ignoreSize = false, const Contract& contract = Contract());
         
         // News and fundamentals
         // void requestNewsBulletins(bool allMessages = true);
@@ -192,27 +192,27 @@ namespace connection {
         // Account and Portfolio callbacks
         void accountSummary(int reqId, const std::string& account, const std::string& tag, 
                           const std::string& value, const std::string& currency) override;
-        void accountSummaryEnd(int reqId) override;
-        void position(const std::string& account, const Contract& contract, 
-                     Decimal position, double avgCost) override;
-        void positionEnd() override;
-        void pnl(int reqId, double dailyPnL, double unrealizedPnL, double realizedPnL) override;
-        void pnlSingle(int reqId, Decimal pos, double dailyPnL, double unrealizedPnL, 
-                      double realizedPnL, double value) override;
-        void updateAccountValue(const std::string& key, const std::string& val, 
-                              const std::string& currency, const std::string& accountName) override;
-        void updatePortfolio(const Contract& contract, Decimal position, double marketPrice,
-                            double marketValue, double averageCost, double unrealizedPNL,
-                            double realizedPNL, const std::string& accountName) override;
-        void updateAccountTime(const std::string& timeStamp) override;
-        void accountDownloadEnd(const std::string& accountName) override;
+        // void accountSummaryEnd(int reqId) override;
+        // void position(const std::string& account, const Contract& contract, 
+        //              Decimal position, double avgCost) override;
+        // void positionEnd() override;
+        // void pnl(int reqId, double dailyPnL, double unrealizedPnL, double realizedPnL) override;
+        // void pnlSingle(int reqId, Decimal pos, double dailyPnL, double unrealizedPnL, 
+        //               double realizedPnL, double value) override;
+        // void updateAccountValue(const std::string& key, const std::string& val, 
+        //                       const std::string& currency, const std::string& accountName) override;
+        // void updatePortfolio(const Contract& contract, Decimal position, double marketPrice,
+        //                     double marketValue, double averageCost, double unrealizedPNL,
+        //                     double realizedPNL, const std::string& accountName) override;
+        // void updateAccountTime(const std::string& timeStamp) override;
+        // void accountDownloadEnd(const std::string& accountName) override;
         
         // Contract Details callbacks
         // void contractDetails(int reqId, const ContractDetails& contractDetails) override;
         // void contractDetailsEnd(int reqId) override;
         
         // Historical Data callbacks (add if not already present)
-        virtual void historicalData(TickerId reqId, const Bar& bar) override;
+        // virtual void historicalData(TickerId reqId, const Bar& bar) override;
         
         // News and Fundamentals callbacks
         // void updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, 
@@ -220,27 +220,30 @@ namespace connection {
         // void fundamentalData(TickerId reqId, const std::string& data) override;
 
         // Helper method to request all available data types at once
-        void requestAllAvailableData(const std::string& symbol = "");
+        // void requestAllAvailableData(const std::string& symbol = "");
         
         // Helper method to request only data essential for scalping
-        void requestScalpingData(const std::string& symbol);
+        void requestScalpingData(const std::string& symbol, const Contract& contract);
         
         // Start continuous data stream for scalping with timed updates
-        void startScalpingDataStream(const std::string& symbol);
+        void startScalpingDataStream(const std::string& symbol, const Contract& contract);
         
         // Stop the data refresh thread
         void stopScalpingDataStream();
+
+        // Start the data stream for scalping with timed updates
+        void startDataStream();
         
         // Utility method to test all data types with documentation
-        void testAllDataTypes(const std::string& symbol);
+        // void testAllDataTypes(const std::string& symbol);
         
 
         // Market depth callbacks
-        void updateMktDepth(TickerId id, int position, int operation, int side, 
-                         double price, Decimal size) override;
-        void updateMktDepthL2(TickerId id, int position, const std::string& marketMaker, 
-                           int operation, int side, double price, Decimal size, 
-                           bool isSmartDepth) override;
+        // void updateMktDepth(TickerId id, int position, int operation, int side, 
+        //                  double price, Decimal size) override;
+        // void updateMktDepthL2(TickerId id, int position, const std::string& marketMaker, 
+        //                    int operation, int side, double price, Decimal size, 
+        //                    bool isSmartDepth) override;
 
         // Route tick market data to ModelManager
         void routeTickToModelManager(double price = 0.0,
