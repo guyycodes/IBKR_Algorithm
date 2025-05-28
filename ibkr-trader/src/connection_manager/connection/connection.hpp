@@ -26,6 +26,19 @@ namespace stock_data_tick {
     class StockData;     // Forward declaration
 }
 
+// Forward declarations for thread-local instances
+namespace connection {
+    class ConnectionCache;
+}
+
+namespace ibkr_decoder {
+    class IBKRDecoder;
+}
+
+namespace ibkr_frame_analyzer {
+    class FrameAnalyzer;
+}
+
 namespace connection {
 
     // Connection constants
@@ -55,6 +68,11 @@ namespace connection {
         EReaderOSSignal m_osSignal;        // Synchronizes incoming messages
         EClientSocket*  m_client;          // The IBKR client socket
         std::mutex m_pingMutex;
+        
+        // Thread-local instances to avoid sharing between threads
+        std::unique_ptr<connection::ConnectionCache> m_connectionCache;
+        std::unique_ptr<ibkr_decoder::IBKRDecoder> m_decoder;
+        std::unique_ptr<ibkr_frame_analyzer::FrameAnalyzer> m_frameAnalyzer;
         
         // Protects ping tracking
         int m_nextPingId = 1;

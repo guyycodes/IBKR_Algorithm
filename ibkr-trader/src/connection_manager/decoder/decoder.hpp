@@ -20,47 +20,63 @@
 #include "ibkr/cppclient/client/EWrapper.h" // Contains TickType definitions
 #include "ibkr/cppclient/client/Decimal.h"
 
+// Forward declaration to avoid circular dependency
+namespace ibkr_frame_analyzer {
+    class FrameAnalyzer;
+}
+
 namespace ibkr_decoder {
 
     class IBKRDecoder {
     public:
+        /**
+         * @brief Constructor for IBKRDecoder instance
+         * @param frameAnalyzer Reference to the frame analyzer instance for this connection
+         */
+        IBKRDecoder(ibkr_frame_analyzer::FrameAnalyzer& frameAnalyzer);
+        
+        /**
+         * @brief Destructor for IBKRDecoder instance
+         */
+        ~IBKRDecoder() = default;
+        
         // ============ LEGACY CUSTOM DECODING METHODS ============
         // These methods maintain compatibility with existing connection code
         
         // Check if a size value is encoded with special format
-        static bool isSpecialSizeValue(double size);
+        bool isSpecialSizeValue(double size);
         
         // Main decoder for special size values (legacy custom implementation)
-        static double interpretSizeValue(double size, int tickType);
+        double interpretSizeValue(double size, int tickType);
         
         // Utility methods for specific size types (legacy custom implementation)
-        static double decodeBidAskSize(uint64_t encodedValue);
-        static double decodeLastSize(uint64_t encodedValue);
-        static double decodeVolume(uint64_t encodedValue);
+        double decodeBidAskSize(uint64_t encodedValue);
+        double decodeLastSize(uint64_t encodedValue);
+        double decodeVolume(uint64_t encodedValue);
         
         // Debugging and analysis utilities
-        static std::string formatHexDump(uint64_t value);
-        static void logSizeValueComponents(uint64_t sizeAsInt, int tickType);
+        std::string formatHexDump(uint64_t value);
+        void logSizeValueComponents(uint64_t sizeAsInt, int tickType);
         
         // ============ NEW IBKR-COMPLIANT DECODING METHODS ============
         // These methods implement the official IBKR decoding approach
         
         // Raw message parsing utilities (based on official IBKR implementation)
-        static bool checkOffset(const char* ptr, const char* endPtr);
-        static const char* findFieldEnd(const char* ptr, const char* endPtr);
+        bool checkOffset(const char* ptr, const char* endPtr);
+        const char* findFieldEnd(const char* ptr, const char* endPtr);
         
         // Field decoders (based on official IBKR EDecoder)
-        static bool decodeField(bool& boolValue, const char*& ptr, const char* endPtr);
-        static bool decodeField(int& intValue, const char*& ptr, const char* endPtr);
-        static bool decodeField(long& longValue, const char*& ptr, const char* endPtr);
-        static bool decodeField(long long& longLongValue, const char*& ptr, const char* endPtr);
-        static bool decodeField(double& doubleValue, const char*& ptr, const char* endPtr);
-        static bool decodeField(std::string& stringValue, const char*& ptr, const char* endPtr);
-        static bool decodeField(Decimal& decimalValue, const char*& ptr, const char* endPtr);
+        bool decodeField(bool& boolValue, const char*& ptr, const char* endPtr);
+        bool decodeField(int& intValue, const char*& ptr, const char* endPtr);
+        bool decodeField(long& longValue, const char*& ptr, const char* endPtr);
+        bool decodeField(long long& longLongValue, const char*& ptr, const char* endPtr);
+        bool decodeField(double& doubleValue, const char*& ptr, const char* endPtr);
+        bool decodeField(std::string& stringValue, const char*& ptr, const char* endPtr);
+        bool decodeField(Decimal& decimalValue, const char*& ptr, const char* endPtr);
         
         // Max field decoders for optional values
-        static bool decodeFieldMax(int& intValue, const char*& ptr, const char* endPtr);
-        static bool decodeFieldMax(double& doubleValue, const char*& ptr, const char* endPtr);
+        bool decodeFieldMax(int& intValue, const char*& ptr, const char* endPtr);
+        bool decodeFieldMax(double& doubleValue, const char*& ptr, const char* endPtr);
         
         // High-level message processors
         struct TickPriceData {
@@ -79,19 +95,22 @@ namespace ibkr_decoder {
             Decimal size;
         };
         
-        static bool processTickPriceMessage(const char*& ptr, const char* endPtr, TickPriceData& data, int serverVersion);
-        static bool processTickSizeMessage(const char*& ptr, const char* endPtr, TickSizeData& data);
+        bool processTickPriceMessage(const char*& ptr, const char* endPtr, TickPriceData& data, int serverVersion);
+        bool processTickSizeMessage(const char*& ptr, const char* endPtr, TickSizeData& data);
         
         // Raw message analysis for debugging
-        static void analyzeRawMessage(const char* msgData, size_t msgLength);
-        static std::vector<std::string> extractFields(const char* msgData, size_t msgLength);
+        void analyzeRawMessage(const char* msgData, size_t msgLength);
+        std::vector<std::string> extractFields(const char* msgData, size_t msgLength);
         
         // Utility to convert Decimal to double for compatibility
-        static double decimalToDouble(Decimal decimal);
-        static Decimal doubleToDecimal(double value);
+        double decimalToDouble(Decimal decimal);
+        Decimal doubleToDecimal(double value);
         
         // Tick string analysis for volume/VWAP extraction
-        static void analyzeTickStringMessage(int tickerId, int field, const std::string& value);
+        void analyzeTickStringMessage(int tickerId, int field, const std::string& value);
+        
+        // Trade volume decoder using official BID64 format
+        double decodeTradeVolume(Decimal size);
         
     private:
         // Constants for decoding
@@ -101,12 +120,15 @@ namespace ibkr_decoder {
         static constexpr double DECODER_UNSET_DOUBLE = DBL_MAX;
         static constexpr const char* INFINITY_STR = "Infinity";
         
+        // Reference to the frame analyzer instance for this connection
+        ibkr_frame_analyzer::FrameAnalyzer& m_frameAnalyzer;
+        
         // Helper methods (legacy custom implementation)
-        static uint16_t extractLowSize(uint64_t encodedValue);
-        static uint32_t extractLowSize32(uint64_t encodedValue);
-        static uint8_t extractFlagByte(uint64_t encodedValue);
-        static uint8_t extractSecondFlagByte(uint64_t encodedValue);
-        static bool isDelayedDataFlag(uint8_t flagByte);
+        uint16_t extractLowSize(uint64_t encodedValue);
+        uint32_t extractLowSize32(uint64_t encodedValue);
+        uint8_t extractFlagByte(uint64_t encodedValue);
+        uint8_t extractSecondFlagByte(uint64_t encodedValue);
+        bool isDelayedDataFlag(uint8_t flagByte);
     };
 
 } // namespace ibkr_decoder

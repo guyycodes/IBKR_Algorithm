@@ -17,6 +17,11 @@
 #include "../../models/metrics_model/stock_data_tick.hpp"
 #include "ibkr/cppclient/client/CommonDefs.h"
 
+// Forward declaration to avoid circular dependency
+namespace ibkr_decoder {
+    class IBKRDecoder;
+}
+
 namespace connection {
 
 /**
@@ -25,16 +30,27 @@ namespace connection {
  * This cache exists because IBKR sends incremental updates (only changed fields) rather than 
  * complete snapshots. The cache maintains the last known full state for each symbol.
  * 
- * The cache includes a pruning mechanism to keep only the last 60 minutes of data.
+ * Each connection owns its own instance to ensure thread safety.
  */
 class ConnectionCache {
 public:
+    /**
+     * @brief Constructor for ConnectionCache instance
+     * @param decoder Reference to the decoder instance for this connection
+     */
+    ConnectionCache(ibkr_decoder::IBKRDecoder& decoder);
+    
+    /**
+     * @brief Destructor for ConnectionCache instance
+     */
+    ~ConnectionCache() = default;
+    
     /**
      * @brief Get the cached StockData for a symbol, or create a new entry if it doesn't exist.
      * @param symbol The stock symbol to get data for
      * @return Reference to the cached StockData
      */
-    static stock_data_tick::StockData& getSymbolData(const std::string& symbol);
+    stock_data_tick::StockData& getSymbolData(const std::string& symbol);
     
     /**
      * @brief Merge new data with cached data, updating only non-zero/non-empty fields.
@@ -54,7 +70,7 @@ public:
      * @param wap Weighted average price (or 0 if not updated)
      * @return StockData object with merged data
      */
-    static stock_data_tick::StockData mergeWithCache(
+    stock_data_tick::StockData mergeWithCache(
         const std::string& symbol,
         uint64_t timestamp,
         double price,
@@ -77,18 +93,21 @@ public:
      * @param field The tick type field for context
      * @return Decoded value
      */
-    static double decodeSpecialValue(double value, int field);
+    double decodeSpecialValue(double value, int field);
     
     /**
      * @brief Prune entries older than the specified number of minutes
      * @param maxAgeMinutes Maximum age in minutes (default: 60)
      * @return Number of entries removed
      */
-    static int pruneOldEntries(int maxAgeMinutes = 60);
+    int pruneOldEntries(int maxAgeMinutes = 60);
 
 private:
-    // Cache that persists for the entire application lifetime
-    static std::unordered_map<std::string, stock_data_tick::StockData> dataCache;
+    // Instance cache that persists for this connection's lifetime
+    std::unordered_map<std::string, stock_data_tick::StockData> dataCache;
+    
+    // Reference to the decoder instance for this connection
+    ibkr_decoder::IBKRDecoder& m_decoder;
 };
 
 } // namespace connection

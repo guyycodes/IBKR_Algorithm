@@ -15,6 +15,11 @@
 
 namespace ibkr_decoder {
 
+    // Constructor implementation
+    IBKRDecoder::IBKRDecoder(ibkr_frame_analyzer::FrameAnalyzer& frameAnalyzer) 
+        : m_frameAnalyzer(frameAnalyzer) {
+    }
+
     // ============ LEGACY CUSTOM DECODING METHODS ============
     // These maintain compatibility with existing connection code
     
@@ -655,10 +660,15 @@ namespace ibkr_decoder {
         // Focus specifically on field 48 which contains volume and VWAP data
         if (field == 48) {
             std::cout << "[IBKRDecoder] *** FIELD 48 DETECTED - CONTAINS VOLUME/VWAP DATA ***" << std::endl;
-            FrameAnalyzer::analyzeTickString48(value);
+            m_frameAnalyzer.analyzeTickString48(value);
         } else {
             std::cout << "[IBKRDecoder] Field " << field << " value: " << value << std::endl;
         }
+    }
+
+    double IBKRDecoder::decodeTradeVolume(Decimal size) {
+        // Use IBKR's official BID64 decimal decoder to get actual volume
+        return DecimalFunctions::decimalToDouble(size);
     }
 
 } // namespace ibkr_decoder

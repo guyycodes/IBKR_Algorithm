@@ -7,8 +7,10 @@
 
 namespace connection {
 
-// Initialize the static data cache
-std::unordered_map<std::string, stock_data_tick::StockData> ConnectionCache::dataCache;
+// Constructor implementation
+ConnectionCache::ConnectionCache(ibkr_decoder::IBKRDecoder& decoder) 
+    : m_decoder(decoder) {
+}
 
 stock_data_tick::StockData& ConnectionCache::getSymbolData(const std::string& symbol) {
     // Get existing cached data for this symbol or create a new entry if it doesn't exist
@@ -16,9 +18,8 @@ stock_data_tick::StockData& ConnectionCache::getSymbolData(const std::string& sy
 }
 
 double ConnectionCache::decodeSpecialValue(double value, int field) {
-    // Check if this is a special size value using the IBKRDecoder
-    if (ibkr_decoder::IBKRDecoder::isSpecialSizeValue(value)) {
-        return ibkr_decoder::IBKRDecoder::interpretSizeValue(value, field);
+    if (m_decoder.isSpecialSizeValue(value)) {
+        return m_decoder.interpretSizeValue(value, field);
     }
     return value;
 }
@@ -39,37 +40,29 @@ stock_data_tick::StockData ConnectionCache::mergeWithCache(
     double close,
     double wap
 ) {
-    // Get the cached data
-    auto& cachedData = getSymbolData(symbol);
+    // Get existing cached data for this symbol
+    stock_data_tick::StockData& cached = dataCache[symbol];
     
-    // Update timestamp in the cached data
-    cachedData.timestamp = timestamp;
+    // Update only non-zero/non-empty fields (IBKR only sends changed data)
+    if (timestamp > 0) cached.timestamp = timestamp;
+    if (price > 0) cached.last = price;
+    if (volume > 0) cached.volume = volume;
+    if (bid > 0) cached.bid = bid;
+    if (ask > 0) cached.ask = ask;
+    if (bidSize > 0) cached.bidSize = bidSize;
+    if (askSize > 0) cached.askSize = askSize;
+    if (!exchange.empty()) cached.exchange = exchange;
+    if (open > 0) cached.open = open;
+    if (high > 0) cached.high = high;
+    if (low > 0) cached.low = low;
+    if (close > 0) cached.close = close;
+    if (wap > 0) cached.wap = wap;
     
-    // Create a new StockData object that combines fresh data with cached data
-    stock_data_tick::StockData stockData;
-    stockData.symbol = symbol;
-    stockData.timestamp = timestamp;
-    stockData.exchange = exchange.empty() ? cachedData.exchange : exchange;
+    // Update the last update time to now
+    cached.timestamp = std::chrono::system_clock::now().time_since_epoch().count();
     
-    // Fill in with new data or fall back to cached values for each field
-    stockData.last = price > 0 ? price : cachedData.last;
-    stockData.volume = volume > 0 ? volume : cachedData.volume;
-    stockData.bid = bid > 0 ? bid : cachedData.bid;
-    stockData.ask = ask > 0 ? ask : cachedData.ask;
-    stockData.bidSize = bidSize > 0 ? bidSize : cachedData.bidSize;
-    stockData.askSize = askSize > 0 ? askSize : cachedData.askSize;
-    
-    // Add OHLC data if available
-    stockData.open = open > 0 ? open : cachedData.open;
-    stockData.high = high > 0 ? high : cachedData.high;
-    stockData.low = low > 0 ? low : cachedData.low;
-    stockData.close = close > 0 ? close : cachedData.close;
-    stockData.wap = wap > 0 ? wap : cachedData.wap;
-    
-    // Update cache with new data for future use
-    cachedData = stockData;
-    
-    return stockData;
+    // Return a copy of the updated data
+    return cached;
 }
 
 int ConnectionCache::pruneOldEntries(int maxAgeMinutes) {

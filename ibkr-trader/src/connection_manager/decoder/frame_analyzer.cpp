@@ -8,8 +8,9 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <iomanip>
 
-namespace ibkr_decoder {
+namespace ibkr_frame_analyzer {
 
     void FrameAnalyzer::analyzeTickString48(const std::string& tickStringValue) {
         std::cout << "[FrameAnalyzer] Analyzing tick string field 48 for volume/VWAP..." << std::endl;
@@ -27,8 +28,15 @@ namespace ibkr_decoder {
                 std::string vwap = fields[4];    // And this!
                 std::string flag = fields[5];
                 
-                std::cout << "[FrameAnalyzer] ===== VOLUME DATA EXTRACTED =====" << std::endl;
-                std::cout << "[FrameAnalyzer] Volume: " << volume << std::endl;
+                // Convert volume and VWAP to doubles for validation
+                double volumeValue = std::stod(volume);
+                double vwapValue = std::stod(vwap);
+                
+                // Format volume in millions for clarity (since this is total market volume)
+                double volumeInMillions = volumeValue / 10000.0;
+                
+                std::cout << "[FrameAnalyzer] ===== Total Market VOLUME DATA EXTRACTED =====" << std::endl;
+                std::cout << "[FrameAnalyzer] Volume (Total Market): " << std::fixed << std::setprecision(2) << volumeInMillions << "M shares" << std::endl;
                 std::cout << "[FrameAnalyzer] VWAP: " << vwap << std::endl;
                 std::cout << "[FrameAnalyzer] Price: " << price << std::endl;
                 std::cout << "[FrameAnalyzer] Size: " << size << std::endl;
@@ -36,12 +44,8 @@ namespace ibkr_decoder {
                 std::cout << "[FrameAnalyzer] Flag: " << flag << std::endl;
                 std::cout << "[FrameAnalyzer] ============================" << std::endl;
                 
-                // Convert volume and VWAP to doubles for validation
-                double volumeValue = std::stod(volume);
-                double vwapValue = std::stod(vwap);
-                
-                std::cout << "[FrameAnalyzer] CONFIRMED - Volume as double: " << volumeValue << std::endl;
-                std::cout << "[FrameAnalyzer] CONFIRMED - VWAP as double: " << vwapValue << std::endl;
+                std::cout << "[FrameAnalyzer] CONFIRMED - Total Market Volume: " << std::fixed << std::setprecision(2) << volumeInMillions << "M shares" << std::endl;
+                std::cout << "[FrameAnalyzer] CONFIRMED - VWAP: $" << std::fixed << std::setprecision(5) << vwapValue << std::endl;
                 
             } catch (const std::exception& e) {
                 std::cout << "[FrameAnalyzer] ERROR parsing tick string fields: " << e.what() << std::endl;
@@ -136,4 +140,73 @@ namespace ibkr_decoder {
         return fields;
     }
 
-} // namespace ibkr_decoder 
+    void FrameAnalyzer::analyzeTickByTickData(int reqId, int tickType, time_t time, double price, 
+                                            uint64_t rawDecimal, double actualVolume,
+                                            const std::string& exchange, const std::string& specialConditions,
+                                            bool pastLimit, bool unreported) {
+        bool isBlock = (actualVolume >= 10000.00) 
+               || (specialConditions.find('B') != std::string::npos);
+
+        // Print ALL raw data we're receiving
+        std::cout << "\n========== RAW TICK-BY-TICK DATA FRAME ==========" << std::endl;
+        std::cout << "reqId: " << reqId << std::endl;
+        std::cout << "tickType: " << tickType << std::endl;
+        std::cout << "time: " << time << std::endl;
+        std::cout << "price: " << price << std::endl;
+        std::cout << "size (raw Decimal): " << rawDecimal << std::endl;
+        std::cout << "size (as double): " << static_cast<double>(rawDecimal) << std::endl;
+        std::cout << "exchange: '" << exchange << "'" << std::endl;
+        std::cout << "specialConditions: '" << specialConditions << "'" << std::endl;
+
+        // DECODE the BID64 Decimal to get actual volume
+        std::cout << "\n====== DECODED VOLUME ======" << std::endl;
+        std::cout << "Raw Decimal (BID64): " << rawDecimal << std::endl;
+        std::cout << "Decoded volume: " << actualVolume << std::endl;
+        std::cout << "============================" << std::endl;
+        
+        // Print raw bytes of the size value
+        double rawVolume = static_cast<double>(rawDecimal);
+        uint64_t rawBits = *reinterpret_cast<uint64_t*>(&rawVolume);
+        std::cout << "\n====== RAW VOLUME BYTES DEBUG ======" << std::endl;
+        std::cout << "Raw volume as double: " << rawVolume << std::endl;
+        std::cout << "Raw bits (hex): 0x" << std::hex << rawBits << std::dec << std::endl;
+        std::cout << "Raw bytes (little-endian):" << std::endl;
+        for (int i = 0; i < 8; i++) {
+            uint8_t byte = (rawBits >> (i * 8)) & 0xFF;
+            std::cout << "  Byte " << i << ": 0x" << std::hex << (int)byte << std::dec << " (" << (int)byte << ")" << std::endl;
+        }
+        std::cout << "Raw bytes (big-endian):" << std::endl;
+        for (int i = 7; i >= 0; i--) {
+            uint8_t byte = (rawBits >> (i * 8)) & 0xFF;
+            std::cout << "  Byte " << (7-i) << ": 0x" << std::hex << (int)byte << std::dec << " (" << (int)byte << ")" << std::endl;
+        }
+        std::cout << "====================================" << std::endl;
+        
+        // Print tick attributes
+        std::cout << "TickAttribLast attributes:" << std::endl;
+        std::cout << "  pastLimit: " << (pastLimit ? "true" : "false") << std::endl;
+        std::cout << "  unreported: " << (unreported ? "true" : "false") << std::endl;
+        if (isBlock) {
+            std::cout << "[BLOCK TRADE] " 
+                    << actualVolume << " shares @ $" << price 
+                    << " Conditions: " << specialConditions 
+                    << std::endl;
+        }
+        std::cout << "=================================================" << std::endl;
+        
+        // Simple logging for now - just show what we got
+        std::cout << "[TRADE] ID:" << reqId 
+                  << " Time:" << time
+                  << " Price:" << price
+                  << " RAW_VOLUME:" << rawVolume
+                  << " ACTUAL_VOLUME:" << actualVolume
+                  << " Exchange:" << exchange
+                  << " Conditions:" << specialConditions << std::endl;
+                           
+        // Highlight this is individual trade volume, not cumulative
+        std::cout << "[INDIVIDUAL TRADE VOLUME] " << actualVolume 
+                  << " shares traded at $" << price << std::endl;
+        std::cout << "=================================================" << std::endl;
+    }
+
+} // namespace ibkr_frame_analyzer 

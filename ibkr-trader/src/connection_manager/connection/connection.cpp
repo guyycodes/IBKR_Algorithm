@@ -19,13 +19,16 @@ namespace connection {
     
     // Constructor implementation
     IBKRTrader::IBKRTrader() 
-        : m_osSignal(2000)
-        , m_client(new EClientSocket(this, &m_osSignal)) // "register" your callback handler
-        , m_modelManager(nullptr)
-        , m_requestId(-1)
-        , m_lastPrice(0.0)
-        , m_symbol("")
-        , m_contract()
+        : m_osSignal(2000),
+          m_client(new EClientSocket(this, &m_osSignal)), // "register" your callback handler
+          m_frameAnalyzer(std::make_unique<ibkr_frame_analyzer::FrameAnalyzer>()),
+          m_decoder(std::make_unique<ibkr_decoder::IBKRDecoder>(*m_frameAnalyzer)),
+          m_connectionCache(std::make_unique<ConnectionCache>(*m_decoder)),
+          m_modelManager(nullptr),
+          m_requestId(-1),
+          m_lastPrice(0.0),
+          m_symbol(""),
+          m_contract()
     {
     }
     
@@ -139,12 +142,12 @@ namespace connection {
         }
         
         // Process potential special size values using the ConnectionCache
-        volume = ConnectionCache::decodeSpecialValue(volume, static_cast<int>(TickType::VOLUME));
-        bidSize = ConnectionCache::decodeSpecialValue(bidSize, static_cast<int>(TickType::BID_SIZE));
-        askSize = ConnectionCache::decodeSpecialValue(askSize, static_cast<int>(TickType::ASK_SIZE));
+        volume = m_connectionCache->decodeSpecialValue(volume, static_cast<int>(TickType::VOLUME));
+        bidSize = m_connectionCache->decodeSpecialValue(bidSize, static_cast<int>(TickType::BID_SIZE));
+        askSize = m_connectionCache->decodeSpecialValue(askSize, static_cast<int>(TickType::ASK_SIZE));
         
         // Use the ConnectionCache to merge new data with cached data
-        stock_data_tick::StockData stockData = ConnectionCache::mergeWithCache(
+        stock_data_tick::StockData stockData = m_connectionCache->mergeWithCache(
             m_symbol,
             timestamp,
             price,
@@ -162,7 +165,7 @@ namespace connection {
         );
         
         // Prune old entries from the cache (keep only last 60 minutes)
-        ConnectionCache::pruneOldEntries(60);
+        m_connectionCache->pruneOldEntries(60);
         
         // If we have a new "last" price but no bid/ask, use it to update the last price
         if (price > 0 && stockData.bid == 0 && stockData.ask == 0) {
@@ -238,7 +241,7 @@ namespace connection {
         // Handle field 48 specially for volume/VWAP analysis
         if (field == 48) {
             std::cout << "[FrameAnalyzer] Processing field 48 tick string: " << value << std::endl;
-            ibkr_decoder::FrameAnalyzer::analyzeTickString48(value);
+            m_frameAnalyzer->analyzeTickString48(value);
         }
         
         // Handle field 88 specially as it appears to be a timestamp
@@ -482,8 +485,8 @@ namespace connection {
             double sizeValue = static_cast<double>(size);
             
             // Check if this is a special size value
-            if (ibkr_decoder::IBKRDecoder::isSpecialSizeValue(sizeValue)) {
-                sizeValue = ibkr_decoder::IBKRDecoder::interpretSizeValue(sizeValue, field);
+            if (m_decoder->isSpecialSizeValue(sizeValue)) {
+                sizeValue = m_decoder->interpretSizeValue(sizeValue, field);
             }
             
             // Route data based on the field type
@@ -541,9 +544,9 @@ namespace connection {
                 double decodedWap = value;
                 
                 // If WAP appears to be encoded (large exponent values)
-                if (ibkr_decoder::IBKRDecoder::isSpecialSizeValue(decodedWap)) {
+                if (m_decoder->isSpecialSizeValue(decodedWap)) {
                     std::cout << "[DEBUG] Decoding special WAP value in tickGeneric: " << decodedWap << std::endl;
-                    decodedWap = ibkr_decoder::IBKRDecoder::interpretSizeValue(decodedWap, field);
+                    decodedWap = m_decoder->interpretSizeValue(decodedWap, field);
                 }
                 
                 // Add debug output for WAP
@@ -601,10 +604,10 @@ namespace connection {
             double decodedWap = static_cast<double>(wap);
             
             // If WAP appears to be encoded (like with the large exponent values we're seeing)
-            if (ibkr_decoder::IBKRDecoder::isSpecialSizeValue(decodedWap)) {
+            if (m_decoder->isSpecialSizeValue(decodedWap)) {
                 std::cout << "[DEBUG] Decoding special WAP value in realtime bar: " << decodedWap << std::endl;
                 // Use the size decoder since WAP appears to be encoded like sizes
-                decodedWap = ibkr_decoder::IBKRDecoder::interpretSizeValue(decodedWap, 14); // 14 is WAP field code
+                decodedWap = m_decoder->interpretSizeValue(decodedWap, 14); // 14 is WAP field code
             }
             
             // Route OHLC, WAP and other data - all at once for complete data
@@ -697,8 +700,8 @@ namespace connection {
         // 3. Tick-by-Tick Data (continuous subscription)
         std::cout << "[3] Subscribing to Tick-by-Tick Data for " << symbol << "\n";
         static int tickRequestId = 7001;
-        requestTickByTickData(tickRequestId++, symbol, "AllLast", 0, false, contract); // Last trades
-        requestTickByTickData(tickRequestId++, symbol, "BidAsk", 0, false, contract);  // Bid/Ask updates
+        requestTickByTickData(tickRequestId++, symbol, "AllLast", 0, true, contract); // Last trades
+        requestTickByTickData(tickRequestId++, symbol, "BidAsk", 0, true, contract);  // Bid/Ask updates
         
         // 4. Market Depth (continuous subscription)
         std::cout << "[4] Subscribing to Market Depth for " << symbol << "\n";
@@ -820,21 +823,22 @@ namespace connection {
 //     ///////////////////////////////////////////////////////////////////////////
 //     // TICK-BY-TICK TRADE DATA CALLBACK
 //     // Processes detailed trade information and routes to ModelManager
-//     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//     // THIS PROVIDES REAL-TIME INDIVIDUAL TRADE VOLUMES (not cumulative)
+//     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickByTickAllLast(int reqId, int tickType, time_t time, double price, 
                                     Decimal size, const TickAttribLast& tickAttribLast, 
                                     const std::string& exchange, const std::string& specialConditions) {
-        // Log compact trade update
-        std::cout << "[REAL-TIME TRADE] ID:" << reqId 
-                  << " Time:" << time
-                  << " Price:" << price
-                  << " TRADE_VOLUME:" << static_cast<double>(size)
-                  << " Type:" << (tickType == 1 ? "Last" : "AllLast") 
-                  << " Exchange:" << exchange
-                  << " Conditions:" << specialConditions << std::endl;
-                          // Highlight this is individual trade volume, not cumulative
-        std::cout << "[INDIVIDUAL TRADE VOLUME] " << static_cast<double>(size) 
-                  << " shares traded at $" << price << std::endl;
+        
+        // DECODE the BID64 Decimal to get actual volume using the abstracted decoder
+        double actualVolume = m_decoder->decodeTradeVolume(size);
+        
+        // ANALYZE the tick-by-tick data using the abstracted analyzer
+        m_frameAnalyzer->analyzeTickByTickData(
+            reqId, tickType, time, price, 
+            static_cast<uint64_t>(size), actualVolume,
+            exchange, specialConditions,
+            tickAttribLast.pastLimit, tickAttribLast.unreported
+        );
         
         // Check if this is for our ModelManager's request ID
         if (m_modelManager && reqId == m_requestId) {
@@ -847,7 +851,7 @@ namespace connection {
             // Route trade data through our central point with special conditions
             // routeTickToModelManager(
             //     price,
-            //     static_cast<double>(size),
+            //     actualVolume,  // Use the properly decoded volume
             //     timestamp,
             //     0, // bid
             //     0, // ask
