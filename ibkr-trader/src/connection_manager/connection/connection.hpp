@@ -140,11 +140,10 @@ namespace connection {
         // void currentTime(long time) override;
         
         // Tick data callbacks
-        void tickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) override;
-        void tickSize(TickerId tickerId, TickType field, Decimal size) override;
+        // void tickPrice(TickerId tickerId, TickType field, double price, const TickAttrib& attrib) override;
+        // void tickSize(TickerId tickerId, TickType field, Decimal size) override;
         void tickString(TickerId tickerId, TickType field, const std::string& value) override;
-        void tickGeneric(TickerId tickerId, TickType field, double value) override;
-        // void managedAccounts(const std::string& accountsList) override;
+
         
         // Tick by tick callbacks
         void tickByTickAllLast(int reqId, int tickType, time_t time, double price, 
@@ -152,9 +151,9 @@ namespace connection {
                               const std::string& exchange, const std::string& specialConditions) override;
         
         // Add the new callback declarations to the class definition
-        // virtual void tickByTickBidAsk(int reqId, time_t time, double bidPrice, double askPrice, 
-        //                             Decimal bidSize, Decimal askSize, 
-        //                             const TickAttribBidAsk& tickAttribBidAsk) override;
+        void tickByTickBidAsk(int reqId, time_t time, double bidPrice, double askPrice, 
+                                    Decimal bidSize, Decimal askSize, 
+                                    const TickAttribBidAsk& tickAttribBidAsk) override;
         
         // virtual void tickByTickMidPoint(int reqId, time_t time, double midPoint) override;
         
@@ -164,7 +163,7 @@ namespace connection {
         //                                 double theta, double undPrice) override;
         
         // Uncomment this declaration as it's needed for the implementation in connection.cpp
-        virtual void realtimeBar(TickerId reqId, long time, double open, double high, 
+        void realtimeBar(TickerId reqId, long time, double open, double high, 
                                double low, double close, Decimal volume, 
                                Decimal wap, int count) override;
         
@@ -177,7 +176,7 @@ namespace connection {
         // Methods to request additional data types
         
         // Account and Portfolio methods
-        void requestAccountSummary();
+        // void requestAccountSummary();
         // void requestPositions();
         // void requestPnL();
         // void requestAccountUpdates(const std::string& account = "");
@@ -208,8 +207,8 @@ namespace connection {
         // void requestFundamentalData(const std::string& symbol);
 
         // Account and Portfolio callbacks
-        void accountSummary(int reqId, const std::string& account, const std::string& tag, 
-                          const std::string& value, const std::string& currency) override;
+        // void accountSummary(int reqId, const std::string& account, const std::string& tag, 
+        //                   const std::string& value, const std::string& currency) override;
         // void accountSummaryEnd(int reqId) override;
         // void position(const std::string& account, const Contract& contract, 
         //              Decimal position, double avgCost) override;

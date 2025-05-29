@@ -111,6 +111,13 @@ public:
      * @return Pair of (low_price, high_price) defining the value area
      */
     std::pair<double, double> find_value_area(double percentage) const;
+    
+    /**
+     * Convert bucket index back to price for display
+     * @param bucket_index The bucket index
+     * @return The bucket price in dollars
+     */
+    double bucket_index_to_price(int bucket_index) const;
 
 private:
     static constexpr int CENTS_PER_DOLLAR = 100;
@@ -125,13 +132,6 @@ private:
      * @return The bucket index (integer)
      */
     int price_to_bucket_index(double price) const;
-    
-    /**
-     * Convert bucket index back to price for display
-     * @param bucket_index The bucket index
-     * @return The bucket price in dollars
-     */
-    double bucket_index_to_price(int bucket_index) const;
 };
 
 } // namespace volume_profile_map

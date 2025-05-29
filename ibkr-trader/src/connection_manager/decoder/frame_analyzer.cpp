@@ -4,6 +4,7 @@
 // Format: price;size;timestamp;volume;vwap;flag
 
 #include "frame_analyzer.hpp"
+#include "decoder.hpp"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -11,13 +12,30 @@
 #include <iomanip>
 
 namespace ibkr_frame_analyzer {
+    
+    FrameAnalyzer::FrameAnalyzer(ibkr_decoder::IBKRDecoder& decoder) : m_decoder(&decoder) {
 
-    void FrameAnalyzer::analyzeTickString48(const std::string& tickStringValue) {
-        std::cout << "[FrameAnalyzer] Analyzing tick string field 48 for volume/VWAP..." << std::endl;
-        std::cout << "[FrameAnalyzer] Raw value: " << tickStringValue << std::endl;
+    }
+
+    TickStringResult FrameAnalyzer::analyzeTickStringData(int tickerId, int field, const std::string& value) {
+        // Route to specific field handlers based on field type
+        switch (field) {
+            case 48:
+                return processField48(value);
+            case 88:
+                return processField88(value);
+            default:
+                return processGenericField(field, value);
+        }
+    }
+
+    TickStringResult FrameAnalyzer::processField48(const std::string& value) {
+        TickStringResult result;
+        
+        // std::cout << "[Field48] Processing volume/VWAP data: " << value << std::endl;
         
         // Parse the semicolon-delimited fields
-        std::vector<std::string> fields = splitString(tickStringValue, ';');
+        std::vector<std::string> fields = splitString(value, ';');
         
         if (fields.size() >= 6) {
             try {
@@ -32,80 +50,109 @@ namespace ibkr_frame_analyzer {
                 double volumeValue = std::stod(volume);
                 double vwapValue = std::stod(vwap);
                 
-                // Format volume in millions for clarity (since this is total market volume)
-                double volumeInMillions = volumeValue / 10000.0;
-                
-                std::cout << "[FrameAnalyzer] ===== Total Market VOLUME DATA EXTRACTED =====" << std::endl;
-                std::cout << "[FrameAnalyzer] Volume (Total Market): " << std::fixed << std::setprecision(2) << volumeInMillions << "M shares" << std::endl;
-                std::cout << "[FrameAnalyzer] VWAP: " << vwap << std::endl;
-                std::cout << "[FrameAnalyzer] Price: " << price << std::endl;
-                std::cout << "[FrameAnalyzer] Size: " << size << std::endl;
-                std::cout << "[FrameAnalyzer] Timestamp: " << timestamp << std::endl;
-                std::cout << "[FrameAnalyzer] Flag: " << flag << std::endl;
-                std::cout << "[FrameAnalyzer] ============================" << std::endl;
-                
-                std::cout << "[FrameAnalyzer] CONFIRMED - Total Market Volume: " << std::fixed << std::setprecision(2) << volumeInMillions << "M shares" << std::endl;
-                std::cout << "[FrameAnalyzer] CONFIRMED - VWAP: $" << std::fixed << std::setprecision(5) << vwapValue << std::endl;
+                result.hasDecodedData = true;
+                result.dataType = "VOLUME+VWAP";
+                result.decodedValue = "Vol: " + std::to_string(volumeValue/10000.0) + "M, VWAP: $" + std::to_string(vwapValue);
+                result.numericValue = vwapValue;
+                result.volume = volumeValue / 10000.0;  // Convert to millions and store
+                result.vwap = vwapValue;                // Store VWAP directly
+                 
+                // std::cout << "[Field48] Decoded - Volume: " << std::fixed << std::setprecision(2) 
+                //           << volumeValue/10000.0 << "M shares, VWAP: $" << std::fixed << std::setprecision(5) << vwapValue << std::endl;
                 
             } catch (const std::exception& e) {
-                std::cout << "[FrameAnalyzer] ERROR parsing tick string fields: " << e.what() << std::endl;
+                std::cout << "[Field48] ERROR parsing: " << e.what() << std::endl;
+                result.hasDecodedData = false;
             }
         } else {
-            std::cout << "[FrameAnalyzer] WARNING: Expected 6 fields but got " << fields.size() << std::endl;
-            for (size_t i = 0; i < fields.size(); ++i) {
-                std::cout << "[FrameAnalyzer] Field " << i << ": " << fields[i] << std::endl;
-            }
+            std::cout << "[Field48] WARNING: Expected 6 fields but got " << fields.size() << std::endl;
+            result.hasDecodedData = false;
         }
+        
+        return result;
     }
 
-    void FrameAnalyzer::analyzeRawFrame(const char* frameData, size_t frameLength) {
-        std::cout << "[FrameAnalyzer] Analyzing raw frame (" << frameLength << " bytes)" << std::endl;
+    TickStringResult FrameAnalyzer::processField88(const std::string& value) {
+        TickStringResult result;
         
-        if (frameLength < 4) {
-            std::cout << "[FrameAnalyzer] Frame too short" << std::endl;
-            return;
+        try {
+            // Convert string to timestamp (Unix epoch)
+            uint64_t timestamp = std::stoull(value);
+            
+            // Create a readable time format
+            time_t time_t_timestamp = static_cast<time_t>(timestamp);
+            char timeStr[30];
+            struct tm timeinfo;
+            
+            #ifdef _WIN32
+            localtime_s(&timeinfo, &time_t_timestamp);
+            #else
+            localtime_r(&time_t_timestamp, &timeinfo);
+            #endif
+            
+            strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", &timeinfo);
+            
+            result.hasDecodedData = true;
+            result.dataType = "TIMESTAMP";
+            result.decodedValue = std::string(timeStr);
+            result.timestamp = timestamp * 1000; // Convert to ms
+            result.numericValue = static_cast<double>(timestamp);
+            
+            // std::cout << "[Field88] Decoded timestamp: " << timeStr << " (epoch: " << timestamp << ")" << std::endl;
+            
+        } catch (const std::exception& e) {
+            std::cout << "[Field88] ERROR parsing timestamp: " << e.what() << std::endl;
+            result.hasDecodedData = false;
         }
         
-        const char* ptr = frameData;
-        const char* endPtr = frameData + frameLength;
-        
-        while (ptr < endPtr - 4) {
-            // Read message length (4 bytes, big-endian)
-            uint32_t msgLength = 0;
-            msgLength = (static_cast<uint8_t>(ptr[0]) << 24) |
-                       (static_cast<uint8_t>(ptr[1]) << 16) |
-                       (static_cast<uint8_t>(ptr[2]) << 8) |
-                       static_cast<uint8_t>(ptr[3]);
-            
-            ptr += 4; // Skip length prefix
-            
-            std::cout << "[FrameAnalyzer] Message length: " << msgLength << " bytes" << std::endl;
-            
-            if (ptr + msgLength > endPtr) {
-                std::cout << "[FrameAnalyzer] Invalid message length, breaking" << std::endl;
-                break;
-            }
-            
-            // Print message content as hex and try to identify field structure
-            std::cout << "[FrameAnalyzer] Message hex: ";
-            for (uint32_t i = 0; i < msgLength && i < 50; ++i) { // Limit output
-                printf("%02X ", static_cast<uint8_t>(ptr[i]));
-            }
-            if (msgLength > 50) std::cout << "...";
-            std::cout << std::endl;
-            
-            // Try to parse as null-delimited fields
-            std::vector<std::string> fields = extractFieldsFromMessage(ptr, msgLength);
-            std::cout << "[FrameAnalyzer] Fields in message:" << std::endl;
-            for (size_t i = 0; i < fields.size(); ++i) {
-                std::cout << "[FrameAnalyzer]   Field " << i << ": '" << fields[i] << "'" << std::endl;
-            }
-            
-            ptr += msgLength; // Move to next message
-            std::cout << "[FrameAnalyzer] ---" << std::endl;
-        }
+        return result;
     }
 
+    AnalyzedBarData FrameAnalyzer::analyzeRealtimeBarData(int reqId, int time, double open, double high, double low, 
+                                          double close, double volume, double wap, int count) {
+        AnalyzedBarData analyzed;
+        
+        // Basic data
+        analyzed.reqId = reqId;
+        analyzed.epochTime = time;
+        analyzed.open = open;
+        analyzed.high = high;
+        analyzed.low = low;
+        analyzed.close = close;
+        analyzed.volume = volume;
+        analyzed.wap = wap;
+        analyzed.count = count;
+        
+        // Format time as human-readable
+        time_t epochTime = time;
+        char timeStr[30];
+        struct tm* timeinfo = localtime(&epochTime);
+        strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", timeinfo);
+        analyzed.formattedTime = std::string(timeStr);
+        
+        // Calculate price change for the bar
+        if (open > 0) {
+            analyzed.priceChange = close - open;
+            analyzed.percentChange = (analyzed.priceChange / open) * 100.0;
+            analyzed.hasValidPriceChange = true;
+        } else {
+            analyzed.priceChange = 0.0;
+            analyzed.percentChange = 0.0;
+            analyzed.hasValidPriceChange = false;
+        }
+        
+        // Calculate bar range
+        if (high > 0 && low > 0) {
+            analyzed.barRange = high - low;
+            analyzed.hasValidRange = true;
+        } else {
+            analyzed.barRange = 0.0;
+            analyzed.hasValidRange = false;
+        }
+        
+        return analyzed;
+    }
+//helper functions
     std::vector<std::string> FrameAnalyzer::splitString(const std::string& str, char delimiter) {
         std::vector<std::string> fields;
         std::stringstream ss(str);
@@ -117,7 +164,7 @@ namespace ibkr_frame_analyzer {
         
         return fields;
     }
-
+//helper function to extract fields from message
     std::vector<std::string> FrameAnalyzer::extractFieldsFromMessage(const char* msgData, size_t msgLength) {
         std::vector<std::string> fields;
         const char* ptr = msgData;
@@ -140,73 +187,78 @@ namespace ibkr_frame_analyzer {
         return fields;
     }
 
-    void FrameAnalyzer::analyzeTickByTickData(int reqId, int tickType, time_t time, double price, 
-                                            uint64_t rawDecimal, double actualVolume,
-                                            const std::string& exchange, const std::string& specialConditions,
-                                            bool pastLimit, bool unreported) {
-        bool isBlock = (actualVolume >= 10000.00) 
-               || (specialConditions.find('B') != std::string::npos);
+    AnalyzedTickByTickData FrameAnalyzer::analyzeTickByTickData(int reqId, int tickType, time_t time, double price, 
+                                                               double size, const std::string& exchange, 
+                                                               const std::string& specialConditions, 
+                                                               bool pastLimit, bool unreported) {
+        AnalyzedTickByTickData analyzed;
+        
+        // Basic data
+        analyzed.reqId = reqId;
+        analyzed.tickType = tickType;
+        analyzed.epochTime = static_cast<uint64_t>(time);
+        analyzed.price = price;
+        analyzed.volume = size;  // Already decoded from Decimal to double
+        analyzed.exchange = exchange;
+        analyzed.specialConditions = specialConditions;
+        analyzed.pastLimit = pastLimit;
+        analyzed.unreported = unreported;
+        
+        // Format time as human-readable
+        char timeStr[30];
+        struct tm* timeinfo = localtime(&time);
+        strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", timeinfo);
+        analyzed.formattedTime = std::string(timeStr);
+        
+        // Calculate derived metrics
+        if (price > 0 && size > 0) {
+            analyzed.dollarsTraded = price * size;
+            analyzed.hasValidTrade = true;
+        } else {
+            analyzed.dollarsTraded = 0.0;
+            analyzed.hasValidTrade = false;
+        }
+        
+        return analyzed;
+    }
 
-        // Print ALL raw data we're receiving
-        std::cout << "\n========== RAW TICK-BY-TICK DATA FRAME ==========" << std::endl;
-        std::cout << "reqId: " << reqId << std::endl;
-        std::cout << "tickType: " << tickType << std::endl;
-        std::cout << "time: " << time << std::endl;
-        std::cout << "price: " << price << std::endl;
-        std::cout << "size (raw Decimal): " << rawDecimal << std::endl;
-        std::cout << "size (as double): " << static_cast<double>(rawDecimal) << std::endl;
-        std::cout << "exchange: '" << exchange << "'" << std::endl;
-        std::cout << "specialConditions: '" << specialConditions << "'" << std::endl;
-
-        // DECODE the BID64 Decimal to get actual volume
-        std::cout << "\n====== DECODED VOLUME ======" << std::endl;
-        std::cout << "Raw Decimal (BID64): " << rawDecimal << std::endl;
-        std::cout << "Decoded volume: " << actualVolume << std::endl;
-        std::cout << "============================" << std::endl;
+    AnalyzedTickByTickBidAskData FrameAnalyzer::analyzeTickByTickBidAskData(int reqId, time_t time, double bidPrice, double askPrice,
+                                                                           double bidSize, double askSize, 
+                                                                           bool bidPastLow, bool askPastHigh) {
+        AnalyzedTickByTickBidAskData analyzed;
         
-        // Print raw bytes of the size value
-        double rawVolume = static_cast<double>(rawDecimal);
-        uint64_t rawBits = *reinterpret_cast<uint64_t*>(&rawVolume);
-        std::cout << "\n====== RAW VOLUME BYTES DEBUG ======" << std::endl;
-        std::cout << "Raw volume as double: " << rawVolume << std::endl;
-        std::cout << "Raw bits (hex): 0x" << std::hex << rawBits << std::dec << std::endl;
-        std::cout << "Raw bytes (little-endian):" << std::endl;
-        for (int i = 0; i < 8; i++) {
-            uint8_t byte = (rawBits >> (i * 8)) & 0xFF;
-            std::cout << "  Byte " << i << ": 0x" << std::hex << (int)byte << std::dec << " (" << (int)byte << ")" << std::endl;
-        }
-        std::cout << "Raw bytes (big-endian):" << std::endl;
-        for (int i = 7; i >= 0; i--) {
-            uint8_t byte = (rawBits >> (i * 8)) & 0xFF;
-            std::cout << "  Byte " << (7-i) << ": 0x" << std::hex << (int)byte << std::dec << " (" << (int)byte << ")" << std::endl;
-        }
-        std::cout << "====================================" << std::endl;
+        // Basic data
+        analyzed.reqId = reqId;
+        analyzed.epochTime = static_cast<uint64_t>(time);
+        analyzed.bidPrice = bidPrice;
+        analyzed.askPrice = askPrice;
+        analyzed.bidSize = bidSize;  // Already decoded from Decimal to double
+        analyzed.askSize = askSize;  // Already decoded from Decimal to double
+        analyzed.bidPastLow = bidPastLow;
+        analyzed.askPastHigh = askPastHigh;
         
-        // Print tick attributes
-        std::cout << "TickAttribLast attributes:" << std::endl;
-        std::cout << "  pastLimit: " << (pastLimit ? "true" : "false") << std::endl;
-        std::cout << "  unreported: " << (unreported ? "true" : "false") << std::endl;
-        if (isBlock) {
-            std::cout << "[BLOCK TRADE] " 
-                    << actualVolume << " shares @ $" << price 
-                    << " Conditions: " << specialConditions 
-                    << std::endl;
-        }
-        std::cout << "=================================================" << std::endl;
+        // Format time as human-readable
+        char timeStr[30];
+        struct tm* timeinfo = localtime(&time);
+        strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", timeinfo);
+        analyzed.formattedTime = std::string(timeStr);
         
-        // Simple logging for now - just show what we got
-        std::cout << "[TRADE] ID:" << reqId 
-                  << " Time:" << time
-                  << " Price:" << price
-                  << " RAW_VOLUME:" << rawVolume
-                  << " ACTUAL_VOLUME:" << actualVolume
-                  << " Exchange:" << exchange
-                  << " Conditions:" << specialConditions << std::endl;
-                           
-        // Highlight this is individual trade volume, not cumulative
-        std::cout << "[INDIVIDUAL TRADE VOLUME] " << actualVolume 
-                  << " shares traded at $" << price << std::endl;
-        std::cout << "=================================================" << std::endl;
+        // Calculate derived metrics
+        if (bidPrice > 0 && askPrice > 0) {
+            analyzed.spread = askPrice - bidPrice;
+            analyzed.midPoint = (bidPrice + askPrice) / 2.0;
+            analyzed.spreadPercent = (analyzed.spread / analyzed.midPoint) * 100.0;
+            analyzed.hasValidSpread = true;
+            analyzed.hasValidMidPoint = true;
+        } else {
+            analyzed.spread = 0.0;
+            analyzed.spreadPercent = 0.0;
+            analyzed.midPoint = 0.0;
+            analyzed.hasValidSpread = false;
+            analyzed.hasValidMidPoint = false;
+        }
+        
+        return analyzed;
     }
 
 } // namespace ibkr_frame_analyzer 

@@ -1,1243 +1,1031 @@
-       Cutoff time: Tue May 27 19:40:08 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378408981293388 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 56
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378408981293388
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.530000
-  Mid: 47.530000 Spread: 0.040000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=30.147057 EMA9=47.559219 EMA26=47.561078 ALMA=47.560000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 57 ✓
-[Size] ID:97131 LAST_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 5
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using last size decoder for tick type: 5
-[LastSizeDecoder] Analyzing last size value with flags: 0x31 0xc0
-[LastSizeDecoder] Non-zero byte at position 6 with value: 192
-[LastSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[LastSizeDecoder] Using standard lot size for flag 0x31
-[Cache] Current time: Tue May 27 20:40:08 2025
-       Cutoff time: Tue May 27 19:40:08 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378408981661096 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 57
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378408981661096
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.530000
-  Mid: 47.530000 Spread: 0.040000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=30.147057 EMA9=47.559219 EMA26=47.561078 ALMA=47.560000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 58 ✓
-[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 3
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:40:08 2025
-       Cutoff time: Tue May 27 19:40:08 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378408982138971 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 58
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378408982138971
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.530000
-  Mid: 47.530000 Spread: 0.040000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=30.147057 EMA9=47.559219 EMA26=47.561078 ALMA=47.560000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 59 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378409640;298927.0000000000000000;46.05005928;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378409640;298927.0000000000000000;46.05005928;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378410935;298927.0000000000000000;46.05005928;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378410935;298927.0000000000000000;46.05005928;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: 47.53;1.0000000000000000;1748378422117;298928.0000000000000000;46.05006424;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.53;1.0000000000000000;1748378422117;298928.0000000000000000;46.05006424;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378424119;298928.0000000000000000;46.05006424;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378424119;298928.0000000000000000;46.05006424;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378425120;298928.0000000000000000;46.05006424;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378425120;298928.0000000000000000;46.05006424;true
-[Price] ID:97131 ASK:47.540000
-[Cache] Current time: Tue May 27 20:40:25 2025
-       Cutoff time: Tue May 27 19:40:25 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378425241970923 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 59
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378425241970923
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.541968 EMA26=47.552843 ALMA=47.532127 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 60 ✓
-[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 3
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:40:25 2025
-       Cutoff time: Tue May 27 19:40:25 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378425242754465 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 60
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378425242754465
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.541968 EMA26=47.552843 ALMA=47.532127 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 61 ✓
-[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 3
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:40:25 2025
-       Cutoff time: Tue May 27 19:40:25 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378425243116548 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 61
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378425243116548
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.541968 EMA26=47.552843 ALMA=47.532127 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 62 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 33 (UNKNOWN_STRING_33)
-value: K
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 33, Value: K
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378425622;298928.0000000000000000;46.05006424;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378425622;298928.0000000000000000;46.05006424;true
-[Timer] Refreshing account data
-[INFO] Canceling previous account summary request with reqId: 9003
-[INFO] Requesting account summary with reqId: 9004
-[AccountSummary] reqId:9004 account:DUK837069 tag:AccountType value:INDIVIDUAL currency:
-[AccountSummary] reqId:9004 account:DUK837069 tag:Cushion value:1 currency:
-[AccountSummary] reqId:9004 account:DUK837069 tag:DayTradesRemaining value:-1 currency:
-[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadNextChange value:0 currency:
-[AccountSummary] reqId:9004 account:DUK837069 tag:AccruedCash value:2317.80 currency:USD
-[Account] DUK837069 AvailableFunds: 1000315.99 USD
-[Account] DUK837069 BuyingPower: 4001263.96 USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:EquityWithLoanValue value:1000315.99 currency:USD
-[Account] DUK837069 ExcessLiquidity: 1000315.99 USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:FullAvailableFunds value:1000315.99 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:FullExcessLiquidity value:1000315.99 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:FullInitMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:FullMaintMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:GrossPositionValue value:0.00 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:InitMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadAvailableFunds value:1000315.99 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadExcessLiquidity value:1000315.99 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadInitMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:LookAheadMaintMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:MaintMarginReq value:0.00 currency:USD
-[Account] DUK837069 NetLiquidation: 1002633.79 USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:SMA value:1002633.79 currency:USD
-[AccountSummary] reqId:9004 account:DUK837069 tag:TotalCashValue value:1000315.99 currency:USD
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: 47.53;1.0000000000000000;1748378426622;298929.0000000000000000;46.0500692;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.53;1.0000000000000000;1748378426622;298929.0000000000000000;46.0500692;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378431377;298929.0000000000000000;46.0500692;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378431377;298929.0000000000000000;46.0500692;true
-[Price] ID:97131 ASK:47.550000
-[Cache] Current time: Tue May 27 20:40:31 2025
-       Cutoff time: Tue May 27 19:40:31 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378431497270843 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 62
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378431497270843
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.530000
-  Mid: 47.530000 Spread: 0.040000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.536128 EMA26=47.548134 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 63 ✓
-[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 3
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:40:31 2025
-       Cutoff time: Tue May 27 19:40:31 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378431498395759 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 63
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378431498395759
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.530000
-  Mid: 47.530000 Spread: 0.040000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.536128 EMA26=47.548134 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 64 ✓
-[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 3
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:40:31 2025
-       Cutoff time: Tue May 27 19:40:31 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.550000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378431499158218 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 64
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378431499158218
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.530000
-  Mid: 47.530000 Spread: 0.040000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.536128 EMA26=47.548134 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 65 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 33 (UNKNOWN_STRING_33)
-value: KP
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 33, Value: KP
-[Account] DUK837069 NetLiquidation: 1002633.79 USD
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 33 (UNKNOWN_STRING_33)
-value: KPZ
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 33, Value: KPZ
-[Price] ID:97131 ASK:47.540000
-[Cache] Current time: Tue May 27 20:40:33 2025
-       Cutoff time: Tue May 27 19:40:33 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378433458153260 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 65
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378433458153260
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.533137 EMA26=47.544395 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 66 ✓
-[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 3
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:40:33 2025
-       Cutoff time: Tue May 27 19:40:33 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378433458436927 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 66
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378433458436927
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.533137 EMA26=47.544395 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 67 ✓
-[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 3
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:40:33 2025
-       Cutoff time: Tue May 27 19:40:33 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378433458545760 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 67
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378433458545760
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.533137 EMA26=47.544395 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 68 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 33 (UNKNOWN_STRING_33)
-value: K
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 33, Value: K
-[Size] ID:97131 VOLUME:3584865303387213824.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 8
-[SizeHexDump] Value: 0x31 c0 00 00 00 04 90 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 36864, Low32: 299008, Mid32: 4
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x90 (Decimal: 144)
-  Byte 2: 0x40 (Decimal: 4)
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizePattern] Lower 32 bits contain value: 299008
-[SizeDecoder] Using volume decoder for tick type: 8
-[VolumeDecoder] Analyzing volume value with flags: 0x31 0xc0
-[VolumeDecoder] Found volume in low 32 bits: 299008
-[Cache] Current time: Tue May 27 20:40:34 2025
-       Cutoff time: Tue May 27 19:40:34 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378434457396636 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 68
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378434457396636
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.533137 EMA26=47.544395 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 69 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: 47.53;1.0000000000000000;1748378438139;298930.0000000000000000;46.05007415;false
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.53;1.0000000000000000;1748378438139;298930.0000000000000000;46.05007415;false
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378439639;298930.0000000000000000;46.05007415;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378439639;298930.0000000000000000;46.05007415;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378440639;298930.0000000000000000;46.05007415;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378440639;298930.0000000000000000;46.05007415;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378442142;298930.0000000000000000;46.05007415;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378442142;298930.0000000000000000;46.05007415;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: 47.53;1.0000000000000000;1748378445647;298931.0000000000000000;46.0500791;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.53;1.0000000000000000;1748378445647;298931.0000000000000000;46.0500791;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378452375;298931.0000000000000000;46.0500791;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378452375;298931.0000000000000000;46.0500791;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378453626;298931.0000000000000000;46.0500791;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378453626;298931.0000000000000000;46.0500791;true
-[Timer] Refreshing account data
-[INFO] Canceling previous account summary request with reqId: 9004
-[INFO] Requesting account summary with reqId: 9005
-[AccountSummary] reqId:9005 account:DUK837069 tag:AccountType value:INDIVIDUAL currency:
-[AccountSummary] reqId:9005 account:DUK837069 tag:Cushion value:1 currency:
-[AccountSummary] reqId:9005 account:DUK837069 tag:DayTradesRemaining value:-1 currency:
-[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadNextChange value:0 currency:
-[AccountSummary] reqId:9005 account:DUK837069 tag:AccruedCash value:2317.80 currency:USD
-[Account] DUK837069 AvailableFunds: 1000315.99 USD
-[Account] DUK837069 BuyingPower: 4001263.96 USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:EquityWithLoanValue value:1000315.99 currency:USD
-[Account] DUK837069 ExcessLiquidity: 1000315.99 USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:FullAvailableFunds value:1000315.99 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:FullExcessLiquidity value:1000315.99 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:FullInitMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:FullMaintMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:GrossPositionValue value:0.00 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:InitMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadAvailableFunds value:1000315.99 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadExcessLiquidity value:1000315.99 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadInitMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:LookAheadMaintMarginReq value:0.00 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:MaintMarginReq value:0.00 currency:USD
-[Account] DUK837069 NetLiquidation: 1002633.79 USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:SMA value:1002633.79 currency:USD
-[AccountSummary] reqId:9005 account:DUK837069 tag:TotalCashValue value:1000315.99 currency:USD
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: 47.52;4.0000000000000000;1748378458382;298935.0000000000000000;46.05009879;false
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.52;4.0000000000000000;1748378458382;298935.0000000000000000;46.05009879;false
-[Size] ID:97131 VOLUME:3584865303387213824.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 8
-[SizeHexDump] Value: 0x31 c0 00 00 00 04 90 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 36864, Low32: 299008, Mid32: 4
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x90 (Decimal: 144)
-  Byte 2: 0x40 (Decimal: 4)
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizePattern] Lower 32 bits contain value: 299008
-[SizeDecoder] Using volume decoder for tick type: 8
-[VolumeDecoder] Analyzing volume value with flags: 0x31 0xc0
-[VolumeDecoder] Found volume in low 32 bits: 299008
-[Cache] Current time: Tue May 27 20:40:58 2025
-       Cutoff time: Tue May 27 19:40:58 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.530000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378458532642966 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 69
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378458532642966
-  Exchange: -
-  Price Data: Last=47.530000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.531285 EMA26=47.540581 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 70 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 45 (LAST_TIMESTAMP)
-value: 1748378458
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 45, Value: 1748378458
-[Price] ID:97131 LAST:47.520000
-[Cache] Current time: Tue May 27 20:40:58 2025
-       Cutoff time: Tue May 27 19:40:58 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.520000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378458533182508 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 70
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378458533182508
-  Exchange: -
-  Price Data: Last=47.520000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.531285 EMA26=47.540581 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 71 ✓
-[Size] ID:97131 LAST_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 5
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using last size decoder for tick type: 5
-[LastSizeDecoder] Analyzing last size value with flags: 0x31 0xc0
-[LastSizeDecoder] Non-zero byte at position 6 with value: 192
-[LastSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[LastSizeDecoder] Using standard lot size for flag 0x31
-[Cache] Current time: Tue May 27 20:40:58 2025
-       Cutoff time: Tue May 27 19:40:58 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.520000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378458533364133 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 71
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378458533364133
-  Exchange: -
-  Price Data: Last=47.520000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=9.905038 EMA9=47.531285 EMA26=47.540581 ALMA=47.530000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 72 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378459383;298935.0000000000000000;46.05009879;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378459383;298935.0000000000000000;46.05009879;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378460134;298935.0000000000000000;46.05009879;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378460134;298935.0000000000000000;46.05009879;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: 47.51;4.0000000000000000;1748378462136;298939.0000000000000000;46.05011833;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: 47.51;4.0000000000000000;1748378462136;298939.0000000000000000;46.05011833;true
-[Size] ID:97131 VOLUME:3584865303387213824.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 8
-[SizeHexDump] Value: 0x31 c0 00 00 00 04 90 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 36864, Low32: 299008, Mid32: 4
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x90 (Decimal: 144)
-  Byte 2: 0x40 (Decimal: 4)
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizePattern] Lower 32 bits contain value: 299008
-[SizeDecoder] Using volume decoder for tick type: 8
-[VolumeDecoder] Analyzing volume value with flags: 0x31 0xc0
-[VolumeDecoder] Found volume in low 32 bits: 299008
-[Cache] Current time: Tue May 27 20:41:02 2025
-       Cutoff time: Tue May 27 19:41:02 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.520000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378462289476426 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 72
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378462289476426
-  Exchange: -
-  Price Data: Last=47.520000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=6.070583 EMA9=47.525778 EMA26=47.536338 ALMA=47.523138 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 73 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 45 (LAST_TIMESTAMP)
-value: 1748378462
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 45, Value: 1748378462
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 84 (UNKNOWN_STRING_84)
-value: D
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 84, Value: D
-[Price] ID:97131 LAST:47.510000
-[Cache] Current time: Tue May 27 20:41:02 2025
-       Cutoff time: Tue May 27 19:41:02 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.510000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378462290693468 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 73
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378462290693468
-  Exchange: -
-  Price Data: Last=47.510000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=6.070583 EMA9=47.525778 EMA26=47.536338 ALMA=47.523138 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 74 ✓
-[Size] ID:97131 LAST_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 5
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using last size decoder for tick type: 5
-[LastSizeDecoder] Analyzing last size value with flags: 0x31 0xc0
-[LastSizeDecoder] Non-zero byte at position 6 with value: 192
-[LastSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[LastSizeDecoder] Using standard lot size for flag 0x31
-[Cache] Current time: Tue May 27 20:41:02 2025
-       Cutoff time: Tue May 27 19:41:02 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.510000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378462291292260 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 74
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378462291292260
-  Exchange: -
-  Price Data: Last=47.510000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=6.070583 EMA9=47.525778 EMA26=47.536338 ALMA=47.523138 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 75 ✓
-[Size] ID:97131 LAST_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 5
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using last size decoder for tick type: 5
-[LastSizeDecoder] Analyzing last size value with flags: 0x31 0xc0
-[LastSizeDecoder] Non-zero byte at position 6 with value: 192
-[LastSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[LastSizeDecoder] Using standard lot size for flag 0x31
-[Cache] Current time: Tue May 27 20:41:02 2025
-       Cutoff time: Tue May 27 19:41:02 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.510000 B:47.510000 A:47.540000 V:100 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378462291864176 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 75
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378462291864176
-  Exchange: -
-  Price Data: Last=47.510000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=6.070583 EMA9=47.525778 EMA26=47.536338 ALMA=47.523138 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 76 ✓
-[Size] ID:97131 VOLUME:3584865303387213824.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 8
-[SizeHexDump] Value: 0x31 c0 00 00 00 04 90 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 36864, Low32: 299008, Mid32: 4
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x90 (Decimal: 144)
-  Byte 2: 0x40 (Decimal: 4)
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizePattern] Lower 32 bits contain value: 299008
-[SizeDecoder] Using volume decoder for tick type: 8
-[VolumeDecoder] Analyzing volume value with flags: 0x31 0xc0
-[VolumeDecoder] Found volume in low 32 bits: 299008
-[Cache] Current time: Tue May 27 20:41:04 2025
-       Cutoff time: Tue May 27 19:41:04 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.510000 B:47.510000 A:47.540000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378464496403969 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 76
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378464496403969
-  Exchange: -
-  Price Data: Last=47.510000 Bid=47.510000 Ask=47.540000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.525000
-  Mid: 47.525000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=4.092053 EMA9=47.516463 EMA26=47.529359 ALMA=47.510709 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 77 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378468645;298939.0000000000000000;46.05011833;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378468645;298939.0000000000000000;46.05011833;true
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378469146;298939.0000000000000000;46.05011833;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378469146;298939.0000000000000000;46.05011833;true
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378496039367720
-  Exchange: -
-  Price Data: Last=47.550000 Bid=47.520000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.535000
-  Mid: 47.535000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=71.443862 EMA9=47.540208 EMA26=47.533760 ALMA=47.549988 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 88 ✓
-[Size] ID:97131 BID_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 0
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 0
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:41:36 2025
-       Cutoff time: Tue May 27 19:41:36 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.550000 B:47.520000 A:47.550000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378496039869761 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 88
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378496039869761
-  Exchange: -
-  Price Data: Last=47.550000 Bid=47.520000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.535000
-  Mid: 47.535000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=71.443862 EMA9=47.540208 EMA26=47.533760 ALMA=47.549988 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 89 ✓
-[Size] ID:97131 ASK_SIZE:3584865303386914816.000000
-[SizeInterpreter] Decoding special size value: 3.584865e+18 for tick type: 3
-[SizeHexDump] Value: 0x31 c0 00 00 00 00 00 00
-[SizeBitfields] Highest byte: 0x31, Second byte: 0xc0, Low16: 0, Low32: 0, Mid32: 0
-[SizeByteAnalysis] Individual bytes:
-  Byte 0: 0x00
-  Byte 1: 0x00
-  Byte 2: 0x00
-  Byte 3: 0x00
-  Byte 4: 0x00
-  Byte 5: 0x00
-  Byte 6: 0xc0 (Decimal: 192)
-  Byte 7: 0x31 (Decimal: 49)
-[SizePattern] Detected standard delayed data pattern (0x31 0xC0)
-[SizeDecoder] Using bid/ask size decoder for tick type: 3
-[BidAskSizeDecoder] Analyzing size value with flags: 0x31 0xc0
-[BidAskSizeDecoder] Non-zero byte at position 6 with value: 192
-[BidAskSizeDecoder] Identified standard delayed data pattern (0x31 0xC0)
-[BidAskSizeDecoder] WARNING: Using default lot size 100, might need refinement
-[Cache] Current time: Tue May 27 20:41:36 2025
-       Cutoff time: Tue May 27 19:41:36 2025
-       Cache size before pruning: 1
-[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
-[Data][IONQ] L:47.550000 B:47.520000 A:47.550000 V:299008 BS:100 AS:100 WAP:- OHLC:46.560000/48.080000/43.600000/45.690000 Ex:- Cond:- Time:1748378496040918095 WAP:-
- ready to send
-
-[DEBUG][OHLC] Received valid OHLC data: 46.560000/48.080000/43.600000/45.690000
-
-[ThreadID: 140737445856832][Symbol: IONQ] StockData Received:
-[ModelManager-Queue] Current queue size before adding tick: 89
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748378496040918095
-  Exchange: -
-  Price Data: Last=47.550000 Bid=47.520000 Ask=47.550000
-  Size Data: BidSize=100 AskSize=100 Volume=299008
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.535000
-  Mid: 47.535000 Spread: 0.030000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=71.443862 EMA9=47.540208 EMA26=47.533760 ALMA=47.549988 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 90 ✓
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 32 (UNKNOWN_STRING_32)
-value: K
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 32, Value: K
-
-===== TICK STRING DATA =====
-tickerId: 97131
-field (code): 48 (UNKNOWN_STRING_48)
-value: ;0E-16;1748378496667;298941.0000000000000000;46.05012827;true
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 97131, Field: 48, Value: ;0E-16;1748378496667;298941.0000000000000000;46.05012827;true
-
-
-  GET  /status      - Get server status
-  GET  /trades      - Get current trades
-  GET  /pending     - Get pending (queued) trades
-  GET  /queue-data?symbol=AAPL - Get all market data ticks for a symbol
-  POST /trade       - Queue a trade request
-  POST /confirm     - Confirm all queued requests
-  POST /clear       - Clear a symbol
-  POST /clear-all   - Clear all symbols
-  POST /emergency-stop - Trigger emergency stop
-  POST /set-auto-confirm - Enable/disable auto-confirmation
-
-Example curl commands:
-  curl -X GET http://localhost:8080/status
-  curl -X GET http://localhost:8080/trades
-  curl -X GET http://localhost:8080/pending
-  curl -X GET http://localhost:8080/queue-data?symbol=AAPL
-  curl -X POST -H "Content-Type: application/json" -d '{"symbol":"AAPL","params":{"lots":5,"margin":".10","stopLoss":".05","maxTrades":10,"lossThreshold":3,"winThreshold":5,"minWinRate":".50","maxHoldSeconds":3600}}' http://localhost:8080/trade
-  curl -X POST http://localhost:8080/confirm
-  curl -X POST -H "Content-Type: application/json" -d '{"symbol":"AAPL"}' http://localhost:8080/clear
-  curl -X POST http://localhost:8080/clear-all
-  curl -X POST http://localhost:8080/emergency-stop
-  curl -X POST -H "Content-Type: application/json" -d '{"autoConfirm":true}' http://localhost:8080/set-auto-confirm
-
-
-
-=========================================
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: IONQ] 
-  Symbol: IONQ
-  Timestamp: 1748383156345567793
-  Exchange: -
-  Price Data: Last=47.460000 Bid=47.400000 Ask=47.440000
-  Size Data: BidSize=100 AskSize=100 Volume=100
-  OHLC: Open=46.560000 High=48.080000 Low=43.600000 Previous_close=45.690000
-  WAP: 47.420000
-  Mid: 47.420000 Spread: 0.040000
-  Derived Metrics: VWAP=0.000000
-  Technical Indicators: RSI=0.000000 EMA9=47.460440 EMA26=47.464363 ALMA=47.460000 Chaikin=0.000000
-  Trading Candidate: NO
-[ModelManager-Queue] New queue size after adding tick: 40 ✓
-
-===== TICK STRING DATA =====
-tickerId: 75901
-field (code): 32 (UNKNOWN_STRING_32)
-value: PZ
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 75901, Field: 32, Value: PZ
-
-===== TICK STRING DATA =====
-tickerId: 75901
-field (code): 33 (UNKNOWN_STRING_33)
-value: T
-==========================
-[IBKRTrader::tickString] Raw callback - ID: 75901, Field: 33, Value: T
-[FrameAnalyzer] Processing field 48 tick string: ;0E-16;1748383158021;300676.0000000000000000;46.05946343;true
-[FrameAnalyzer] Analyzing tick string field 48 for volume/VWAP...
-[FrameAnalyzer] Raw value: ;0E-16;1748383158021;300676.0000000000000000;46.05946343;true
-[FrameAnalyzer] ===== VOLUME DATA EXTRACTED =====
-[FrameAnalyzer] Volume: 300676.0000000000000000
-[FrameAnalyzer] VWAP: 46.05946343
-[FrameAnalyzer] Price: 
-[FrameAnalyzer] Size: 0E-16
-[FrameAnalyzer] Timestamp: 1748383158021
-[FrameAnalyzer] Flag: true
-[FrameAnalyzer] ============================
-[FrameAnalyzer] CONFIRMED - Volume as double: 300676.000000
-[FrameAnalyzer] CONFIRMED - VWAP as double: 46.059463
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:13 (epoch: 1748551633)
+Tick Type: 2 (AllLast)
+Price: $138.9000
+Volume: 100 shares
+Exchange: ARCA
+Special Conditions: FT
+Dollars Traded: $13890.00
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:13 (epoch: 1748551633)
+Tick Type: 2 (AllLast)
+Price: $138.9000
+Volume: 900 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $125010.00
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:13 (epoch: 1748551633)
+Tick Type: 2 (AllLast)
+Price: $138.9000
+Volume: 25 shares
+Exchange: DRCTEDGE
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $3472.50
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:14 (epoch: 1748551634)
+Tick Type: 2 (AllLast)
+Price: $138.9100
+Volume: 336 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $46673.76
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:14 (epoch: 1748551634)
+Tick Type: 2 (AllLast)
+Price: $138.9100
+Volume: 101 shares
+Exchange: DRCTEDGE
+Special Conditions: T
+Dollars Traded: $14029.91
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:14 (epoch: 1748551634)
+Tick Type: 2 (AllLast)
+Price: $138.9000
+Volume: 4 shares
+Exchange: ISLAND
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $555.60
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[Connection] Decoder processing complete for realtime bar data
+
+========== REALTIME BAR ANALYSIS ==========
+Symbol: NVDA | Request ID: 6001
+Bar Time: 2025-05-29 20:47:10 (epoch: 1748551630)
+Time Difference: 5 seconds
+Open: $138.9000
+High: $138.9100
+Low: $138.9000
+Close: $138.9100
+Volume: 29 shares
+WAP: $138.901557
+Trade Count: 8
+Price Change: $0.0100 (+0.01%)
+Bar Range: $0.0100
+===========================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:15 (epoch: 1748551635)
+Tick Type: 2 (AllLast)
+Price: $138.9000
+Volume: 4 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $555.60
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:16 (epoch: 1748551636)
+Tick Type: 2 (AllLast)
+Price: $138.8900
+Volume: 50 shares
+Exchange: ISLAND
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $6944.50
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
+Tick Type: 2 (AllLast)
+Price: $138.8900
+Volume: 2 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $277.78
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
+Tick Type: 2 (AllLast)
+Price: $138.9000
+Volume: 45 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $6250.50
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
+Tick Type: 2 (AllLast)
+Price: $138.9000
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.90
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
+Tick Type: 2 (AllLast)
+Price: $138.8900
+Volume: 6 shares
+Exchange: ARCA
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $833.34
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
+Tick Type: 2 (AllLast)
+Price: $138.8900
+Volume: 29 shares
+Exchange: ISLAND
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $4027.81
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:18 (epoch: 1748551638)
+Tick Type: 2 (AllLast)
+Price: $138.9000
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.90
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:19 (epoch: 1748551639)
+Tick Type: 2 (AllLast)
+Price: $138.8900
+Volume: 281 shares
+Exchange: ISLAND
+Special Conditions: T
+Dollars Traded: $39028.09
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:19 (epoch: 1748551639)
+Tick Type: 2 (AllLast)
+Price: $138.8900
+Volume: 5 shares
+Exchange: ISLAND
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $694.45
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:19 (epoch: 1748551639)
+Tick Type: 2 (AllLast)
+Price: $138.8900
+Volume: 14 shares
+Exchange: ISLAND
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $1944.46
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 20:47:19 (epoch: 1748551639)
+Bid: $138.8600 x 100
+Ask: $138.9100 x 800
+Spread: $0.0500 (0.04%)
+Mid Point: $138.8850
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:20 (epoch: 1748551640)
+Tick Type: 2 (AllLast)
+Price: $138.9100
+Volume: 36 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $5000.76
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:20 (epoch: 1748551640)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.88
+===============================================
+[Connection] Decoder processing complete for realtime bar data
+
+========== REALTIME BAR ANALYSIS ==========
+Symbol: NVDA | Request ID: 6001
+Bar Time: 2025-05-29 20:47:15 (epoch: 1748551635)
+Time Difference: 6 seconds
+Open: $138.8900
+High: $138.8900
+Low: $138.8900
+Close: $138.8900
+Volume: 3 shares
+WAP: $138.890000
+Trade Count: 1
+Price Change: $0.0000 (+0.00%)
+Bar Range: $0.0000
+===========================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:21 (epoch: 1748551641)
+Tick Type: 2 (AllLast)
+Price: $174.5700
+Volume: 1242 shares
+Exchange: FINRA
+Special Conditions: TW
+⚠️ Unreported Trade
+Dollars Traded: $216815.94
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:23 (epoch: 1748551643)
+Tick Type: 2 (AllLast)
+Price: $138.9100
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.91
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:23 (epoch: 1748551643)
+Tick Type: 2 (AllLast)
+Price: $138.8900
+Volume: 500 shares
+Exchange: FINRA
+Special Conditions: T
+Dollars Traded: $69445.00
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:24 (epoch: 1748551644)
+Tick Type: 2 (AllLast)
+Price: $138.9100
+Volume: 30 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $4167.30
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 20:47:25 (epoch: 1748551645)
+Bid: $138.8600 x 100
+Ask: $138.9000 x 200
+Spread: $0.0400 (0.03%)
+Mid Point: $138.8800
+===============================================
+[Connection] Decoder processing complete for realtime bar data
+
+========== REALTIME BAR ANALYSIS ==========
+Symbol: NVDA | Request ID: 6001
+Bar Time: 2025-05-29 20:47:20 (epoch: 1748551640)
+Time Difference: 5 seconds
+Open: $138.8900
+High: $138.8900
+Low: $138.8900
+Close: $138.8900
+Volume: 5 shares
+WAP: $138.890000
+Trade Count: 1
+Price Change: $0.0000 (+0.00%)
+Bar Range: $0.0000
+===========================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
+
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 20:47:26 (epoch: 1748551646)
+Bid: $138.8600 x 100
+Ask: $138.8900 x 1000
+Spread: $0.0300 (0.02%)
+Mid Point: $138.8750
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 7 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $972.16
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 7 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $972.16
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 20 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $2777.60
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 7 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $972.16
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 1 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.88
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 3 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $416.64
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 4 shares
+Exchange: DRCTEDGE
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $555.52
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66195]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8600
+Volume: 5 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $694.30
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 3 shares
+Exchange: ISLAND
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $416.61
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 1 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.87
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 7 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $972.09
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 81 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $11248.47
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 8 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $1110.96
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $174.5700
+Volume: 1404 shares
+Exchange: FINRA
+Special Conditions: TW
+⚠️ Unreported Trade
+Dollars Traded: $245096.28
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.88
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Bid: $138.8600 x 100
+Ask: $138.8800 x 1000
+Spread: $0.0200 (0.01%)
+Mid Point: $138.8700
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66195]
+
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Bid: $138.8500 x 1400
+Ask: $138.8800 x 1000
+Spread: $0.0300 (0.02%)
+Mid Point: $138.8650
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 11 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $1527.57
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
+Tick Type: 2 (AllLast)
+Price: $138.8600
+Volume: 89 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $12358.54
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8600
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.86
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Bid: $138.8500 x 1400
+Ask: $138.8700 x 700
+Spread: $0.0200 (0.01%)
+Mid Point: $138.8600
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Bid: $138.8500 x 1400
+Ask: $138.8800 x 1000
+Spread: $0.0300 (0.02%)
+Mid Point: $138.8650
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8600
+Volume: 11 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $1527.46
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 1 shares
+Exchange: DRCTEDGE
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $138.87
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 2 shares
+Exchange: DRCTEDGE
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $277.74
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 1 shares
+Exchange: DRCTEDGE
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.87
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8600
+Volume: 23 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $3193.78
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8600
+Volume: 77 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $10692.22
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8500
+Volume: 50 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $6942.50
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8500
+Volume: 700 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $97195.00
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8500
+Volume: 245 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $34018.25
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 33 shares
+Exchange: DRCTEDGE
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $4582.71
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 73 shares
+Exchange: DRCTEDGE
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $10137.51
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
+Tick Type: 2 (AllLast)
+Price: $138.8500
+Volume: 15 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $2082.75
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:29 (epoch: 1748551649)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 2 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $277.76
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+
+[Connection] Decoder processing complete for realtime bar data
+
+========== REALTIME BAR ANALYSIS ==========
+Symbol: NVDA | Request ID: 6001
+Bar Time: 2025-05-29 20:47:25 (epoch: 1748551645)
+Time Difference: 5 seconds
+Open: $138.8500
+High: $138.8500
+Low: $138.8500
+Close: $138.8500
+Volume: 9 shares
+WAP: $138.850000
+Trade Count: 2
+Price Change: $0.0000 (+0.00%)
+Bar Range: $0.0000
+===========================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:30 (epoch: 1748551650)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.87
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:30 (epoch: 1748551650)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.87
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:31 (epoch: 1748551651)
+Tick Type: 2 (AllLast)
+Price: $138.8800
+Volume: 24 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $3333.12
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:31 (epoch: 1748551651)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.87
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:31 (epoch: 1748551651)
+Tick Type: 2 (AllLast)
+Price: $138.8700
+Volume: 1 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.87
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:32 (epoch: 1748551652)
+Tick Type: 2 (AllLast)
+Price: $138.8600
+Volume: 45 shares
+Exchange: MEMX
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $6248.70
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:32 (epoch: 1748551652)
+Tick Type: 2 (AllLast)
+Price: $138.8600
+Volume: 1 shares
+Exchange: DRCTEDGE
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.86
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:32 (epoch: 1748551652)
+Tick Type: 2 (AllLast)
+Price: $138.8500
+Volume: 454 shares
+Exchange: FINRA
+Special Conditions: T
+Dollars Traded: $63037.90
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 20:47:32 (epoch: 1748551652)
+Tick Type: 2 (AllLast)
+Price: $128.0900
+Volume: 90 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $11528.10
+===============================================
+^C
+[main] Received signal 2 (CTRL+C)
+[main] Initiating graceful shutdown sequence...
+[AppState] EMERGENCY STOP of all threads with 5000ms timeout (requested by signalHandler)
+[Thread][ThreadID: 140737462642240] Emergency shutdown detected for symbol: NVDA
+[Thread][ThreadID: 140737462642240] Disconnecting from IBKR API for symbol: NVDA
+[INFO] Waiting for data refresh thread to stop...
+[INFO] Account data refresh thread stopped
+[INFO] Data refresh thread stopped
+[INFO] Disconnected from IBKR.
+[ModelManager] Disconnected from IBKR API for symbol: NVDA
+[Thread][ThreadID: 140737462642240] Stopped for symbol: NVDA
+[AppState] Emergency stop completed: 1 threads stopped normally, 0 threads detached due to timeout
+[main] Graceful shutdown in progress (watchdog will force exit in 5s if needed)
+[main] Started watchdog timer (5 seconds) for shutdown

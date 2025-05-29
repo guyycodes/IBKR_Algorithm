@@ -396,4 +396,3 @@ std::pair<double, double> VolumeProfileMap::find_value_area(double percentage) c
 }
 
 } // namespace volume_profile_map
-

@@ -95,8 +95,36 @@ namespace ibkr_decoder {
             Decimal size;
         };
         
+        struct RealtimeBarData {
+            int version;
+            int reqId;
+            int time;
+            double open;
+            double high;
+            double low;
+            double close;
+            Decimal volume;
+            Decimal wap;
+            int count;
+        };
+        
+        struct TickByTickData {
+            int reqId;
+            int tickType;
+            time_t time;
+            double price;
+            Decimal size;
+            int attrMask;
+            std::string exchange;
+            std::string specialConditions;
+            bool pastLimit;
+            bool unreported;
+        };
+        
         bool processTickPriceMessage(const char*& ptr, const char* endPtr, TickPriceData& data, int serverVersion);
         bool processTickSizeMessage(const char*& ptr, const char* endPtr, TickSizeData& data);
+        bool processRealtimeBarMessage(const char*& ptr, const char* endPtr, RealtimeBarData& data);
+        bool processTickByTickMessage(const char*& ptr, const char* endPtr, TickByTickData& data);
         
         // Raw message analysis for debugging
         void analyzeRawMessage(const char* msgData, size_t msgLength);
