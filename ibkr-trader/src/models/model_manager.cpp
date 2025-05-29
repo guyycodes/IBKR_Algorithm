@@ -162,6 +162,7 @@ bool ModelManager::connectToIBKR() {
         // Make the initial market data request
         // Subscribe to tick-by-tick data (most granular), wait 1 second and then start the data stream
         client->reqMktData(m_requestId, contract, genericTicks, snapshot, regulatorySnapshot, mktDataOptions);
+        
         std::this_thread::sleep_for(std::chrono::seconds(1));
         m_connManager->getTrader().startDataStream();
         

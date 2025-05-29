@@ -68,11 +68,6 @@ namespace connection {
         return success;
     }
     
-    void IBKRTrader::startDataStream() {
-        std::cout << "[INFO] Automatically requesting scalping data for symbol: " << m_symbol << " and contract: " << m_contract.symbol << std::endl;
-        startScalpingDataStream(m_symbol, m_contract);
-    }
-    
     // // Set the model manager for direct market data routing
     void IBKRTrader::setModelManager(model_manager::ModelManager* modelManager, const std::string& symbol) {
         m_modelManager = modelManager;
@@ -124,6 +119,12 @@ namespace connection {
             m_client->eDisconnect();
         }
         std::cout << "[INFO] Disconnected from IBKR.\n";
+    }
+
+    // Start continuous data stream for scalping with timed updates
+    void IBKRTrader::startDataStream() { 
+        std::cout << "[INFO] Automatically requesting scalping data for symbol: " << m_symbol << " and contract: " << m_contract.symbol << std::endl;
+        startScalpingDataStream(m_symbol, m_contract);
     }
 
          // Start continuous data stream for scalping with timed updates
@@ -182,27 +183,33 @@ namespace connection {
         
         // Set to use real-time data instead of delayed
         m_client->reqMarketDataType(1); // 1 = REALTIME (was 3 = DELAYED)
-        
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         // 1. Account Information (will be refreshed periodically by timer)
         std::cout << "[1] Requesting Account Information\n";
         // requestAccountSummary();
-        
+
+        /////////////////////////////////////////////////////////////////////////////
+        // reqmarketdata is being called in model manager for tickString data
+        // line 164 model_manager:  client->reqMktData(m_requestId, contract, genericTicks, snapshot, regulatorySnapshot, mktDataOptions);
+        /////////////////////////////////////////////////////////////////////////////
+
         // 3. Tick-by-Tick Data (continuous subscription)
+
         std::cout << "[3] Subscribing to Tick-by-Tick Data for " << symbol << "\n";
         static int tickRequestId = 7001;
 
-        requestTickByTickData(tickRequestId++, symbol, "AllLast", 0, true, contract); // Last trades
+        requestTickByTickData(tickRequestId++, symbol, "AllLast", 0, false, contract); // Last trades
+
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        requestTickByTickData(tickRequestId++, symbol, "BidAsk", 0, true, contract);
+
+        requestTickByTickData(tickRequestId++, symbol, "BidAsk", 0, false, contract);
 
         // 4. Market Depth (continuous subscription)
         std::cout << "[4] Subscribing to Market Depth for " << symbol << "\n";
         static int depthReqId = 8001;
-        
-        
+
         // m_client->reqMktDepth(depthReqId++, contract, 5, false, {});
-        
-        
+    
         // 6. Add Real-time Bar data (5-second bars) to get continuous OHLC updates
         std::cout << "[6] Subscribing to Real-time Bar Data for " << symbol << "\n";
         static int barRequestId = 6001;
@@ -250,7 +257,7 @@ namespace connection {
     void IBKRTrader::routeTickToModelManager(double price, double volume, uint64_t timestamp,
                                            double bid, double ask, double bidSize, double askSize,
                                            const std::string& exchange, const std::string& specialConditions,
-                                           double open, double high, double low, double close, double wap) {
+                                           double open, double high, double low, double close, double vwap) {
         // Only process if we have a ModelManager
         if (!m_modelManager) {
             return;
@@ -281,8 +288,20 @@ namespace connection {
             high,
             low,
             close,
-            wap
+            vwap
         );
+
+        // Handle individual trade data from tickByTickAllLast separately
+        if (price > 0 && volume > 0) {
+            std::cout << "[IndividualTrade][" << m_symbol << "] "
+                      << "Processing individual trade: " << volume << " shares at $" << price 
+                      << " (Conditions: " << (!specialConditions.empty() ? specialConditions : "none") << ")" << std::endl;
+            
+            // Send individual trade data directly to ModelManager (separate from cache)
+            // need to implement this
+            // m_modelManager->addIndividualTrade(price, volume);
+            return; // Early return - don't process as regular market data
+        }
         
         // Prune old entries from the cache (keep only last 60 minutes)
         m_connectionCache->pruneOldEntries(60);
@@ -315,13 +334,12 @@ namespace connection {
         
         // Log the data being sent to ModelManager (compact format)
         std::cout << "[Data][" << m_symbol << "] "
-                  << "L:" << (stockData.last > 0 ? std::to_string(stockData.last) : "-") << " "
-                  << "B:" << (stockData.bid > 0 ? std::to_string(stockData.bid) : "-") << " "
-                  << "A:" << (stockData.ask > 0 ? std::to_string(stockData.ask) : "-") << " "
+                  << "Last:" << (stockData.last > 0 ? std::to_string(stockData.last) : "-") << " "
+                  << "Bid:" << (stockData.bid > 0 ? std::to_string(stockData.bid) : "-") << " "
+                  << "Ask:" << (stockData.ask > 0 ? std::to_string(stockData.ask) : "-") << " "
                   << "V:" << (stockData.volume > 0 ? std::to_string(stockData.volume) : "-") << " "
-                  << "BS:" << (stockData.bidSize > 0 ? std::to_string(stockData.bidSize) : "-") << " "
-                  << "AS:" << (stockData.askSize > 0 ? std::to_string(stockData.askSize) : "-") << " "
-                  << "WAP:" << (stockData.wap > 0 ? std::to_string(stockData.wap) : "-") << " "
+                  << "BidSize:" << (stockData.bidSize > 0 ? std::to_string(stockData.bidSize) : "-") << " "
+                  << "AskSize:" << (stockData.askSize > 0 ? std::to_string(stockData.askSize) : "-") << " "
                   << "OHLC:" << (stockData.open > 0 ? std::to_string(stockData.open) : "-") << "/"
                             << (stockData.high > 0 ? std::to_string(stockData.high) : "-") << "/"
                             << (stockData.low > 0 ? std::to_string(stockData.low) : "-") << "/"
@@ -329,7 +347,7 @@ namespace connection {
                   << "Ex:" << (!stockData.exchange.empty() ? stockData.exchange : "-") << " "
                   << "Cond:" << (!specialConditions.empty() ? specialConditions : "-") << " " 
                   << "Time:" << (stockData.timestamp > 0 ? std::to_string(stockData.timestamp) : "-") << " "
-                  << "WAP:" << (stockData.wap > 0 ? std::to_string(stockData.wap) : "-") << "\n ready to send" << "\n" << std::endl;
+                  << "VWAP:" << (stockData.vwap > 0 ? std::to_string(stockData.vwap) : "-") << "\n ready to send" << "\n" << std::endl;
         
         // Add debug output to see if we have any OHLC data
         if (stockData.open > 0 || stockData.high > 0 || stockData.low > 0 || stockData.close > 0) {
@@ -337,9 +355,9 @@ namespace connection {
                       << stockData.open << "/" << stockData.high << "/" << stockData.low << "/" << stockData.close << std::endl;
         }
         
-        // Add debug output for WAP
-        if (stockData.wap > 0) {
-            std::cout << "[DEBUG][WAP] StockData with WAP: " << stockData.wap << " ready to send" << std::endl;
+        // Add debug output for VWAP
+        if (stockData.vwap > 0) {
+            std::cout << "[DEBUG][VWAP] StockData with VWAP: " << stockData.vwap << " ready to send" << std::endl;
         }
         
         // Send to ModelManager
@@ -451,11 +469,11 @@ namespace connection {
     }
 
 
-//     ///////////////////////////////////////////////////////////////////////////
-//     // TICK-BY-TICK TRADE DATA CALLBACK
-//     // Processes detailed trade information and routes to ModelManager
-//     // THIS PROVIDES REAL-TIME INDIVIDUAL TRADE VOLUMES (not cumulative)
-//     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    // TICK-BY-TICK TRADE DATA CALLBACK
+    // Processes detailed trade information and routes to ModelManager
+    // THIS PROVIDES REAL-TIME INDIVIDUAL TRADE VOLUMES (not cumulative)
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickByTickAllLast(int reqId, int tickType, time_t time, double price, 
                                     Decimal size, const TickAttribLast& tickAttribLast, 
                                     const std::string& exchange, const std::string& specialConditions) {
@@ -528,6 +546,10 @@ namespace connection {
         // }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // TICK-BY-TICK BID-ASK DATA CALLBACK
+    // Processes detailed bid-ask information and routes to ModelManager
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickByTickBidAsk(int reqId, time_t time, double bidPrice, double askPrice, 
                                     Decimal bidSize, Decimal askSize, 
                                     const TickAttribBidAsk& tickAttribBidAsk) {

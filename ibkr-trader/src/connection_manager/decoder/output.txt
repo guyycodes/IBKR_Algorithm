@@ -1,1018 +1,1016 @@
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:13 (epoch: 1748551633)
+Trade Time: 2025-05-29 22:31:05 (epoch: 1748557865)
 Tick Type: 2 (AllLast)
-Price: $138.9000
-Volume: 100 shares
-Exchange: ARCA
-Special Conditions: FT
-Dollars Traded: $13890.00
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:13 (epoch: 1748551633)
-Tick Type: 2 (AllLast)
-Price: $138.9000
-Volume: 900 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $125010.00
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:13 (epoch: 1748551633)
-Tick Type: 2 (AllLast)
-Price: $138.9000
-Volume: 25 shares
-Exchange: DRCTEDGE
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $3472.50
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:14 (epoch: 1748551634)
-Tick Type: 2 (AllLast)
-Price: $138.9100
-Volume: 336 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $46673.76
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:14 (epoch: 1748551634)
-Tick Type: 2 (AllLast)
-Price: $138.9100
-Volume: 101 shares
-Exchange: DRCTEDGE
-Special Conditions: T
-Dollars Traded: $14029.91
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:14 (epoch: 1748551634)
-Tick Type: 2 (AllLast)
-Price: $138.9000
-Volume: 4 shares
-Exchange: ISLAND
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $555.60
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[Connection] Decoder processing complete for realtime bar data
-
-========== REALTIME BAR ANALYSIS ==========
-Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 20:47:10 (epoch: 1748551630)
-Time Difference: 5 seconds
-Open: $138.9000
-High: $138.9100
-Low: $138.9000
-Close: $138.9100
-Volume: 29 shares
-WAP: $138.901557
-Trade Count: 8
-Price Change: $0.0100 (+0.01%)
-Bar Range: $0.0100
-===========================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:15 (epoch: 1748551635)
-Tick Type: 2 (AllLast)
-Price: $138.9000
-Volume: 4 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $555.60
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:16 (epoch: 1748551636)
-Tick Type: 2 (AllLast)
-Price: $138.8900
-Volume: 50 shares
-Exchange: ISLAND
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $6944.50
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
-Tick Type: 2 (AllLast)
-Price: $138.8900
-Volume: 2 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $277.78
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
-Tick Type: 2 (AllLast)
-Price: $138.9000
-Volume: 45 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $6250.50
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
-Tick Type: 2 (AllLast)
-Price: $138.9000
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.90
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
-Tick Type: 2 (AllLast)
-Price: $138.8900
-Volume: 6 shares
-Exchange: ARCA
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $833.34
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:17 (epoch: 1748551637)
-Tick Type: 2 (AllLast)
-Price: $138.8900
-Volume: 29 shares
-Exchange: ISLAND
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $4027.81
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:18 (epoch: 1748551638)
-Tick Type: 2 (AllLast)
-Price: $138.9000
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.90
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:19 (epoch: 1748551639)
-Tick Type: 2 (AllLast)
-Price: $138.8900
-Volume: 281 shares
-Exchange: ISLAND
-Special Conditions: T
-Dollars Traded: $39028.09
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:19 (epoch: 1748551639)
-Tick Type: 2 (AllLast)
-Price: $138.8900
-Volume: 5 shares
-Exchange: ISLAND
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $694.45
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:19 (epoch: 1748551639)
-Tick Type: 2 (AllLast)
-Price: $138.8900
-Volume: 14 shares
-Exchange: ISLAND
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $1944.46
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 20:47:19 (epoch: 1748551639)
-Bid: $138.8600 x 100
-Ask: $138.9100 x 800
-Spread: $0.0500 (0.04%)
-Mid Point: $138.8850
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66171]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:20 (epoch: 1748551640)
-Tick Type: 2 (AllLast)
-Price: $138.9100
-Volume: 36 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $5000.76
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:20 (epoch: 1748551640)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.88
-===============================================
-[Connection] Decoder processing complete for realtime bar data
-
-========== REALTIME BAR ANALYSIS ==========
-Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 20:47:15 (epoch: 1748551635)
-Time Difference: 6 seconds
-Open: $138.8900
-High: $138.8900
-Low: $138.8900
-Close: $138.8900
-Volume: 3 shares
-WAP: $138.890000
-Trade Count: 1
-Price Change: $0.0000 (+0.00%)
-Bar Range: $0.0000
-===========================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:21 (epoch: 1748551641)
-Tick Type: 2 (AllLast)
-Price: $174.5700
-Volume: 1242 shares
-Exchange: FINRA
-Special Conditions: TW
-⚠️ Unreported Trade
-Dollars Traded: $216815.94
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:23 (epoch: 1748551643)
-Tick Type: 2 (AllLast)
-Price: $138.9100
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.91
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:23 (epoch: 1748551643)
-Tick Type: 2 (AllLast)
-Price: $138.8900
-Volume: 500 shares
-Exchange: FINRA
-Special Conditions: T
-Dollars Traded: $69445.00
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:24 (epoch: 1748551644)
-Tick Type: 2 (AllLast)
-Price: $138.9100
-Volume: 30 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $4167.30
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 20:47:25 (epoch: 1748551645)
-Bid: $138.8600 x 100
-Ask: $138.9000 x 200
-Spread: $0.0400 (0.03%)
-Mid Point: $138.8800
-===============================================
-[Connection] Decoder processing complete for realtime bar data
-
-========== REALTIME BAR ANALYSIS ==========
-Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 20:47:20 (epoch: 1748551640)
-Time Difference: 5 seconds
-Open: $138.8900
-High: $138.8900
-Low: $138.8900
-Close: $138.8900
-Volume: 5 shares
-WAP: $138.890000
-Trade Count: 1
-Price Change: $0.0000 (+0.00%)
-Bar Range: $0.0000
-===========================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66182]
-
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 20:47:26 (epoch: 1748551646)
-Bid: $138.8600 x 100
-Ask: $138.8900 x 1000
-Spread: $0.0300 (0.02%)
-Mid Point: $138.8750
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 7 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $972.16
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 7 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $972.16
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
-Tick Type: 2 (AllLast)
-Price: $138.8800
+Price: $138.0500
 Volume: 20 shares
+Exchange: MEMX
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $2761.00
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:05 (epoch: 1748557865)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 10 shares
 Exchange: ARCA
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $2777.60
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 7 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $972.16
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 1 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.88
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 3 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $416.64
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:26 (epoch: 1748551646)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 4 shares
-Exchange: DRCTEDGE
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $555.52
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66195]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8600
-Volume: 5 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $694.30
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 3 shares
-Exchange: ISLAND
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $416.61
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 1 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.87
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 7 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $972.09
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 81 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $11248.47
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 8 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $1110.96
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $174.5700
-Volume: 1404 shares
-Exchange: FINRA
-Special Conditions: TW
-⚠️ Unreported Trade
-Dollars Traded: $245096.28
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.88
+Dollars Traded: $1380.50
 ===============================================
 [Connection] Decoder processing complete for tick-by-tick bid-ask data
 
 ========== TICK-BY-TICK BID-ASK ANALYSIS ==========
 Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Bid: $138.8600 x 100
-Ask: $138.8800 x 1000
-Spread: $0.0200 (0.01%)
-Mid Point: $138.8700
+Quote Time: 2025-05-29 22:31:05 (epoch: 1748557865)
+Bid: $138.0500 x 400
+Ask: $138.0600 x 300
+Spread: $0.0100 (0.01%)
+Mid Point: $138.0550
 ===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66195]
-
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Bid: $138.8500 x 1400
-Ask: $138.8800 x 1000
-Spread: $0.0300 (0.02%)
-Mid Point: $138.8650
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 11 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $1527.57
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:27 (epoch: 1748551647)
-Tick Type: 2 (AllLast)
-Price: $138.8600
-Volume: 89 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $12358.54
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8600
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.86
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Bid: $138.8500 x 1400
-Ask: $138.8700 x 700
-Spread: $0.0200 (0.01%)
-Mid Point: $138.8600
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Bid: $138.8500 x 1400
-Ask: $138.8800 x 1000
-Spread: $0.0300 (0.02%)
-Mid Point: $138.8650
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8600
-Volume: 11 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $1527.46
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 1 shares
-Exchange: DRCTEDGE
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $138.87
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 2 shares
-Exchange: DRCTEDGE
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $277.74
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 1 shares
-Exchange: DRCTEDGE
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.87
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8600
-Volume: 23 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $3193.78
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8600
-Volume: 77 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $10692.22
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8500
-Volume: 50 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $6942.50
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8500
-Volume: 700 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $97195.00
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8500
-Volume: 245 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $34018.25
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 33 shares
-Exchange: DRCTEDGE
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $4582.71
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8700
-Volume: 73 shares
-Exchange: DRCTEDGE
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $10137.51
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:28 (epoch: 1748551648)
-Tick Type: 2 (AllLast)
-Price: $138.8500
-Volume: 15 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $2082.75
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:29 (epoch: 1748551649)
-Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 2 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $277.76
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
-
 [Connection] Decoder processing complete for realtime bar data
 
 ========== REALTIME BAR ANALYSIS ==========
 Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 20:47:25 (epoch: 1748551645)
-Time Difference: 5 seconds
-Open: $138.8500
-High: $138.8500
-Low: $138.8500
-Close: $138.8500
-Volume: 9 shares
-WAP: $138.850000
+Bar Time: 2025-05-29 22:31:00 (epoch: 1748557860)
+Time Difference: 6 seconds
+Open: $138.0400
+High: $138.0500
+Low: $138.0300
+Close: $138.0400
+Volume: 21 shares
+WAP: $138.042191
+Trade Count: 6
+Price Change: $0.0000 (+0.00%)
+Bar Range: $0.0200
+===========================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
+
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:05 (epoch: 1748557865)
+Bid: $138.0400 x 100
+Ask: $138.0600 x 300
+Spread: $0.0200 (0.01%)
+Mid Point: $138.0500
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Bid: $138.0200 x 700
+Ask: $138.0600 x 300
+Spread: $0.0400 (0.03%)
+Mid Point: $138.0400
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Bid: $138.0200 x 700
+Ask: $138.0600 x 400
+Spread: $0.0400 (0.03%)
+Mid Point: $138.0400
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Tick Type: 2 (AllLast)
+Price: $138.0400
+Volume: 3 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $414.12
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 50 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $6903.00
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 2 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $276.12
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 2 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $276.12
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 125 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $17257.50
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 121 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $16705.26
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Bid: $138.0200 x 700
+Ask: $138.0600 x 100
+Spread: $0.0400 (0.03%)
+Mid Point: $138.0400
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Bid: $138.0200 x 700
+Ask: $138.0700 x 500
+Spread: $0.0500 (0.04%)
+Mid Point: $138.0450
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
+Bid: $138.0200 x 700
+Ask: $138.0700 x 600
+Spread: $0.0500 (0.04%)
+Mid Point: $138.0450
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:07 (epoch: 1748557867)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 1 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.05
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:07 (epoch: 1748557867)
+Tick Type: 2 (AllLast)
+Price: $138.0200
+Volume: 3 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $414.06
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:08 (epoch: 1748557868)
+Bid: $138.0300 x 400
+Ask: $138.0700 x 600
+Spread: $0.0400 (0.03%)
+Mid Point: $138.0500
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:09 (epoch: 1748557869)
+Tick Type: 2 (AllLast)
+Price: $138.0300
+Volume: 20 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $2760.60
+===============================================
+[Connection] Decoder processing complete for realtime bar data
+
+========== REALTIME BAR ANALYSIS ==========
+Symbol: NVDA | Request ID: 6001
+Bar Time: 2025-05-29 22:31:05 (epoch: 1748557865)
+Time Difference: 6 seconds
+Open: $138.0600
+High: $138.0600
+Low: $138.0600
+Close: $138.0600
+Volume: 2 shares
+WAP: $138.060000
 Trade Count: 2
 Price Change: $0.0000 (+0.00%)
 Bar Range: $0.0000
 ===========================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:10 (epoch: 1748557870)
+Bid: $138.0300 x 400
+Ask: $138.0700 x 700
+Spread: $0.0400 (0.03%)
+Mid Point: $138.0500
+===============================================
 [TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
 
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:30 (epoch: 1748551650)
+Trade Time: 2025-05-29 22:31:11 (epoch: 1748557871)
 Tick Type: 2 (AllLast)
-Price: $138.8700
+Price: $138.0300
+Volume: 23 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $3174.69
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:11 (epoch: 1748557871)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 1 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.05
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:11 (epoch: 1748557871)
+Bid: $138.0200 x 800
+Ask: $138.0700 x 700
+Spread: $0.0500 (0.04%)
+Mid Point: $138.0450
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:11 (epoch: 1748557871)
+Bid: $138.0300 x 200
+Ask: $138.0700 x 700
+Spread: $0.0400 (0.03%)
+Mid Point: $138.0500
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Bid: $138.0300 x 200
+Ask: $138.0500 x 100
+Spread: $0.0200 (0.01%)
+Mid Point: $138.0400
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Bid: $138.0300 x 100
+Ask: $138.0500 x 100
+Spread: $0.0200 (0.01%)
+Mid Point: $138.0400
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Bid: $138.0400 x 200
+Ask: $138.0600 x 100
+Spread: $0.0200 (0.01%)
+Mid Point: $138.0500
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Bid: $138.0400 x 200
+Ask: $138.0700 x 600
+Spread: $0.0300 (0.02%)
+Mid Point: $138.0550
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Bid: $138.0400 x 200
+Ask: $138.0700 x 700
+Spread: $0.0300 (0.02%)
+Mid Point: $138.0550
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65277]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 299 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $41276.95
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Tick Type: 2 (AllLast)
+Price: $138.0500
 Volume: 1 shares
 Exchange: FINRA
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $138.87
+Dollars Traded: $138.05
 ===============================================
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:30 (epoch: 1748551650)
+Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
 Tick Type: 2 (AllLast)
-Price: $138.8700
+Price: $138.0400
+Volume: 25 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $3451.00
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Tick Type: 2 (AllLast)
+Price: $138.0400
+Volume: 97 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $13389.88
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Tick Type: 2 (AllLast)
+Price: $138.0400
+Volume: 378 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $52179.12
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Tick Type: 2 (AllLast)
+Price: $138.0300
+Volume: 100 shares
+Exchange: ISLAND
+Special Conditions: FT
+Dollars Traded: $13803.00
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Tick Type: 2 (AllLast)
+Price: $138.0400
+Volume: 3 shares
+Exchange: ARCA
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $414.12
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 100 shares
+Exchange: ARCA
+Special Conditions: FT
+Dollars Traded: $13805.00
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
+Bid: $138.0400 x 100
+Ask: $138.0700 x 700
+Spread: $0.0300 (0.02%)
+Mid Point: $138.0550
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65277]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:14 (epoch: 1748557874)
+Tick Type: 2 (AllLast)
+Price: $138.0400
+Volume: 25 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $3451.00
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65277]
+
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:14 (epoch: 1748557874)
+Bid: $138.0400 x 100
+Ask: $138.0600 x 100
+Spread: $0.0200 (0.01%)
+Mid Point: $138.0500
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 13 shares
+Exchange: ARCA
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $1794.65
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 13 shares
+Exchange: ARCA
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $1794.65
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 13 shares
+Exchange: BATS
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $1794.65
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 29 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $4003.74
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 38 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $5246.28
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 96 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $13253.76
+===============================================
+[Connection] Decoder processing complete for realtime bar data
+
+========== REALTIME BAR ANALYSIS ==========
+Symbol: NVDA | Request ID: 6001
+Bar Time: 2025-05-29 22:31:10 (epoch: 1748557870)
+Time Difference: 6 seconds
+Open: $138.0500
+High: $138.0500
+Low: $138.0300
+Close: $138.0500
+Volume: 9 shares
+WAP: $138.043409
+Trade Count: 4
+Price Change: $0.0000 (+0.00%)
+Bar Range: $0.0200
+===========================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:15 (epoch: 1748557875)
+Bid: $138.0400 x 100
+Ask: $138.0700 x 600
+Spread: $0.0300 (0.02%)
+Mid Point: $138.0550
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65277]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:17 (epoch: 1748557877)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 5 shares
+Exchange: ARCA
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $690.25
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65277]
+
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:18 (epoch: 1748557878)
+Bid: $138.0300 x 200
+Ask: $138.0700 x 600
+Spread: $0.0400 (0.03%)
+Mid Point: $138.0500
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:18 (epoch: 1748557878)
+Tick Type: 2 (AllLast)
+Price: $138.0400
+Volume: 1 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.04
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65277]
+
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:18 (epoch: 1748557878)
+Bid: $138.0300 x 200
+Ask: $138.0700 x 900
+Spread: $0.0400 (0.03%)
+Mid Point: $138.0500
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:18 (epoch: 1748557878)
+Tick Type: 2 (AllLast)
+Price: $138.0700
+Volume: 25 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $3451.75
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:19 (epoch: 1748557879)
+Bid: $138.0400 x 200
+Ask: $138.0700 x 900
+Spread: $0.0300 (0.02%)
+Mid Point: $138.0550
+===============================================
+[Connection] Decoder processing complete for tick-by-tick bid-ask data
+
+========== TICK-BY-TICK BID-ASK ANALYSIS ==========
+Symbol: NVDA | Request ID: 7002
+Quote Time: 2025-05-29 22:31:19 (epoch: 1748557879)
+Bid: $138.0400 x 300
+Ask: $138.0700 x 900
+Spread: $0.0300 (0.02%)
+Mid Point: $138.0550
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:19 (epoch: 1748557879)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 2 shares
+Exchange: DRCTEDGE
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $276.10
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:19 (epoch: 1748557879)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 8 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $1104.40
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:19 (epoch: 1748557879)
+Tick Type: 2 (AllLast)
+Price: $138.0600
+Volume: 424 shares
+Exchange: FINRA
+Special Conditions: T
+Dollars Traded: $58537.44
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[Connection] Decoder processing complete for realtime bar data
+
+========== REALTIME BAR ANALYSIS ==========
+Symbol: NVDA | Request ID: 6001
+Bar Time: 2025-05-29 22:31:15 (epoch: 1748557875)
+Time Difference: 6 seconds
+Open: $138.0600
+High: $138.0600
+Low: $138.0600
+Close: $138.0600
+Volume: 4 shares
+WAP: $138.060000
+Trade Count: 1
+Price Change: $0.0000 (+0.00%)
+Bar Range: $0.0000
+===========================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:20 (epoch: 1748557880)
+Tick Type: 2 (AllLast)
+Price: $138.0400
 Volume: 1 shares
 Exchange: FINRA
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $138.87
+Dollars Traded: $138.04
 ===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
-
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:31 (epoch: 1748551651)
+Trade Time: 2025-05-29 22:31:21 (epoch: 1748557881)
 Tick Type: 2 (AllLast)
-Price: $138.8800
-Volume: 24 shares
+Price: $138.0700
+Volume: 36 shares
 Exchange: FINRA
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $3333.12
+Dollars Traded: $4970.52
 ===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:31 (epoch: 1748551651)
+Trade Time: 2025-05-29 22:31:21 (epoch: 1748557881)
 Tick Type: 2 (AllLast)
-Price: $138.8700
+Price: $138.0500
 Volume: 1 shares
 Exchange: FINRA
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $138.87
+Dollars Traded: $138.05
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:22 (epoch: 1748557882)
+Tick Type: 2 (AllLast)
+Price: $138.0400
+Volume: 5 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $690.20
 ===============================================
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:31 (epoch: 1748551651)
+Trade Time: 2025-05-29 22:31:23 (epoch: 1748557883)
 Tick Type: 2 (AllLast)
-Price: $138.8700
+Price: $138.0700
 Volume: 1 shares
 Exchange: FINRA
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $138.87
+Dollars Traded: $138.07
 ===============================================
 [TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
 
 [TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 369.43M, VWAP: $140.66194]
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
 
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:32 (epoch: 1748551652)
+Trade Time: 2025-05-29 22:31:23 (epoch: 1748557883)
 Tick Type: 2 (AllLast)
-Price: $138.8600
-Volume: 45 shares
-Exchange: MEMX
+Price: $138.0500
+Volume: 1 shares
+Exchange: FINRA
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $6248.70
+Dollars Traded: $138.05
 ===============================================
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:32 (epoch: 1748551652)
+Trade Time: 2025-05-29 22:31:24 (epoch: 1748557884)
 Tick Type: 2 (AllLast)
-Price: $138.8600
+Price: $138.0600
+Volume: 3 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $414.18
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[Connection] Decoder processing complete for realtime bar data
+
+========== REALTIME BAR ANALYSIS ==========
+Symbol: NVDA | Request ID: 6001
+Bar Time: 2025-05-29 22:31:20 (epoch: 1748557880)
+Time Difference: 5 seconds
+Open: $138.0600
+High: $138.0600
+Low: $138.0600
+Close: $138.0600
+Volume: 0 shares
+WAP: $138.060000
+Trade Count: 0
+Price Change: $0.0000 (+0.00%)
+Bar Range: $0.0000
+===========================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:24 (epoch: 1748557884)
+Tick Type: 2 (AllLast)
+Price: $138.0600
 Volume: 1 shares
 Exchange: DRCTEDGE
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $138.86
+Dollars Traded: $138.06
 ===============================================
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:32 (epoch: 1748551652)
+Trade Time: 2025-05-29 22:31:25 (epoch: 1748557885)
 Tick Type: 2 (AllLast)
-Price: $138.8500
-Volume: 454 shares
-Exchange: FINRA
+Price: $138.0500
+Volume: 147 shares
+Exchange: ARCA
 Special Conditions: T
-Dollars Traded: $63037.90
+Dollars Traded: $20293.35
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:26 (epoch: 1748557886)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 17 shares
+Exchange: ARCA
+Special Conditions: FTI
+⚠️ Unreported Trade
+Dollars Traded: $2346.85
 ===============================================
 [Connection] Decoder processing complete for tick-by-tick data
 
 ========== TICK-BY-TICK TRADE ANALYSIS ==========
 Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 20:47:32 (epoch: 1748551652)
+Trade Time: 2025-05-29 22:31:27 (epoch: 1748557887)
 Tick Type: 2 (AllLast)
-Price: $128.0900
-Volume: 90 shares
+Price: $138.0700
+Volume: 1 shares
 Exchange: FINRA
 Special Conditions: TI
 ⚠️ Unreported Trade
-Dollars Traded: $11528.10
+Dollars Traded: $138.07
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:27 (epoch: 1748557887)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 30 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $4141.50
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[Timer] Refreshing account data
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:27 (epoch: 1748557887)
+Tick Type: 2 (AllLast)
+Price: $138.0400
+Volume: 60 shares
+Exchange: FINRA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $8282.40
+===============================================
+[TickString] Decoded:
+Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
+
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:29 (epoch: 1748557889)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 1 shares
+Exchange: ARCA
+Special Conditions: TI
+⚠️ Unreported Trade
+Dollars Traded: $138.05
+===============================================
+[Connection] Decoder processing complete for tick-by-tick data
+
+========== TICK-BY-TICK TRADE ANALYSIS ==========
+Symbol: NVDA | Request ID: 7001
+Trade Time: 2025-05-29 22:31:29 (epoch: 1748557889)
+Tick Type: 2 (AllLast)
+Price: $138.0500
+Volume: 200 shares
+Exchange: ARCA
+Special Conditions: T
+Dollars Traded: $27610.00
 ===============================================
 ^C
 [main] Received signal 2 (CTRL+C)
@@ -1024,8 +1022,3 @@ Dollars Traded: $11528.10
 [INFO] Account data refresh thread stopped
 [INFO] Data refresh thread stopped
 [INFO] Disconnected from IBKR.
-[ModelManager] Disconnected from IBKR API for symbol: NVDA
-[Thread][ThreadID: 140737462642240] Stopped for symbol: NVDA
-[AppState] Emergency stop completed: 1 threads stopped normally, 0 threads detached due to timeout
-[main] Graceful shutdown in progress (watchdog will force exit in 5s if needed)
-[main] Started watchdog timer (5 seconds) for shutdown
