@@ -1,1024 +1,1052 @@
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:05 (epoch: 1748557865)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 20 shares
-Exchange: MEMX
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $2761.00
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:05 (epoch: 1748557865)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 10 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $1380.50
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:05 (epoch: 1748557865)
-Bid: $138.0500 x 400
-Ask: $138.0600 x 300
-Spread: $0.0100 (0.01%)
-Mid Point: $138.0550
-===============================================
-[Connection] Decoder processing complete for realtime bar data
-
-========== REALTIME BAR ANALYSIS ==========
-Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 22:31:00 (epoch: 1748557860)
-Time Difference: 6 seconds
-Open: $138.0400
-High: $138.0500
-Low: $138.0300
-Close: $138.0400
-Volume: 21 shares
-WAP: $138.042191
-Trade Count: 6
-Price Change: $0.0000 (+0.00%)
-Bar Range: $0.0200
-===========================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
-
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:05 (epoch: 1748557865)
-Bid: $138.0400 x 100
-Ask: $138.0600 x 300
-Spread: $0.0200 (0.01%)
-Mid Point: $138.0500
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Bid: $138.0200 x 700
-Ask: $138.0600 x 300
-Spread: $0.0400 (0.03%)
-Mid Point: $138.0400
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Bid: $138.0200 x 700
-Ask: $138.0600 x 400
-Spread: $0.0400 (0.03%)
-Mid Point: $138.0400
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 3 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $414.12
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 50 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $6903.00
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 2 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $276.12
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 2 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $276.12
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 125 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $17257.50
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 121 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $16705.26
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Bid: $138.0200 x 700
-Ask: $138.0600 x 100
-Spread: $0.0400 (0.03%)
-Mid Point: $138.0400
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Bid: $138.0200 x 700
-Ask: $138.0700 x 500
-Spread: $0.0500 (0.04%)
-Mid Point: $138.0450
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:06 (epoch: 1748557866)
-Bid: $138.0200 x 700
-Ask: $138.0700 x 600
-Spread: $0.0500 (0.04%)
-Mid Point: $138.0450
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:07 (epoch: 1748557867)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 1 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.05
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:07 (epoch: 1748557867)
-Tick Type: 2 (AllLast)
-Price: $138.0200
-Volume: 3 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $414.06
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:08 (epoch: 1748557868)
-Bid: $138.0300 x 400
-Ask: $138.0700 x 600
-Spread: $0.0400 (0.03%)
-Mid Point: $138.0500
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:09 (epoch: 1748557869)
-Tick Type: 2 (AllLast)
-Price: $138.0300
-Volume: 20 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $2760.60
-===============================================
-[Connection] Decoder processing complete for realtime bar data
-
-========== REALTIME BAR ANALYSIS ==========
-Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 22:31:05 (epoch: 1748557865)
-Time Difference: 6 seconds
-Open: $138.0600
-High: $138.0600
-Low: $138.0600
-Close: $138.0600
-Volume: 2 shares
-WAP: $138.060000
-Trade Count: 2
-Price Change: $0.0000 (+0.00%)
-Bar Range: $0.0000
-===========================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:10 (epoch: 1748557870)
-Bid: $138.0300 x 400
-Ask: $138.0700 x 700
-Spread: $0.0400 (0.03%)
-Mid Point: $138.0500
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65278]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:11 (epoch: 1748557871)
-Tick Type: 2 (AllLast)
-Price: $138.0300
-Volume: 23 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $3174.69
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:11 (epoch: 1748557871)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 1 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.05
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:11 (epoch: 1748557871)
-Bid: $138.0200 x 800
-Ask: $138.0700 x 700
-Spread: $0.0500 (0.04%)
-Mid Point: $138.0450
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:11 (epoch: 1748557871)
-Bid: $138.0300 x 200
-Ask: $138.0700 x 700
-Spread: $0.0400 (0.03%)
-Mid Point: $138.0500
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Bid: $138.0300 x 200
-Ask: $138.0500 x 100
-Spread: $0.0200 (0.01%)
-Mid Point: $138.0400
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Bid: $138.0300 x 100
-Ask: $138.0500 x 100
-Spread: $0.0200 (0.01%)
-Mid Point: $138.0400
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Bid: $138.0400 x 200
-Ask: $138.0600 x 100
-Spread: $0.0200 (0.01%)
-Mid Point: $138.0500
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Bid: $138.0400 x 200
-Ask: $138.0700 x 600
-Spread: $0.0300 (0.02%)
-Mid Point: $138.0550
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Bid: $138.0400 x 200
-Ask: $138.0700 x 700
-Spread: $0.0300 (0.02%)
-Mid Point: $138.0550
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65277]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 299 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $41276.95
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.05
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 25 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $3451.00
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 97 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $13389.88
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 378 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $52179.12
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Tick Type: 2 (AllLast)
-Price: $138.0300
-Volume: 100 shares
-Exchange: ISLAND
-Special Conditions: FT
-Dollars Traded: $13803.00
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 3 shares
-Exchange: ARCA
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $414.12
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 100 shares
-Exchange: ARCA
-Special Conditions: FT
-Dollars Traded: $13805.00
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:12 (epoch: 1748557872)
-Bid: $138.0400 x 100
-Ask: $138.0700 x 700
-Spread: $0.0300 (0.02%)
-Mid Point: $138.0550
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.94M, VWAP: $140.65277]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:14 (epoch: 1748557874)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 25 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $3451.00
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65277]
-
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:14 (epoch: 1748557874)
-Bid: $138.0400 x 100
-Ask: $138.0600 x 100
-Spread: $0.0200 (0.01%)
-Mid Point: $138.0500
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 13 shares
-Exchange: ARCA
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $1794.65
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 13 shares
-Exchange: ARCA
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $1794.65
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 13 shares
-Exchange: BATS
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $1794.65
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 29 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $4003.74
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 38 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $5246.28
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:15 (epoch: 1748557875)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 96 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $13253.76
-===============================================
-[Connection] Decoder processing complete for realtime bar data
-
-========== REALTIME BAR ANALYSIS ==========
-Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 22:31:10 (epoch: 1748557870)
-Time Difference: 6 seconds
-Open: $138.0500
-High: $138.0500
-Low: $138.0300
-Close: $138.0500
-Volume: 9 shares
-WAP: $138.043409
-Trade Count: 4
-Price Change: $0.0000 (+0.00%)
-Bar Range: $0.0200
-===========================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:15 (epoch: 1748557875)
-Bid: $138.0400 x 100
-Ask: $138.0700 x 600
-Spread: $0.0300 (0.02%)
-Mid Point: $138.0550
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65277]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:17 (epoch: 1748557877)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 5 shares
-Exchange: ARCA
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $690.25
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65277]
-
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:18 (epoch: 1748557878)
-Bid: $138.0300 x 200
-Ask: $138.0700 x 600
-Spread: $0.0400 (0.03%)
-Mid Point: $138.0500
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:18 (epoch: 1748557878)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 1 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.04
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65277]
-
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:18 (epoch: 1748557878)
-Bid: $138.0300 x 200
-Ask: $138.0700 x 900
-Spread: $0.0400 (0.03%)
-Mid Point: $138.0500
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:18 (epoch: 1748557878)
-Tick Type: 2 (AllLast)
-Price: $138.0700
-Volume: 25 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $3451.75
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:19 (epoch: 1748557879)
-Bid: $138.0400 x 200
-Ask: $138.0700 x 900
-Spread: $0.0300 (0.02%)
-Mid Point: $138.0550
-===============================================
-[Connection] Decoder processing complete for tick-by-tick bid-ask data
-
-========== TICK-BY-TICK BID-ASK ANALYSIS ==========
-Symbol: NVDA | Request ID: 7002
-Quote Time: 2025-05-29 22:31:19 (epoch: 1748557879)
-Bid: $138.0400 x 300
-Ask: $138.0700 x 900
-Spread: $0.0300 (0.02%)
-Mid Point: $138.0550
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:19 (epoch: 1748557879)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 2 shares
-Exchange: DRCTEDGE
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $276.10
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:19 (epoch: 1748557879)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 8 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $1104.40
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:19 (epoch: 1748557879)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 424 shares
-Exchange: FINRA
-Special Conditions: T
-Dollars Traded: $58537.44
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for realtime bar data
-
-========== REALTIME BAR ANALYSIS ==========
-Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 22:31:15 (epoch: 1748557875)
-Time Difference: 6 seconds
-Open: $138.0600
-High: $138.0600
-Low: $138.0600
-Close: $138.0600
-Volume: 4 shares
-WAP: $138.060000
-Trade Count: 1
-Price Change: $0.0000 (+0.00%)
-Bar Range: $0.0000
-===========================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:20 (epoch: 1748557880)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.04
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:21 (epoch: 1748557881)
-Tick Type: 2 (AllLast)
-Price: $138.0700
-Volume: 36 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $4970.52
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:21 (epoch: 1748557881)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.05
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:22 (epoch: 1748557882)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 5 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $690.20
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:23 (epoch: 1748557883)
-Tick Type: 2 (AllLast)
-Price: $138.0700
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.07
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:23 (epoch: 1748557883)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.05
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:24 (epoch: 1748557884)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 3 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $414.18
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for realtime bar data
-
-========== REALTIME BAR ANALYSIS ==========
-Symbol: NVDA | Request ID: 6001
-Bar Time: 2025-05-29 22:31:20 (epoch: 1748557880)
-Time Difference: 5 seconds
-Open: $138.0600
-High: $138.0600
-Low: $138.0600
-Close: $138.0600
-Volume: 0 shares
-WAP: $138.060000
-Trade Count: 0
-Price Change: $0.0000 (+0.00%)
-Bar Range: $0.0000
-===========================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:24 (epoch: 1748557884)
-Tick Type: 2 (AllLast)
-Price: $138.0600
-Volume: 1 shares
-Exchange: DRCTEDGE
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.06
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:25 (epoch: 1748557885)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 147 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $20293.35
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:26 (epoch: 1748557886)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 17 shares
-Exchange: ARCA
-Special Conditions: FTI
-⚠️ Unreported Trade
-Dollars Traded: $2346.85
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:27 (epoch: 1748557887)
-Tick Type: 2 (AllLast)
-Price: $138.0700
-Volume: 1 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.07
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:27 (epoch: 1748557887)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 30 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $4141.50
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Timer] Refreshing account data
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:27 (epoch: 1748557887)
-Tick Type: 2 (AllLast)
-Price: $138.0400
-Volume: 60 shares
-Exchange: FINRA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $8282.40
-===============================================
-[TickString] Decoded:
-Type: VOLUME+VWAP[Volume (Total Market): 370.95M, VWAP: $140.65276]
-
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:29 (epoch: 1748557889)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 1 shares
-Exchange: ARCA
-Special Conditions: TI
-⚠️ Unreported Trade
-Dollars Traded: $138.05
-===============================================
-[Connection] Decoder processing complete for tick-by-tick data
-
-========== TICK-BY-TICK TRADE ANALYSIS ==========
-Symbol: NVDA | Request ID: 7001
-Trade Time: 2025-05-29 22:31:29 (epoch: 1748557889)
-Tick Type: 2 (AllLast)
-Price: $138.0500
-Volume: 200 shares
-Exchange: ARCA
-Special Conditions: T
-Dollars Traded: $27610.00
-===============================================
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0930, EMA26=16.0941, RSI=2.4, ALMA=16.0944, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 809
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345135445045
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1800 AskSize=1200 Volume=68183
+  OHLC: Open=16.070000 High=16.080000 Low=16.060000 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=2.439713 EMA9=16.093000 EMA26=16.094072 ALMA=16.094363 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 810 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.070000
+  high: 16.080000
+  low: 16.060000
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1800
+  askSize: 1200
+  vwap: 16.014896
+  timestamp: 1748621345180160795
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345180160795
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1800
+  Ask: $16.0800 x 1200
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0700
+  High: $16.0800
+  Low: $16.0600
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68183 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 746 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0930, EMA26=16.0941, RSI=2.4, ALMA=16.0944, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 810
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345180160795
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1800 AskSize=1200 Volume=68183
+  OHLC: Open=16.070000 High=16.080000 Low=16.060000 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=2.439713 EMA9=16.093000 EMA26=16.094072 ALMA=16.094363 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 811 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.070000
+  high: 16.080000
+  low: 16.060000
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1800
+  askSize: 1200
+  vwap: 16.014896
+  timestamp: 1748621345180753253
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345180753253
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1800
+  Ask: $16.0800 x 1200
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0700
+  High: $16.0800
+  Low: $16.0600
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68183 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 746 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0930, EMA26=16.0941, RSI=2.4, ALMA=16.0944, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 811
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345180753253
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1800 AskSize=1200 Volume=68183
+  OHLC: Open=16.070000 High=16.080000 Low=16.060000 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=2.439713 EMA9=16.093000 EMA26=16.094072 ALMA=16.094363 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 812 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.070000
+  high: 16.080000
+  low: 16.060000
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1800
+  askSize: 1200
+  vwap: 16.014896
+  timestamp: 1748621345181189961
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345181189961
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1800
+  Ask: $16.0800 x 1200
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0700
+  High: $16.0800
+  Low: $16.0600
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68183 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 746 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0930, EMA26=16.0941, RSI=2.4, ALMA=16.0944, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 812
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345181189961
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1800 AskSize=1200 Volume=68183
+  OHLC: Open=16.070000 High=16.080000 Low=16.060000 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=2.439713 EMA9=16.093000 EMA26=16.094072 ALMA=16.094363 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 813 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.070000
+  high: 16.080000
+  low: 16.060000
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1800
+  askSize: 1200
+  vwap: 16.014896
+  timestamp: 1748621345181644003
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345181644003
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1800
+  Ask: $16.0800 x 1200
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0700
+  High: $16.0800
+  Low: $16.0600
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68183 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 746 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0930, EMA26=16.0941, RSI=2.4, ALMA=16.0944, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 813
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345181644003
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1800 AskSize=1200 Volume=68183
+  OHLC: Open=16.070000 High=16.080000 Low=16.060000 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=2.439713 EMA9=16.093000 EMA26=16.094072 ALMA=16.094363 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 814 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.070000
+  high: 16.080000
+  low: 16.060000
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1800
+  askSize: 1200
+  vwap: 16.014896
+  timestamp: 1748621345386775295
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345386775295
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1800
+  Ask: $16.0800 x 1200
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0700
+  High: $16.0800
+  Low: $16.0600
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68183 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 746 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0930, EMA26=16.0941, RSI=2.4, ALMA=16.0944, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 814
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345386775295
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1800 AskSize=1200 Volume=68183
+  OHLC: Open=16.070000 High=16.080000 Low=16.060000 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=2.439713 EMA9=16.093000 EMA26=16.094072 ALMA=16.094363 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 815 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1800
+  askSize: 1200
+  vwap: 16.014896
+  timestamp: 1748621345408909920
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345408909920
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1800
+  Ask: $16.0800 x 1200
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68183 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 746 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0930, EMA26=16.0941, RSI=2.4, ALMA=16.0944, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 815
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345408909920
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1800 AskSize=1200 Volume=68183
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=2.439713 EMA9=16.093000 EMA26=16.094072 ALMA=16.094363 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 816 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 500
+  askSize: 1200
+  vwap: 16.014896
+  timestamp: 1748621345656911628
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345656911628
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 500
+  Ask: $16.0800 x 1200
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68183 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Triggering candle update - 817 ticks to process
+[TimeOrderedTickBuffer] Aggregating 817 ticks into 1-minute candles...
+[TimeOrderedTickBuffer] Created 817 chronologically ordered 1-minute candles
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 816
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345656911628
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=500 AskSize=1200 Volume=68183
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 817 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 500
+  askSize: 1100
+  vwap: 16.014896
+  timestamp: 1748621345658169003
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345658169003
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 500
+  Ask: $16.0800 x 1100
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68183 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 817
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345658169003
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=500 AskSize=1100 Volume=68183
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 818 ✓
+[VolumeProfile][Symbol: QBTS] Added trade: 14 shares at $16.0700
+[VolumeProfile][Symbol: QBTS] Added trade: 110 shares at $16.0700
+[VolumeProfile][Symbol: QBTS] Added trade: 1 shares at $16.0717
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.0750
+  high: 16.0950
+  low: 16.0701
+  close: 16.0800
+  last $: 16.0750
+  bid: 16.0700
+  ask: 16.0800
+  bidSize: 500
+  askSize: 1100
+  vwap: 16.0149
+  timestamp: 1748621345887597837
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:05 2025
+       Cutoff time: Fri May 30 15:09:05 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621345887597837
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 500
+  Ask: $16.0800 x 1100
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 818
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621345887597837
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=500 AskSize=1100 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 819 ✓
 ^C
 [main] Received signal 2 (CTRL+C)
 [main] Initiating graceful shutdown sequence...
 [AppState] EMERGENCY STOP of all threads with 5000ms timeout (requested by signalHandler)
-[Thread][ThreadID: 140737462642240] Emergency shutdown detected for symbol: NVDA
-[Thread][ThreadID: 140737462642240] Disconnecting from IBKR API for symbol: NVDA
-[INFO] Waiting for data refresh thread to stop...
-[INFO] Account data refresh thread stopped
-[INFO] Data refresh thread stopped
-[INFO] Disconnected from IBKR.
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1700
+  askSize: 1000
+  vwap: 16.014896
+  timestamp: 1748621346282080420
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346282080420
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1700
+  Ask: $16.0800 x 1000
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 819
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346282080420
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1700 AskSize=1000 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 820 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 2000
+  askSize: 900
+  vwap: 16.014896
+  timestamp: 1748621346284092337
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346284092337
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 2000
+  Ask: $16.0800 x 900
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 820
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346284092337
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=2000 AskSize=900 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 821 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 2800
+  askSize: 900
+  vwap: 16.014896
+  timestamp: 1748621346284871920
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346284871920
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 2800
+  Ask: $16.0800 x 900
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 821
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346284871920
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=2800 AskSize=900 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 822 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 2600
+  askSize: 900
+  vwap: 16.014896
+  timestamp: 1748621346285885628
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346285885628
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 2600
+  Ask: $16.0800 x 900
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 822
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346285885628
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=2600 AskSize=900 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 823 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 2800
+  askSize: 900
+  vwap: 16.014896
+  timestamp: 1748621346286595920
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346286595920
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 2800
+  Ask: $16.0800 x 900
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 823
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346286595920
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=2800 AskSize=900 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 824 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 2900
+  askSize: 900
+  vwap: 16.014896
+  timestamp: 1748621346287204253
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346287204253
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 2900
+  Ask: $16.0800 x 900
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 824
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346287204253
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=2900 AskSize=900 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 825 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 2900
+  askSize: 500
+  vwap: 16.014896
+  timestamp: 1748621346287538670
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346287538670
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 2900
+  Ask: $16.0800 x 500
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 825
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346287538670
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=2900 AskSize=500 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 826 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 2100
+  askSize: 1000
+  vwap: 16.014896
+  timestamp: 1748621346287832128
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346287832128
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 2100
+  Ask: $16.0800 x 1000
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 826
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346287832128
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=2100 AskSize=1000 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 827 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1900
+  askSize: 1000
+  vwap: 16.014896
+  timestamp: 1748621346288190920
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346288190920
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1900
+  Ask: $16.0800 x 1000
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 827
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346288190920
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1900 AskSize=1000 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO
+[ModelManager-Queue] New queue size after adding tick: 828 ✓
+[Cache][DEBUG] ✅ Data ready for QBTS
+  open: 16.075000
+  high: 16.095000
+  low: 16.070100
+  close: 16.080000
+  last $: 16.075000
+  bid: 16.070000
+  ask: 16.080000
+  bidSize: 1800
+  askSize: 1000
+  vwap: 16.014896
+  timestamp: 1748621346288482878
+  volume: 1
+[Cache] Current time: Fri May 30 16:09:06 2025
+       Cutoff time: Fri May 30 15:09:06 2025
+       Cache size before pruning: 1
+[Cache] Pruning summary: 0 entries removed, 1 → 1 entries
+
+[ModelManager] ✅ addTick() CALLED SUCCESSFULLY
+Symbol:  | Timestamp: 1748621346288482878
+TICK-BY-TICK DATA:
+  Last Price: $16.0750
+  Bid: $16.0700 x 1800
+  Ask: $16.0800 x 1000
+  Spread: $0.0100 (0.06%)
+OHLC DATA:
+  Open: $16.0750
+  High: $16.0950
+  Low: $16.0701
+  Close: $16.0800
+MARKET DATA:
+  Volume: 1 shares
+  VWAP: $16.0149
+==================Getting volume from the volume_profile_map======================
+[ModelManager] Volume updated from profile: 68308 shares (total traded volume)
+========================================
+[TimeOrderedTickBuffer] Computing technical indicators from 817 candles...
+[TimeOrderedTickBuffer] Calculated indicators: VWAP=16.0149, EMA9=16.0751, EMA26=16.0768, RSI=4.5, ALMA=16.0750, Chaikin=0.000000
+
+[ThreadID: 140737445856832][Symbol: QBTS] StockData Received:
+[ModelManager-Queue] Current queue size before adding tick: 828
+=========================================
+[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: QBTS] 
+  Symbol: 
+  Timestamp: 1748621346288482878
+  Exchange: -
+  Price Data: Last=16.075000 Bid=16.070000 Ask=16.080000
+  Size Data: BidSize=1800 AskSize=1000 Volume=68308
+  OHLC: Open=16.075000 High=16.095000 Low=16.070100 Previous_close=16.080000
+  Mid: 16.075000 Spread: 0.010000
+  Derived Metrics: VWAP=16.014896
+  Technical Indicators: RSI=4.530086 EMA9=16.075061 EMA26=16.076779 ALMA=16.075000 Chaikin=0.000000
+  Trading Candidate: NO

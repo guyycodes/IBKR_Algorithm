@@ -1144,9 +1144,35 @@ nlohmann::json LocalAPI::getSymbolQueueData(const std::string& symbol) const {
                 // Add individual ticks to the response
                 for (const auto& tick : ticks) {
                     nlohmann::json tickData;
-                    tickData["price"] = tick.last;
+                    tickData["price"] = tick.last;  // Backward compatibility - use 'last' field
+                    tickData["bid"] = tick.bid;
+                    tickData["ask"] = tick.ask;
+                    tickData["bidSize"] = tick.bidSize;
+                    tickData["askSize"] = tick.askSize;
+                    tickData["last"] = tick.last;
                     tickData["volume"] = tick.volume;
                     tickData["timestamp"] = tick.timestamp;
+                    
+                    // Add technical indicators
+                    tickData["rsi"] = tick.rsi;
+                    tickData["ema9"] = tick.ema9;
+                    tickData["ema26"] = tick.ema26;
+                    tickData["alma"] = tick.alma;
+                    tickData["chaikin"] = tick.chaikin;
+                    
+                    // Add OHLC data
+                    tickData["open"] = tick.open;
+                    tickData["high"] = tick.high;
+                    tickData["low"] = tick.low;
+                    tickData["close"] = tick.close;
+                    
+                    // Add derived metrics
+                    tickData["mid"] = tick.mid;
+                    tickData["spread"] = tick.spread;
+                    tickData["spreadPercent"] = tick.spreadPercent;
+                    tickData["vwap"] = tick.vwap;
+                    tickData["imbalance"] = tick.imbalance;
+                    
                     queueData["ticks"].push_back(tickData);
                 }
             } 
@@ -1171,8 +1197,34 @@ nlohmann::json LocalAPI::getSymbolQueueData(const std::string& symbol) const {
                             // Add at least the latest tick to the response
                             nlohmann::json tickData;
                             tickData["price"] = latestTick.last;
+                            tickData["bid"] = latestTick.bid;
+                            tickData["ask"] = latestTick.ask;
+                            tickData["bidSize"] = latestTick.bidSize;
+                            tickData["askSize"] = latestTick.askSize;
+                            tickData["last"] = latestTick.last;
                             tickData["volume"] = latestTick.volume;
                             tickData["timestamp"] = latestTick.timestamp;
+                            
+                            // Add technical indicators
+                            tickData["rsi"] = latestTick.rsi;
+                            tickData["ema9"] = latestTick.ema9;
+                            tickData["ema26"] = latestTick.ema26;
+                            tickData["alma"] = latestTick.alma;
+                            tickData["chaikin"] = latestTick.chaikin;
+                            
+                            // Add OHLC data
+                            tickData["open"] = latestTick.open;
+                            tickData["high"] = latestTick.high;
+                            tickData["low"] = latestTick.low;
+                            tickData["close"] = latestTick.close;
+                            
+                            // Add derived metrics
+                            tickData["mid"] = latestTick.mid;
+                            tickData["spread"] = latestTick.spread;
+                            tickData["spreadPercent"] = latestTick.spreadPercent;
+                            tickData["vwap"] = latestTick.vwap;
+                            tickData["imbalance"] = latestTick.imbalance;
+                            
                             queueData["ticks"].push_back(tickData);
                             queueData["tick_count"] = 1;
                             queueData["note"] = "Using latest tick as fallback";
@@ -1198,6 +1250,10 @@ nlohmann::json LocalAPI::getSymbolQueueData(const std::string& symbol) const {
                 {"unit", (timeWindow.second == model_manager::TimeWindowUnit::SECONDS ? "seconds" : 
                           (timeWindow.second == model_manager::TimeWindowUnit::MINUTES ? "minutes" : "hours"))}
             };
+            
+            // Add volume profile summary
+            auto& volumeProfile = model->getVolumeProfile();
+            queueData["volume_profile_summary"] = volumeProfile.get_summary();
         } else {
             queueData["error"] = "Symbol not found or no model available";
         }

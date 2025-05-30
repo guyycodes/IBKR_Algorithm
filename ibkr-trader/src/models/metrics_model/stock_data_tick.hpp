@@ -55,7 +55,6 @@ public:
     double high = 0.0;
     double low = 0.0;
     double close = 0.0;
-    int count = 0;  // Number of trades in this bar
 
     // Order book (market depth) data
     std::map<double, PriceLevel> bidLevels;  // Maps price -> level (sorted descending)
@@ -66,16 +65,22 @@ public:
     double mid = 0.0;           // Midpoint price
     double spread = 0.0;        // Bid-ask spread
     double spreadPercent = 0.0; // Spread as percentage of mid price
-    double wap = 0.0;           // Weighted average price
     double vwap = 0.0;          // Volume-weighted average price
     double imbalance = 0.0;     // Order book imbalance (bid vs ask size)
     double momentum = 0.0;      // Short-term price momentum
     double depthImbalance = 0.0; // Imbalance based on full order book (not just top of book)
 
+    // Technical indicators (populated by time-ordered buffer)
+    double rsi = 0.0;           // Relative Strength Index
+    double ema9 = 0.0;          // 9-period Exponential Moving Average
+    double ema26 = 0.0;         // 26-period Exponential Moving Average
+    double alma = 0.0;          // Arnaud Legoux Moving Average
+    double chaikin = 0.0;       // Chaikin Oscillator
+
     // Constructors
     StockData() = default;
     StockData(const std::string& sym, timestamp_t ts, double bidPrice, double askPrice, double lastPrice = 0.0);
-    StockData(const std::string& sym, const std::string& dt, double o, double h, double l, double c, volume_t vol, int cnt);
+    StockData(const std::string& sym, const std::string& dt, double o, double h, double l, double c, volume_t vol);
 
     // Methods
     void calculateDerivedMetrics();
@@ -119,7 +124,7 @@ public:
 //     double calculateMA(int periods) const;
 //     double calculateEMA(int periods, double smoothingFactor = 2.0) const;
 //     double calculateRSI(int periods = 14) const;
-//     double calculateVWAP() const;
+    // double calculateVWAP() const;
 //     double calculateMomentum(int periods = 10) const;
     
 //     // Opportunity detection

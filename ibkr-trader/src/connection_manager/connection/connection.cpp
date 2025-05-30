@@ -270,7 +270,7 @@ namespace connection {
             m_symbol,
             timestamp,
             midPoint,
-            volume, // this is total exchange volume, not volume for this symbol
+            1, // trade volume is handeled by the volume_profile_map and added to the data model later
             bid,
             ask,
             bidSize,
@@ -317,8 +317,9 @@ namespace connection {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
     // STRING DATA CALLBACK : Sends VWAP & VOLUME(Total Market) to ModelManager ✅
+    // (Individual trade volume is handeled by the volume_profile_map)
     // Processes string data (primarily timestamps) and routes relevant info to ModelManager
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickString(TickerId tickerId, TickType field, const std::string& value) {
@@ -329,16 +330,15 @@ namespace connection {
             // Print what we decoded instead of routing to ModelManager
             if (result.hasDecodedData) {
                 if (result.volume > 0.0 || result.vwap > 0.0) {
-                    std::cout << "[TickString] Decoded:\n"
-                                << "Type: " << result.dataType
-                                << "[Volume (Total Market): " << std::fixed << std::setprecision(2) << result.volume 
-                                << "M, VWAP: $" << std::fixed << std::setprecision(5) << result.vwap << "]" << std::endl;
+                    // std::cout << "[TickString] Decoded:\n"
+                    //             << "Type: " << result.dataType
+                    //             << "[Volume (Total Market): " << std::fixed << std::setprecision(2) << result.volume 
+                    //             << "M, VWAP: $" << std::fixed << std::setprecision(5) << result.vwap << "]" << std::endl;
                 }
-                
-                std::cout << std::endl;
             }
             
             // Route to ModelManager (moved inside the if block where result is available)
+            // m_requestId is set in model_manager and passed in when initial connection is made: see model_manager.cpp line 164
             if (m_modelManager && tickerId == m_requestId) {
                 routeTickToModelManager(0, result.volume, 0, 0, 0, 0, 0, "", "", 0, 0, 0, 0, result.vwap);
             }
@@ -384,32 +384,32 @@ namespace connection {
 
         // Step 3: Process through decoder for validation and additional analysis
         // In a real implementation, this would decode from raw bytes
-        std::cout << "[Connection] Decoder processing complete for realtime bar data" << std::endl;
+        // std::cout << "[Connection] Decoder processing complete for realtime bar data" << std::endl;
         
         // Step 4: Print the beautiful analyzed data in the callback
-        std::cout << "\n========== REALTIME BAR ANALYSIS ==========" << std::endl;
-        std::cout << "Symbol: " << m_symbol << " | Request ID: " << analyzedData.reqId << std::endl;
-        std::cout << "Bar Time: " << analyzedData.formattedTime << " (epoch: " << analyzedData.epochTime << ")" << std::endl;
-        std::cout << "Time Difference: " << (currentTime - analyzedData.epochTime) << " seconds" << std::endl;
-        std::cout << "Open: $" << std::fixed << std::setprecision(4) << analyzedData.open << std::endl;
-        std::cout << "High: $" << std::fixed << std::setprecision(4) << analyzedData.high << std::endl;
-        std::cout << "Low: $" << std::fixed << std::setprecision(4) << analyzedData.low << std::endl;
-        std::cout << "Close: $" << std::fixed << std::setprecision(4) << analyzedData.close << std::endl;
-        std::cout << "Volume: " << std::fixed << std::setprecision(0) << analyzedData.volume << " shares" << std::endl;
-        std::cout << "WAP: $" << std::fixed << std::setprecision(6) << analyzedData.wap << std::endl;
-        std::cout << "Trade Count: " << analyzedData.count << std::endl;
+        // std::cout << "\n========== REALTIME BAR ANALYSIS ==========" << std::endl;
+        // std::cout << "Symbol: " << m_symbol << " | Request ID: " << analyzedData.reqId << std::endl;
+        // std::cout << "Bar Time: " << analyzedData.formattedTime << " (epoch: " << analyzedData.epochTime << ")" << std::endl;
+        // std::cout << "Time Difference: " << (currentTime - analyzedData.epochTime) << " seconds" << std::endl;
+        // std::cout << "Open: $" << std::fixed << std::setprecision(4) << analyzedData.open << std::endl;
+        // std::cout << "High: $" << std::fixed << std::setprecision(4) << analyzedData.high << std::endl;
+        // std::cout << "Low: $" << std::fixed << std::setprecision(4) << analyzedData.low << std::endl;
+        // std::cout << "Close: $" << std::fixed << std::setprecision(4) << analyzedData.close << std::endl;
+        // std::cout << "Volume: " << std::fixed << std::setprecision(0) << analyzedData.volume << " shares" << std::endl;
+        // std::cout << "WAP: $" << std::fixed << std::setprecision(6) << analyzedData.wap << std::endl;
+        // std::cout << "Trade Count: " << analyzedData.count << std::endl;
         
         // Print calculated metrics if valid
-        if (analyzedData.hasValidPriceChange) {
-            std::cout << "Price Change: $" << std::fixed << std::setprecision(4) << analyzedData.priceChange 
-                      << " (" << std::showpos << std::fixed << std::setprecision(2) << analyzedData.percentChange << "%)" << std::noshowpos << std::endl;
-        }
+        // if (analyzedData.hasValidPriceChange) {
+        //     std::cout << "Price Change: $" << std::fixed << std::setprecision(4) << analyzedData.priceChange 
+        //               << " (" << std::showpos << std::fixed << std::setprecision(2) << analyzedData.percentChange << "%)" << std::noshowpos << std::endl;
+        // }
         
-        if (analyzedData.hasValidRange) {
-            std::cout << "Bar Range: $" << std::fixed << std::setprecision(4) << analyzedData.barRange << std::endl;
-        }
+        // if (analyzedData.hasValidRange) {
+        //     std::cout << "Bar Range: $" << std::fixed << std::setprecision(4) << analyzedData.barRange << std::endl;
+        // }
         
-        std::cout << "===========================================" << std::endl;
+        // std::cout << "===========================================" << std::endl;
         
         // Step 5: Keep routing commented out as requested
         if (m_modelManager && (reqId >= 6000 && reqId < 7000)) {
@@ -418,7 +418,7 @@ namespace connection {
     }
 
 
-    ///////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
     // TICK-BY-TICK TRADE DATA CALLBACK : USED FOR VOLUME PROFILE, NOT MODEL MANAGER ✅
     // Processes detailed trade information and routes to ModelManager
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -457,44 +457,45 @@ namespace connection {
         
         // Step 3: Process through decoder for validation and additional analysis
         // In a real implementation, this would decode from raw bytes
-        std::cout << "[Connection] Decoder processing complete for tick-by-tick data" << std::endl;
+        // std::cout << "[Connection] Decoder processing complete for tick-by-tick data" << std::endl;
         
         // Step 4: Print the beautiful analyzed data in the callback
-        std::cout << "\n========== TICK-BY-TICK TRADE ANALYSIS ==========" << std::endl;
-        std::cout << "Symbol: " << m_symbol << " | Request ID: " << analyzedData.reqId << std::endl;
-        std::cout << "Trade Time: " << analyzedData.formattedTime << " (epoch: " << analyzedData.epochTime << ")" << std::endl;
-        std::cout << "Tick Type: " << analyzedData.tickType << " (" << (analyzedData.tickType == 1 ? "Last" : "AllLast") << ")" << std::endl;
-        std::cout << "Price: $" << std::fixed << std::setprecision(4) << analyzedData.price << std::endl;
-        std::cout << "Volume: " << std::fixed << std::setprecision(0) << analyzedData.volume << " shares" << std::endl;
-        std::cout << "Exchange: " << (analyzedData.exchange.empty() ? "N/A" : analyzedData.exchange) << std::endl;
+        // std::cout << "\n========== TICK-BY-TICK TRADE ANALYSIS ==========" << std::endl;
+        // std::cout << "Symbol: " << m_symbol << " | Request ID: " << analyzedData.reqId << std::endl;
+        // std::cout << "Trade Time: " << analyzedData.formattedTime << " (epoch: " << analyzedData.epochTime << ")" << std::endl;
+        // std::cout << "Tick Type: " << analyzedData.tickType << " (" << (analyzedData.tickType == 1 ? "Last" : "AllLast") << ")" << std::endl;
+        // std::cout << "Price: $" << std::fixed << std::setprecision(4) << analyzedData.price << std::endl;
+        // std::cout << "Volume: " << std::fixed << std::setprecision(0) << analyzedData.volume << " shares" << std::endl;
+        // std::cout << "Exchange: " << (analyzedData.exchange.empty() ? "N/A" : analyzedData.exchange) << std::endl;
         
         // Print special conditions if present
-        if (!analyzedData.specialConditions.empty()) {
-            std::cout << "Special Conditions: " << analyzedData.specialConditions << std::endl;
-        }
+        // if (!analyzedData.specialConditions.empty()) {
+        //     std::cout << "Special Conditions: " << analyzedData.specialConditions << std::endl;
+        // }
         
-        // Print flags if set
-        if (analyzedData.pastLimit) {
-            std::cout << "⚠️ Trade Past Limit" << std::endl;
-        }
-        if (analyzedData.unreported) {
-            std::cout << "⚠️ Unreported Trade" << std::endl;
-        }
+        // // Print flags if set
+        // if (analyzedData.pastLimit) {
+        //     std::cout << "⚠️ Trade Past Limit" << std::endl;
+        // }
+        // if (analyzedData.unreported) {
+        //     std::cout << "⚠️ Unreported Trade" << std::endl;
+        // }
         
         // Print calculated metrics if valid
-        if (analyzedData.hasValidTrade) {
-            std::cout << "Dollars Traded: $" << std::fixed << std::setprecision(2) << analyzedData.dollarsTraded << std::endl;
-        }
+        // if (analyzedData.hasValidTrade) {
+        //     std::cout << "Dollars Traded: $" << std::fixed << std::setprecision(2) << analyzedData.dollarsTraded << std::endl;
+        // }
         
-        std::cout << "===============================================" << std::endl;
+        // std::cout << "===============================================" << std::endl;
         
-        // Step 5: Keep routing commented out as requested
-        if (m_modelManager && reqId == m_requestId) {
+        // Step 5: Route tick-by-tick trade data to ModelManager for volume profile
+        // Note: Tick-by-tick data uses different request IDs (7001) than market data (10000+)
+        if (m_modelManager && reqId >= 7000 && reqId < 8000) {
              // Handle individual trade data from tickByTickAllLast to build the volume profile in model manager
             if (price > 0 && analyzedData.volume > 0) {
-                std::cout << "[IndividualTrade][" << m_symbol << "] "
-                        << "Processing individual trade: " << analyzedData.volume << " shares at $" << price 
-                        << " (Conditions: " << (!specialConditions.empty() ? specialConditions : "none") << ")" << std::endl;
+                // std::cout << "[IndividualTrade][" << m_symbol << "] "
+                //         << "Processing individual trade: " << analyzedData.volume << " shares at $" << price 
+                //         << " (Conditions: " << (!specialConditions.empty() ? specialConditions : "none") << ")" << std::endl;
                 
                 // Send individual trade data directly to ModelManager (separate from cache)
                 m_modelManager->addTradeTick(analyzedData.price, analyzedData.volume);
@@ -502,7 +503,7 @@ namespace connection {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
     // TICK-BY-TICK BID-ASK DATA CALLBACK : Provides Model Manager - BID, ASK, BID SIZE, ASK SIZE & EPOCH TIME ✅
     // Processes detailed bid-ask information and routes to ModelManager
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -526,39 +527,41 @@ namespace connection {
         
         // Step 3: Process through decoder for validation and additional analysis
         // In a real implementation, this would decode from raw bytes
-        std::cout << "[Connection] Decoder processing complete for tick-by-tick bid-ask data" << std::endl;
+        // std::cout << "[Connection] Decoder processing complete for tick-by-tick bid-ask data" << std::endl;
         
         // Step 4: Print the beautiful analyzed data in the callback
-        std::cout << "\n========== TICK-BY-TICK BID-ASK ANALYSIS ==========" << std::endl;
-        std::cout << "Symbol: " << m_symbol << " | Request ID: " << analyzedData.reqId << std::endl;
-        std::cout << "Quote Time: " << analyzedData.formattedTime << " (epoch: " << analyzedData.epochTime << ")" << std::endl;
-        std::cout << "Bid: $" << std::fixed << std::setprecision(4) << analyzedData.bidPrice 
-                  << " x " << std::fixed << std::setprecision(0) << analyzedData.bidSize << std::endl;
-        std::cout << "Ask: $" << std::fixed << std::setprecision(4) << analyzedData.askPrice 
-                  << " x " << std::fixed << std::setprecision(0) << analyzedData.askSize << std::endl;
+        // std::cout << "\n========== TICK-BY-TICK BID-ASK ANALYSIS ==========" << std::endl;
+        // std::cout << "Symbol: " << m_symbol << " | Request ID: " << analyzedData.reqId << std::endl;
+        // std::cout << "Quote Time: " << analyzedData.formattedTime << " (epoch: " << analyzedData.epochTime << ")" << std::endl;
+        // std::cout << "Bid: $" << std::fixed << std::setprecision(4) << analyzedData.bidPrice 
+        //           << " x " << std::fixed << std::setprecision(0) << analyzedData.bidSize << std::endl;
+        // std::cout << "Ask: $" << std::fixed << std::setprecision(4) << analyzedData.askPrice 
+        //           << " x " << std::fixed << std::setprecision(0) << analyzedData.askSize << std::endl;
         
         // Print flags if set
-        if (analyzedData.bidPastLow) {
-            std::cout << "⚠️ Bid Past Low" << std::endl;
-        }
-        if (analyzedData.askPastHigh) {
-            std::cout << "⚠️ Ask Past High" << std::endl;
-        }
+        // if (analyzedData.bidPastLow) {
+        //     std::cout << "⚠️ Bid Past Low" << std::endl;
+        // }
+        // if (analyzedData.askPastHigh) {
+        //     std::cout << "⚠️ Ask Past High" << std::endl;
+        // }
         
         // Print calculated metrics if valid
         if (analyzedData.hasValidSpread) {
-            std::cout << "Spread: $" << std::fixed << std::setprecision(4) << analyzedData.spread 
-                      << " (" << std::fixed << std::setprecision(2) << analyzedData.spreadPercent << "%)" << std::endl;
+            // std::cout << "Spread: $" << std::fixed << std::setprecision(4) << analyzedData.spread 
+            //           << " (" << std::fixed << std::setprecision(2) << analyzedData.spreadPercent << "%)" << std::endl;
         }
         
         if (analyzedData.hasValidMidPoint) {
-            std::cout << "Mid Point: $" << std::fixed << std::setprecision(4) << analyzedData.midPoint << std::endl;
+            // std::cout << "Mid Point: $" << std::fixed << std::setprecision(4) << analyzedData.midPoint << std::endl;
         }
         
-        std::cout << "===============================================" << std::endl;
+        // std::cout << "===============================================" << std::endl;
         
-        // Step 5: Keep routing commented out as requested
-        if (m_modelManager && reqId == m_requestId) {
+        // Step 5: Route tick-by-tick bid-ask data to ModelManager
+        // Note: Tick-by-tick data uses different request IDs (7002) than market data (10000+)
+        // so we check for the tick-by-tick ID range instead of m_requestId
+        if (m_modelManager && reqId >= 7000 && reqId < 8000) {
             routeTickToModelManager(analyzedData.midPoint, 0, analyzedData.epochTime, analyzedData.bidPrice, analyzedData.askPrice, analyzedData.bidSize , analyzedData.askSize, "", "", 0, 0, 0, 0, 0);
         }
     }

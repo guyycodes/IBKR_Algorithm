@@ -7,8 +7,10 @@
 #include <vector>
 #include <chrono>
 #include <memory>
+#include <limits>
 #include "../../models/metrics_model/stock_data_tick.hpp"
 #include "../../models/technical_calculator/technical_calculator.hpp"
+#include <cstdint>
 
 // Forward declarations
 namespace technical_calculator {
@@ -24,6 +26,9 @@ namespace technical_calculator {
 }
 
 namespace time_ordered_tick_buffer {
+
+// Configuration constants
+static constexpr int64_t DEFAULT_WINDOW_MS = 60'000;  // 1 minute default window
 
 // Helper struct for indicators
 struct TechnicalIndicators {
@@ -81,7 +86,7 @@ struct TemporaryCandle {
 class TimeOrderedTickBuffer {
 public:
     // Constructor with configurable window size
-    TimeOrderedTickBuffer(int64_t windowSizeMs = 60000);
+    TimeOrderedTickBuffer(int64_t windowSizeMs = DEFAULT_WINDOW_MS);
     
     // Destructor
     ~TimeOrderedTickBuffer();
@@ -96,7 +101,7 @@ private:
     // Map with timestamp as key ensures automatic chronological ordering
     std::map<int64_t, stock_data_tick::StockData> m_orderedTicks;
     
-    // Window size in milliseconds (e.g., 1 minute = 60000ms)
+    // Window size in milliseconds (e.g., DEFAULT_WINDOW_MS = 1 minute)
     const int64_t m_windowSizeMs;
     
     // Aggregated candles at different timeframes
@@ -111,12 +116,35 @@ private:
     // How often to update candles (in ms)
     const int64_t m_candleUpdateFrequencyMs = 1000; // Update every second
     
+    // Chaikin Oscillator state for incremental calculation
+    double m_runningADL = 0.0;        // Accumulation/Distribution Line
+    double m_emaADL_fast = std::numeric_limits<double>::quiet_NaN();  // Fast EMA of ADL
+    double m_emaADL_slow = std::numeric_limits<double>::quiet_NaN();  // Slow EMA of ADL
+    double m_lastChaikin = 0.0;       // Most recent Chaikin value for quick access
+    std::map<int64_t, double> m_candleMFV;  // Track MFV by minute timestamp for rolling window
+    
+    // RSI state for incremental calculation
+    double m_prevClose = std::numeric_limits<double>::quiet_NaN();
+    double m_avgGain = 0.0;
+    double m_avgLoss = 0.0;
+    double m_lastRSI = 50.0;
+    static constexpr int RSI_PERIOD = 14;
+    int m_rsiWarmupCount = 0;
+    
+    // Track the last minute processed to avoid double-counting candles
+    int64_t m_lastProcessedMinute = std::numeric_limits<int64_t>::min();
+    
+    // Performance optimization: reuse minute buckets to avoid repeated allocations
+    std::map<int64_t, TemporaryCandle> m_minuteBuckets;
+    
     // Private methods
+    int64_t getCurrentTimestamp();
+    bool shouldUpdateCandles();
     void pruneOldTicks();
     void updateCandles();
-    bool shouldUpdateCandles();
-    int64_t getCurrentTimestamp();
     TechnicalIndicators computeIndicatorsFromCandles();
+    void updateChaikinForCandle(const Candle& candle, int64_t minuteIndex, bool isFirstTime);
+    void updateRSIForCandle(double close);
 };
 
 } // namespace time_ordered_tick_buffer

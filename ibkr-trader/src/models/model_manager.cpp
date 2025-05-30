@@ -360,21 +360,54 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
     }
     
     // Display additional market data (if available)
-    if (tick.volume > 0 || tick.vwap > 0 || tick.wap > 0) {
+    if (tick.volume > 0 || tick.vwap > 0) {
         std::cout << "MARKET DATA:" << std::endl;
         if (tick.volume > 0) std::cout << "  Volume: " << std::fixed << std::setprecision(0) << tick.volume << " shares" << std::endl;
         if (tick.vwap > 0) std::cout << "  VWAP: $" << std::fixed << std::setprecision(4) << tick.vwap << std::endl;
-        if (tick.wap > 0) std::cout << "  WAP: $" << std::fixed << std::setprecision(4) << tick.wap << std::endl;
     }
     
     if (!tick.exchange.empty()) {
         std::cout << "  Exchange: " << tick.exchange << std::endl;
     }
-    
-    std::cout << "========================================" << std::endl;
-    
-    // Calculate derived metrics
+
+    std::cout << "==================Getting volume from the volume_profile_map======================" << std::endl;
+    // Get actual volume from volume profile for this price and create enriched tick
     stock_data_tick::StockData enrichedTick = tick;
+    
+    // Get volume profile summary and parse total volume
+    std::string volumeSummary = m_volumeProfile.get_summary();
+    int totalVolume = 0;
+    
+    // Parse the total volume from the summary string
+    // Look for "Total Volume: X shares" pattern
+    size_t totalVolumePos = volumeSummary.find("Total Volume: ");
+    if (totalVolumePos != std::string::npos) {
+        // Move past "Total Volume: "
+        size_t numberStart = totalVolumePos + 14;
+        size_t sharesPos = volumeSummary.find(" shares", numberStart);
+        
+        if (sharesPos != std::string::npos) {
+            std::string volumeStr = volumeSummary.substr(numberStart, sharesPos - numberStart);
+            try {
+                totalVolume = std::stoi(volumeStr);
+            } catch (const std::exception& e) {
+                std::cout << "[ModelManager] Error parsing volume from summary: " << e.what() << std::endl;
+                totalVolume = 0;
+            }
+        }
+    }
+    
+    if (totalVolume > 0) {
+        // Use real volume from volume profile
+        enrichedTick.volume = totalVolume;
+        std::cout << "[ModelManager] Volume updated from profile: " << totalVolume 
+                  << " shares (total traded volume)" << std::endl;
+    } else {
+        // If no volume in profile yet, use the tick volume as-is (this happens early in trading session)
+        std::cout << "[ModelManager] No volume in profile yet, using tick volume: " << enrichedTick.volume << std::endl;
+    }
+    std::cout << "========================================" << std::endl;
+    // Calculate derived metrics
     enrichedTick.calculateDerivedMetrics();
 
     // Add to time-ordered buffer
@@ -384,13 +417,13 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
     time_ordered_tick_buffer::TechnicalIndicators indicators = m_timeOrderedBuffer.calculateIndicators();
     
     // Enrich the tick with calculated indicators
-    enrichedTick.vwap = indicators.vwap;
+    // enrichedTick.vwap = indicators.vwap;
     // add the later
-    // enrichedTick.rsi = indicators.rsi;
-    // enrichedTick.ema9 = indicators.ema9;
-    // enrichedTick.ema26 = indicators.ema26;
-    // enrichedTick.alma = indicators.alma;
-    // enrichedTick.chaikin = indicators.chaikin;
+    enrichedTick.rsi = indicators.rsi;
+    enrichedTick.ema9 = indicators.ema9;
+    enrichedTick.ema26 = indicators.ema26;
+    enrichedTick.alma = indicators.alma;
+    enrichedTick.chaikin = indicators.chaikin;
     
     // Check trading conditions
     bool isValidCandidate = false;
@@ -439,18 +472,40 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
               << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
               << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
               << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
-              << "\n  WAP: " << enrichedTick.wap
               << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
               << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
-              << "\n  Technical Indicators: RSI=" << indicators.rsi 
-              << " EMA9=" << indicators.ema9 << " EMA26=" << indicators.ema26
-              << " ALMA=" << indicators.alma << " Chaikin=" << indicators.chaikin
+              << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
+              << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
+              << " ALMA=" << enrichedTick.alma << " Chaikin=" << enrichedTick.chaikin
               << "\n  Trading Candidate: " << (isValidCandidate ? "YES" : "NO")
               << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
               << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;
 
     // Prune old data immediately after adding a new tick
     pruneOldData();
+}
+
+/**
+ * Add an individual trade to the volume profile
+ * This method is called from connection.cpp when tick-by-tick trade data arrives
+ * 
+ * @param price The trade price
+ * @param volume The trade volume
+ */
+void ModelManager::addTradeTick(double price, int volume) {
+    if (volume <= 0) {
+        return; // Skip invalid volume
+    }
+    
+    // Add the trade to the volume profile
+    // use the class instantiated in the constructor
+    m_volumeProfile.add_transaction(price, volume);
+
+    
+    // Log the trade addition for debugging
+    std::cout << "[VolumeProfile][Symbol: " << getSymbol() << "] "
+              << "Added trade: " << volume << " shares at $" 
+              << std::fixed << std::setprecision(4) << price << std::endl;
 }
 
 /**
@@ -517,64 +572,70 @@ std::vector<stock_data_tick::StockData> ModelManager::getTicksInWindow() const {
         return windowTicks;
     }
     
-    // Create a temporary queue to prevent modifying the original
-    std::queue<stk_q::STK_Q_Data> tempQueue;
+    // STK_Q already handles chronological ordering and time filtering
+    // Just use removeOlderThan to get the data we need, then rebuild the vector
+    // First, let STK_Q prune old data
+    queue->removeOlderThan(cutoffMs);
+    
+    // Now get all remaining data (which is already in our time window)
     stk_q::STK_Q_Data data;
+    windowTicks.reserve(queue->size()); // Reserve space for efficiency
     
-    // Get a copy of the queue
-    windowTicks.reserve(queueSize); // Reserve space for efficiency
+    // Pop all data to convert to StockData format, then push back
+    size_t originalSize = queue->size();
+    std::vector<stk_q::STK_Q_Data> tempData;
+    tempData.reserve(originalSize);
     
-    // Track included and excluded items
-    int includedCount = 0;
-    int excludedCount = 0;
-    
-    // We'll create a temporary copy of the queue by popping and re-adding
-    for (size_t i = 0; i < queueSize; i++) {
-        if (queue->pop(data)) {
-            // Check if data is within the time window
-            bool isWithinWindow = static_cast<uint64_t>(data.time) >= cutoffMs;
-            
-            if (isWithinWindow) {
-                // Convert queue data to StockData
-                stock_data_tick::StockData tick;
-                tick.symbol = getSymbol();
-                tick.timestamp = data.time;
-                tick.exchange = data.exchange;
-                tick.last = data.price;   // This is stockData->last
-                tick.volume = data.size;  // This is stockData->volume
-                
-                // Calculate derived metrics
-                tick.calculateDerivedMetrics();
-                
-                // Add to vector
-                windowTicks.push_back(tick);
-                includedCount++;
-                
-                // Log the data item we're including (limit to first 5 to avoid spam)
-                if (includedCount <= 5) {
-                    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Including StockData: Price=" 
-                            << data.price << ", Time=" << data.time 
-                            << " (within cutoff " << cutoffMs << ")" << std::endl;
-                }
-            } else {
-                excludedCount++;
-                
-                // Log the first few items we're filtering out
-                if (excludedCount <= 5) {
-                    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Excluding StockData: Price=" 
-                            << data.price << ", Time=" << data.time 
-                            << " (before cutoff " << cutoffMs << ")" << std::endl;
-                }
-            }
-            
-            // Re-add to the original queue
-            queue->push(data);
-        }
+    // Extract all data
+    while (queue->pop(data)) {
+        tempData.push_back(data);
+        
+        // Convert queue data to StockData with all the rich data we now store
+        stock_data_tick::StockData tick;
+        tick.symbol = getSymbol();
+        tick.timestamp = data.time;
+        tick.exchange = data.exchange;
+        
+        // Use the rich data from our expanded STK_Q_Data
+        tick.bid = data.bid;
+        tick.ask = data.ask;
+        tick.last = data.last;
+        tick.bidSize = data.bidSize;
+        tick.askSize = data.askSize;
+        tick.lastSize = data.lastSize;
+        tick.volume = data.volume;
+        
+        // OHLC data
+        tick.open = data.open;
+        tick.high = data.high;
+        tick.low = data.low;
+        tick.close = data.close;
+        
+        // Derived metrics
+        tick.mid = data.mid;
+        tick.spread = data.spread;
+        tick.spreadPercent = data.spreadPercent;
+        tick.vwap = data.vwap;
+        tick.imbalance = data.imbalance;
+        
+        // Technical indicators
+        tick.rsi = data.rsi;
+        tick.ema9 = data.ema9;
+        tick.ema26 = data.ema26;
+        tick.alma = data.alma;
+        tick.chaikin = data.chaikin;
+        
+        // Add to vector
+        windowTicks.push_back(tick);
     }
     
-    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Finished processing. Included: " 
-              << includedCount << ", Excluded: " << excludedCount 
-              << ", Returning vector size of converted StockData: " << windowTicks.size() << std::endl;
+    // Push all data back to queue
+    for (auto& item : tempData) {
+        queue->push(std::move(item));
+    }
+    
+    std::cout << "[getTicksInWindow][Symbol: " << getSymbol() << "] Returning " 
+              << windowTicks.size() << " ticks in time window" << std::endl;
     
     return windowTicks;
 }
@@ -775,27 +836,6 @@ size_t ModelManager::processQueueData(size_t maxItems) {
     }
     
     return processedCount;
-}
-
-/**
- * Add an individual trade to the volume profile
- * This method is called from connection.cpp when tick-by-tick trade data arrives
- * 
- * @param price The trade price
- * @param volume The trade volume
- */
-void ModelManager::addTradeTick(double price, int volume) {
-    if (volume <= 0) {
-        return; // Skip invalid volume
-    }
-    
-    // Add the trade to the volume profile
-    m_volumeProfile.add_transaction(price, volume);
-    
-    // Log the trade addition for debugging
-    std::cout << "[VolumeProfile][Symbol: " << getSymbol() << "] "
-              << "Added trade: " << volume << " shares at $" 
-              << std::fixed << std::setprecision(4) << price << std::endl;
 }
 
 } // namespace model_manager 

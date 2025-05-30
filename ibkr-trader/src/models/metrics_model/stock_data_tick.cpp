@@ -12,8 +12,8 @@ StockData::StockData(const std::string& sym, timestamp_t ts, double bidPrice, do
     calculateDerivedMetrics();
 }
 
-StockData::StockData(const std::string& sym, const std::string& dt, double o, double h, double l, double c, volume_t vol, int cnt)
-    : symbol(sym), dateTime(dt), open(o), high(h), low(l), close(c), volume(vol), count(cnt) {
+StockData::StockData(const std::string& sym, const std::string& dt, double o, double h, double l, double c, volume_t vol)
+    : symbol(sym), dateTime(dt), open(o), high(h), low(l), close(c), volume(vol) {
     last = close;
     calculateDerivedMetrics();
 }
@@ -29,14 +29,8 @@ void StockData::calculateDerivedMetrics() {
         imbalance = static_cast<double>(bidSize - askSize) / (bidSize + askSize);
     }
     
-    // WAP calculation
-    if (bidSize + askSize > 0) {
-        wap = (bid * askSize + ask * bidSize) / (bidSize + askSize);
-    } else {
-        wap = mid;
-    }
-
-    // Calculate signal metrics if we have order book data
+    // Note: VWAP is calculated by the time-ordered buffer, not here
+    // We removed WAP calculation since VWAP is the preferred metric
 }
 
 void StockData::calculateDepthMetrics() {
@@ -188,7 +182,7 @@ void StockData::updateTick(double bidPrice, double askPrice, double lastPrice,
         low = (low == 0) ? last : std::min(low, last);
         close = last;
         volume += lastVol;
-        count++;
+        // Note: count field was removed since it's tracked elsewhere
     }
     
     calculateDerivedMetrics();
@@ -232,7 +226,7 @@ std::string StockData::formatTimestamp() const {
 //         dataPoints.pop_front();
 //     }
     
-//     // Calculate time-series based metrics like VWAP, momentum
+//     // Calculate time-series based metrics like momentum
 //     calculateTimeSeriesMetrics();
 // }
 
@@ -294,15 +288,8 @@ std::string StockData::formatTimestamp() const {
 // double TimeSeriesData::calculateVWAP() const {
 //     if (dataPoints.empty()) return 0.0;
     
-//     double sumPriceVolume = 0.0;
-//     volume_t sumVolume = 0;
-    
-//     for (const auto& data : dataPoints) {
-//         sumPriceVolume += data.last * data.lastSize;
-//         sumVolume += data.lastSize;
-//     }
-    
-//     return (sumVolume > 0) ? sumPriceVolume / sumVolume : 0.0;
+//     // VWAP is already provided by IBKR and stored in StockData, just return it
+//     return dataPoints.back().vwap;
 // }
 
 // double TimeSeriesData::calculateMomentum(int periods) const {

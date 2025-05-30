@@ -5,6 +5,10 @@
 
 namespace stk_q
 {
+    // Data filtering interval - keeps only one tick per interval (in milliseconds)
+    // 250ms = 4 ticks per second, 500ms = 2 ticks per second, 125ms = 8 ticks per second
+    static constexpr int64_t TICK_INTERVAL_MS = 250;
+
     STK_Q::STK_Q() {
         // constructor
     }
@@ -14,94 +18,118 @@ namespace stk_q
     }
     
     void STK_Q::push(STK_Q_Data& data) {
-        // push data into the queue (copy version)
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_queue.push(data);
+        int64_t originalTime = data.time;
+        int64_t roundedTime  = (originalTime / TICK_INTERVAL_MS) * TICK_INTERVAL_MS;
+
+        // Skip if we already have a tick for this interval
+        if (m_orderedData.find(roundedTime) == m_orderedData.end()) {
+            // Make a local copy so we don't mutate the caller's data
+            STK_Q_Data copy = data;
+            copy.time = roundedTime;
+            m_orderedData.emplace(roundedTime, std::move(copy));
+
+            // Log every 10th stored tick
+            if (m_orderedData.size() % 10 == 0) {
+                std::cout << "[STK_Q] Stored tick. original=" << originalTime
+                          << "ms rounded=" << roundedTime
+                          << "ms, size=" << m_orderedData.size() << std::endl;
+            }
+        }
     }
     
     void STK_Q::push(STK_Q_Data&& data) {
-        // push data into the queue (move version for efficiency)
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_queue.push(std::move(data));
+        int64_t originalTime = data.time;
+        int64_t roundedTime  = (originalTime / TICK_INTERVAL_MS) * TICK_INTERVAL_MS;
+
+        if (m_orderedData.find(roundedTime) == m_orderedData.end()) {
+            data.time = roundedTime;
+            m_orderedData.emplace(roundedTime, std::move(data));
+            if (m_orderedData.size() % 10 == 0) {
+                std::cout << "[STK_Q] Stored tick. original=" << originalTime
+                          << "ms rounded=" << roundedTime
+                          << "ms, size=" << m_orderedData.size() << std::endl;
+            }
+        }
     }
-    
     bool STK_Q::pop(STK_Q_Data& outData){
         std::lock_guard<std::mutex> lock(m_mutex);
-        if(m_queue.empty()){
+        if(m_orderedData.empty()){
             return false;
         }
 
-        outData = m_queue.front();
-        m_queue.pop();
+        // Get the OLDEST data (earliest timestamp) from beginning of map
+        auto it = m_orderedData.begin();
+        outData = it->second;
+        m_orderedData.erase(it);
         return true;
     }
 
+    // Peek at the OLDEST data (earliest timestamp) from beginning of map
     bool STK_Q::peek(STK_Q_Data& outData) const {
         std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_mutex));
-        if(m_queue.empty()){
+        if (m_orderedData.empty()) {
             return false;
         }
+        outData = m_orderedData.begin()->second; // First element (earliest timestamp)
+        return true;
+    }
 
-        outData = m_queue.front();
+    // Peek at the NEWEST data (latest timestamp) from end of map 
+    bool STK_Q::peekLatest(STK_Q_Data& outData) const {
+        std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_mutex));
+        if (m_orderedData.empty()) {
+            return false;
+        }
+        outData = m_orderedData.rbegin()->second; // Last element (latest timestamp)
         return true;
     }
 
     bool STK_Q::empty() const {
         std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_mutex));
-        return m_queue.empty();
+        return m_orderedData.empty();
     }
 
     size_t STK_Q::size() const {
         std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_mutex));
-        return m_queue.size();
+        return m_orderedData.size();
     }
     
     void STK_Q::clear(){
         std::lock_guard<std::mutex> lock(m_mutex);
-        std::queue<STK_Q_Data> empty;
-        std::swap(m_queue, empty);
+        m_orderedData.clear();
     }
 
     void STK_Q::print() const {
         std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_mutex));
-        // Create a copy of the queue for printing
-        std::queue<STK_Q_Data> temp = m_queue;
-        while(!temp.empty()){
-            STK_Q_Data data = temp.front();
-            temp.pop();
-            std::cout << "Symbol: " 
-                    << data.symbol << ", Price: " 
-                    << data.price << ", Time: " 
-                    << data.time << ", Size: " 
-                    << data.size << ", Exchange: " 
-                    << data.exchange 
-                    << std::endl;
+        // Print all data in chronological order with rich market data
+        for (const auto& [timestamp, data] : m_orderedData) {
+            std::cout << "Symbol: " << data.symbol 
+                      << ", Time: " << data.time
+                      << ", Last: " << data.last
+                      << ", Bid: " << data.bid << "x" << data.bidSize
+                      << ", Ask: " << data.ask << "x" << data.askSize
+                      << ", Volume: " << data.volume
+                      << ", VWAP: " << data.vwap
+                      << ", Exchange: " << data.exchange 
+                      << std::endl;
         }
     }
     
     void STK_Q::removeOlderThan(uint64_t cutoffTime) {
         std::lock_guard<std::mutex> lock(m_mutex);
         
-        // If queue is empty, nothing to do
-        if (m_queue.empty()) {
+        // If map is empty, nothing to do
+        if (m_orderedData.empty()) {
             return;
         }
         
-        // Create a temporary queue to hold items newer than the cutoff time
-        std::queue<STK_Q_Data> newQueue;
-        
-        // Process all elements from the current queue
-        while (!m_queue.empty()) {
-            STK_Q_Data data = m_queue.front();
-            m_queue.pop();
-            
-            // Only keep data items that are newer than the cutoff time
-            if (static_cast<uint64_t>(data.time) >= cutoffTime) {
-                newQueue.push(std::move(data));
-            }
+        // Since map is sorted by timestamp, we can efficiently remove old entries
+        // from the beginning until we reach the cutoff time
+        auto it = m_orderedData.begin();
+        while (it != m_orderedData.end() && static_cast<uint64_t>(it->first) < cutoffTime) {
+            it = m_orderedData.erase(it);  // erase returns iterator to next element
         }
-        
-        // Replace the old queue with the filtered one
-        m_queue = std::move(newQueue);
     }
 }// namespace stk_q

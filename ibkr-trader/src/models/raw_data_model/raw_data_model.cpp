@@ -55,11 +55,48 @@ bool RawDataModel::initFromJson(const nlohmann::json& jsonData) {
 // Convert StockData to STK_Q_Data
 stk_q::STK_Q_Data RawDataModel::convertTickToQueueData(const stock_data_tick::StockData& stockData) const {
     stk_q::STK_Q_Data queueData;
+    
+    // Core identification
     queueData.symbol = m_symbol;
-    queueData.price = stockData.last;
-    queueData.time = static_cast<long>(stockData.timestamp);
-    queueData.size = stockData.volume;
+    // Convert nanoseconds timestamp to milliseconds using std::chrono for reliability
+    auto ns = std::chrono::nanoseconds(stockData.timestamp);
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(ns);
+    queueData.time = ms.count();
     queueData.exchange = stockData.exchange;
+    
+    // Core market data
+    queueData.bid = stockData.bid;
+    queueData.ask = stockData.ask;
+    queueData.last = stockData.last;
+    queueData.bidSize = static_cast<int>(stockData.bidSize);
+    queueData.askSize = static_cast<int>(stockData.askSize);
+    queueData.lastSize = static_cast<int>(stockData.lastSize);
+    queueData.volume = static_cast<int>(stockData.volume);
+    
+    // OHLC data
+    queueData.open = stockData.open;
+    queueData.high = stockData.high;
+    queueData.low = stockData.low;
+    queueData.close = stockData.close;
+    
+    // Derived metrics
+    queueData.mid = stockData.mid;
+    queueData.spread = stockData.spread;
+    queueData.spreadPercent = stockData.spreadPercent;
+    queueData.vwap = stockData.vwap;
+    queueData.imbalance = stockData.imbalance;
+    
+    // Technical indicators
+    queueData.rsi = stockData.rsi;
+    queueData.ema9 = stockData.ema9;
+    queueData.ema26 = stockData.ema26;
+    queueData.alma = stockData.alma;
+    queueData.chaikin = stockData.chaikin;
+    
+    // Backward compatibility fields
+    queueData.price = stockData.last;     // For any code still using 'price'
+    queueData.size = static_cast<int>(stockData.volume);  // For any code still using 'size'
+    
     return queueData;
 }
 
@@ -70,7 +107,6 @@ void RawDataModel::addTick(const stock_data_tick::StockData& stockData) {
     
     // ********************************************************************
     // IMPORTANT DESIGN DECISION:
-    // Stock data is stored ONLY in the queue (STK_Q).
     // The ModelManager will prune the queue based on time window settings.
     // ********************************************************************
     
@@ -144,16 +180,40 @@ bool RawDataModel::getLatestTickFromQueue(stock_data_tick::StockData& outTick) c
     }
     
     stk_q::STK_Q_Data data;
-    if (m_stockQueue->peek(data)) {
-        // Convert queue data to StockData format
+    if (m_stockQueue->peekLatest(data)) {
+        // Convert queue data to StockData format using all the rich data we now store
         outTick.symbol = m_symbol;
         outTick.timestamp = data.time;
         outTick.exchange = data.exchange;
-        outTick.last = data.price;  // This is stockData->last
-        outTick.volume = data.size;  // This is stockData->volume
         
-        // Calculate derived metrics
-        outTick.calculateDerivedMetrics();
+        // Core market data
+        outTick.bid = data.bid;
+        outTick.ask = data.ask;
+        outTick.last = data.last;
+        outTick.bidSize = data.bidSize;
+        outTick.askSize = data.askSize;
+        outTick.lastSize = data.lastSize;
+        outTick.volume = data.volume;
+        
+        // OHLC data
+        outTick.open = data.open;
+        outTick.high = data.high;
+        outTick.low = data.low;
+        outTick.close = data.close;
+        
+        // Derived metrics
+        outTick.mid = data.mid;
+        outTick.spread = data.spread;
+        outTick.spreadPercent = data.spreadPercent;
+        outTick.vwap = data.vwap;
+        outTick.imbalance = data.imbalance;
+        
+        // Technical indicators
+        outTick.rsi = data.rsi;
+        outTick.ema9 = data.ema9;
+        outTick.ema26 = data.ema26;
+        outTick.alma = data.alma;
+        outTick.chaikin = data.chaikin;
         
         return true;
     }

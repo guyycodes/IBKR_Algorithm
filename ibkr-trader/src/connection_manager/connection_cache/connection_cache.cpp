@@ -4,6 +4,7 @@
 #include "../decoder/decoder.hpp"  // Include IBKRDecoder for special size value handling
 #include <iostream>
 #include <chrono>
+#include <iomanip>
 
 namespace connection {
 
@@ -39,7 +40,7 @@ ConnectionCache::MergeResult ConnectionCache::mergeWithCacheAndTrackChanges(
     double high,
     double low,
     double close,
-    double wap
+    double vwap
 ) {
     // Get existing cached data for this symbol (creates entry if first time)
     // NOTE: For single-symbol usage, this is always the same object - no memory growth
@@ -97,7 +98,7 @@ ConnectionCache::MergeResult ConnectionCache::mergeWithCacheAndTrackChanges(
     if (high > 0) cached.high = high; // ← Only update if new data (updates every 5 seconds)
     if (low > 0) cached.low = low; // ← Only update if new data (updates every 5 seconds)
     if (close > 0) cached.close = close; // ← Only update if new data (updates every 5 seconds)
-    if (wap > 0) cached.wap = wap; 
+    if (vwap > 0) cached.vwap = vwap; 
     
     // Set the midPoint (prioritize pre-calculated over calculated)
     if (usePreCalculatedMidPoint) {
@@ -110,12 +111,46 @@ ConnectionCache::MergeResult ConnectionCache::mergeWithCacheAndTrackChanges(
     // NOTE: This keeps the single symbol "fresh" so it's never pruned
     cached.timestamp = std::chrono::system_clock::now().time_since_epoch().count();
     
-    // Check if data is complete (has all required tick-by-tick fields)
+    // Check if data is complete (has essential tick-by-tick fields)
     bool isComplete = (cached.last > 0 && 
-                      cached.bid > 0 && 
-                      cached.ask > 0 && 
-                      cached.bidSize > 0 && 
-                      cached.askSize > 0);
+                                 cached.bid > 0 && 
+                                 cached.ask > 0 && 
+                                 cached.bidSize > 0 && 
+                                 cached.askSize > 0 &&
+                                 cached.timestamp > 0 &&
+                                 cached.vwap > 0);
+
+    
+    // Debug: Log what fields we have/don't have
+    if (!isComplete) {
+        std::cout << "[Cache][DEBUG] ❌ Data incomplete for " << symbol << ":" << std::endl;
+        std::cout << "  open: " << cached.open << " (optional)" << std::endl;
+        std::cout << "  high: " << cached.high << " (optional)" << std::endl;
+        std::cout << "  low: " << cached.low << " (optional)" << std::endl;
+        std::cout << "  close: " << cached.close << " (optional)" << std::endl;
+        std::cout << "  last: " << cached.last << " (required > 0)" << std::endl;
+        std::cout << "  bid: " << cached.bid << " (required > 0)" << std::endl;
+        std::cout << "  ask: " << cached.ask << " (required > 0)" << std::endl;
+        std::cout << "  bidSize: " << cached.bidSize << " (optional)" << std::endl;
+        std::cout << "  askSize: " << cached.askSize << " (optional)" << std::endl;
+        std::cout << "  vwap: " << cached.vwap << " (optional)" << std::endl;
+        std::cout << "  timestamp: " << cached.timestamp << " (required > 0)" << std::endl;
+        std::cout << "  volume: " << cached.volume << " (required > 0)" << std::endl;
+    } else {
+        std::cout << "[Cache][DEBUG] ✅ Data ready for " << symbol << std::endl;
+        std::cout << "  open: " << cached.open  << std::endl;
+        std::cout << "  high: " << cached.high << std::endl;
+        std::cout << "  low: " << cached.low << std::endl;
+        std::cout << "  close: " << cached.close << std::endl;
+        std::cout << "  last $: " << cached.last << std::endl;
+        std::cout << "  bid: " << cached.bid << std::endl;
+        std::cout << "  ask: " << cached.ask << std::endl;
+        std::cout << "  bidSize: " << cached.bidSize << std::endl;
+        std::cout << "  askSize: " << cached.askSize << std::endl;
+        std::cout << "  vwap: " << cached.vwap << std::endl;
+        std::cout << "  timestamp: " << cached.timestamp << std::endl;
+        std::cout << "  volume: " << cached.volume << std::endl;
+    }
     
     // Return result with change tracking
     MergeResult result;
@@ -141,11 +176,11 @@ stock_data_tick::StockData ConnectionCache::mergeWithCache(
     double high,
     double low,
     double close,
-    double wap
+    double vwap
 ) {
     // Use the enhanced method and return just the data for backward compatibility
     auto result = mergeWithCacheAndTrackChanges(symbol, timestamp, price, volume, bid, ask, 
-                                               bidSize, askSize, exchange, open, high, low, close, wap);
+                                               bidSize, askSize, exchange, open, high, low, close, vwap);
     return result.data;
 }
 
