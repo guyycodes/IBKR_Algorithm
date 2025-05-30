@@ -395,4 +395,34 @@ std::pair<double, double> VolumeProfileMap::find_value_area(double percentage) c
     return {bucket_index_to_price(lower_bucket), bucket_index_to_price(upper_bucket)};
 }
 
+void VolumeProfileMap::print_volume_map() const {
+    std::cout << "=== VOLUME MAP CONTENTS ===" << std::endl;
+    std::cout << "Price Increment: $" << std::fixed << std::setprecision(4) << price_increment_ << std::endl;
+    
+    if (volume_map_.empty()) {
+        std::cout << "Volume map is empty." << std::endl;
+        return;
+    }
+    
+    std::cout << "Populated buckets:" << std::endl;
+    for (const auto& [bucket_index, volumes] : volume_map_) {
+        if (!volumes.empty()) {
+            double price = bucket_index_to_price(bucket_index);
+            std::cout << "Bucket " << bucket_index << " (Price: $" 
+                      << std::fixed << std::setprecision(4) << price << "): ";
+            
+            // Print all volumes in the multiset
+            std::cout << "{";
+            auto it = volumes.begin();
+            for (size_t i = 0; i < volumes.size(); ++i) {
+                std::cout << *it;
+                if (i < volumes.size() - 1) std::cout << ", ";
+                ++it;
+            }
+            std::cout << "}" << std::endl;
+        }
+    }
+    std::cout << "Total populated buckets: " << volume_map_.size() << std::endl;
+}
+
 } // namespace volume_profile_map

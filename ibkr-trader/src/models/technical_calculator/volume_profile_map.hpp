@@ -118,6 +118,12 @@ public:
      * @return The bucket price in dollars
      */
     double bucket_index_to_price(int bucket_index) const;
+    
+    /**
+     * Print the current volume map for debugging/inspection
+     * Shows only buckets that contain volumes
+     */
+    void print_volume_map() const;
 
 private:
     static constexpr int CENTS_PER_DOLLAR = 100;

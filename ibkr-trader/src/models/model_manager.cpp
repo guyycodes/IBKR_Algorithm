@@ -738,4 +738,25 @@ size_t ModelManager::processQueueData(size_t maxItems) {
     return processedCount;
 }
 
+/**
+ * Add an individual trade to the volume profile
+ * This method is called from connection.cpp when tick-by-tick trade data arrives
+ * 
+ * @param price The trade price
+ * @param volume The trade volume
+ */
+void ModelManager::addIndividualTrade(double price, int volume) {
+    if (volume <= 0) {
+        return; // Skip invalid volume
+    }
+    
+    // Add the trade to the volume profile
+    m_volumeProfile.add_transaction(price, volume);
+    
+    // Log the trade addition for debugging
+    std::cout << "[VolumeProfile][Symbol: " << getSymbol() << "] "
+              << "Added trade: " << volume << " shares at $" 
+              << std::fixed << std::setprecision(4) << price << std::endl;
+}
+
 } // namespace model_manager 

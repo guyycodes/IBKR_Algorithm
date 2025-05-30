@@ -9,7 +9,9 @@
 #include "../decoder/frame_analyzer.hpp"  // Include FrameAnalyzer for tick string field 48 analysis
 
 namespace connection {
-
+// reqMarketData: will setup the tickString, tickGeneric, tickPrice, tickSize callbacks every 250ms
+// reqTickByTick: will get the ticks as they come in
+// realTimeBars: will get the 5-second bar updates
     // Define connection constants
     const char* HOST = "host.docker.internal";
     // Paper Trading port is 4002, Live Trading would be 7496
@@ -36,8 +38,6 @@ namespace connection {
     IBKRTrader::~IBKRTrader() {
         // Stop any running data stream
         stopScalpingDataStream();
-
-        
         // Clean up the client
         delete m_client;
     }
@@ -244,10 +244,6 @@ namespace connection {
             std::cerr << "[ERROR] Cannot request tick-by-tick data: not connected" << std::endl;
             return;
         }
-        
-        std::cout << "[INFO] Requesting tick-by-tick data for " << symbol 
-                  << " with reqId: " << reqId 
-                  << ", type: " << tickType << std::endl;
                   
         // Note: Tick-by-tick data requires market data subscription in IB
         // For delayed data users, this will either not work or provide delayed data
@@ -268,11 +264,6 @@ namespace connection {
             timestamp = std::chrono::system_clock::now().time_since_epoch().count();
         }
         
-        // Process potential special size values using the ConnectionCache
-        volume = m_connectionCache->decodeSpecialValue(volume, static_cast<int>(TickType::VOLUME));
-        bidSize = m_connectionCache->decodeSpecialValue(bidSize, static_cast<int>(TickType::BID_SIZE));
-        askSize = m_connectionCache->decodeSpecialValue(askSize, static_cast<int>(TickType::ASK_SIZE));
-        
         // Use the ConnectionCache to merge new data with cached data
         stock_data_tick::StockData stockData = m_connectionCache->mergeWithCache(
             m_symbol,
@@ -290,18 +281,6 @@ namespace connection {
             close,
             vwap
         );
-
-        // Handle individual trade data from tickByTickAllLast separately
-        if (price > 0 && volume > 0) {
-            std::cout << "[IndividualTrade][" << m_symbol << "] "
-                      << "Processing individual trade: " << volume << " shares at $" << price 
-                      << " (Conditions: " << (!specialConditions.empty() ? specialConditions : "none") << ")" << std::endl;
-            
-            // Send individual trade data directly to ModelManager (separate from cache)
-            // need to implement this
-            // m_modelManager->addIndividualTrade(price, volume);
-            return; // Early return - don't process as regular market data
-        }
         
         // Prune old entries from the cache (keep only last 60 minutes)
         m_connectionCache->pruneOldEntries(60);
@@ -369,7 +348,7 @@ namespace connection {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // STRING DATA CALLBACK
+    // STRING DATA CALLBACK : Sends VWAP only to ModelManager ✅
     // Processes string data (primarily timestamps) and routes relevant info to ModelManager
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickString(TickerId tickerId, TickType field, const std::string& value) {
@@ -391,13 +370,13 @@ namespace connection {
         }
         
         // Comment out the routing to ModelManager for now
-        // if (m_modelManager && tickerId == m_requestId) {
-        //     routeTickToModelManager(0, 0, lastTimestamp, 0, 0, 0, 0, "", "", 0, 0, 0, 0, 0, 0, 0);
-        // }
+        if (m_modelManager && tickerId == m_requestId) {
+            routeTickToModelManager(0, 0, 0, 0, 0, 0, 0, "", "", 0, 0, 0, 0, result.vwap);
+        }
     }
 
      ///////////////////////////////////////////////////////////////////////////
-     // REAL-TIME BAR DATA CALLBACK
+     // REAL-TIME BAR DATA CALLBACK : Passes OHLC to model manager for every 5 seconds ✅
      // Processes OHLC, volume and WAP from 5-second bars and routes to ModelManager
      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::realtimeBar(TickerId reqId, long time, double open, double high, 
@@ -463,16 +442,15 @@ namespace connection {
         std::cout << "===========================================" << std::endl;
         
         // Step 5: Keep routing commented out as requested
-        // if (m_modelManager && (reqId >= 6000 && reqId < 7000)) {
-        //     // Route to model manager would go here
-        // }
+        if (m_modelManager && (reqId >= 6000 && reqId < 7000)) {
+            routeTickToModelManager(0, 0, 0, 0, 0, 0, 0, "", "", analyzedData.open, analyzedData.high, analyzedData.low, analyzedData.close, 0);
+        }
     }
 
 
     ///////////////////////////////////////////////////////////////////////////
-    // TICK-BY-TICK TRADE DATA CALLBACK
+    // TICK-BY-TICK TRADE DATA CALLBACK : USED FOR VOLUME PROFILE, NOT MODEL MANAGER ✅
     // Processes detailed trade information and routes to ModelManager
-    // THIS PROVIDES REAL-TIME INDIVIDUAL TRADE VOLUMES (not cumulative)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickByTickAllLast(int reqId, int tickType, time_t time, double price, 
                                     Decimal size, const TickAttribLast& tickAttribLast, 
@@ -541,13 +519,22 @@ namespace connection {
         std::cout << "===============================================" << std::endl;
         
         // Step 5: Keep routing commented out as requested
-        // if (m_modelManager && reqId == m_requestId) {
-        //     // Route to model manager would go here
-        // }
+        if (m_modelManager && reqId == m_requestId) {
+             // Handle individual trade data from tickByTickAllLast to build the volume profile in model manager
+            if (price > 0 && volume > 0) {
+                std::cout << "[IndividualTrade][" << m_symbol << "] "
+                        << "Processing individual trade: " << volume << " shares at $" << price 
+                        << " (Conditions: " << (!specialConditions.empty() ? specialConditions : "none") << ")" << std::endl;
+                
+                // Send individual trade data directly to ModelManager (separate from cache)
+                // need to implement this
+                m_modelManager->addIndividualTrade(analyzedData.price, analyzedData.volume);
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // TICK-BY-TICK BID-ASK DATA CALLBACK
+    // TICK-BY-TICK BID-ASK DATA CALLBACK : Provides Model Manager - BID, ASK, BID SIZE, ASK SIZE & EPOCH TIME ✅
     // Processes detailed bid-ask information and routes to ModelManager
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickByTickBidAsk(int reqId, time_t time, double bidPrice, double askPrice, 
@@ -602,9 +589,9 @@ namespace connection {
         std::cout << "===============================================" << std::endl;
         
         // Step 5: Keep routing commented out as requested
-        // if (m_modelManager && reqId == m_requestId) {
-        //     // Route to model manager would go here
-        // }
+        if (m_modelManager && reqId == m_requestId) {
+            routeTickToModelManager(analyzedData.midPoint, 0, analyzedData.epochTime, analyzedData.bidPrice, analyzedData.askPrice, analyzedData.bidSize , analyzedData.askSize, "", "", 0, 0, 0, 0, 0);
+        }
     }
 
     void IBKRTrader::error(int id, long errorTime, int errorCode,
