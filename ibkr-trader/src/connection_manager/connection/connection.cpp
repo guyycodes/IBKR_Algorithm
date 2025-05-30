@@ -249,8 +249,9 @@ namespace connection {
         // For delayed data users, this will either not work or provide delayed data
         m_client->reqTickByTickData(reqId, contract, tickType, numberOfTicks, ignoreSize);
     }
-        // Route tick market data to ModelManager/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void IBKRTrader::routeTickToModelManager(double price, double volume, uint64_t timestamp,
+    
+    // Route tick market data to ModelManager///////midPoint is pre-calcualted//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    void IBKRTrader::routeTickToModelManager(double midPoint, double volume, uint64_t timestamp,
                                            double bid, double ask, double bidSize, double askSize,
                                            const std::string& exchange, const std::string& specialConditions,
                                            double open, double high, double low, double close, double vwap) {
@@ -264,12 +265,12 @@ namespace connection {
             timestamp = std::chrono::system_clock::now().time_since_epoch().count();
         }
         
-        // Use the ConnectionCache to merge new data with cached data
-        stock_data_tick::StockData stockData = m_connectionCache->mergeWithCache(
+        // Use the enhanced ConnectionCache method to merge data and track tick-by-tick changes
+        auto cacheResult = m_connectionCache->mergeWithCacheAndTrackChanges(
             m_symbol,
             timestamp,
-            price,
-            volume,
+            midPoint,
+            volume, // this is total exchange volume, not volume for this symbol
             bid,
             ask,
             bidSize,
@@ -285,70 +286,39 @@ namespace connection {
         // Prune old entries from the cache (keep only last 60 minutes)
         m_connectionCache->pruneOldEntries(60);
         
-        // If we have a new "last" price but no bid/ask, use it to update the last price
-        if (price > 0 && stockData.bid == 0 && stockData.ask == 0) {
-            m_lastPrice = price;
+        // Handle fallback pricing logic
+        stock_data_tick::StockData stockData = cacheResult.data;
+        
+        // Store the midPoint for future fallback use if needed
+        if (midPoint > 0) {
+            m_lastPrice = midPoint;
         }
         
-        // If we have bid/ask but no last price, use midpoint
-        if (stockData.last == 0 && bid > 0 && ask > 0) {
-            stockData.last = (bid + ask) / 2.0;
-        } else if (stockData.last == 0 && m_lastPrice > 0) {
-            // If no new price and no bid/ask, use the last known price
+        // Only use fallback if cache couldn't establish a last price AND we have no current data
+        if (stockData.last == 0 && m_lastPrice > 0) {
+            // Use the last known price as final fallback
             stockData.last = m_lastPrice;
+            std::cout << "[Connection] Using last known midPoint price as final fallback for " << m_symbol << std::endl;
         }
         
-        // Check if we have a complete data element before processing
-        bool isComplete = (stockData.last > 0 && 
-                          stockData.bid > 0 && 
-                          stockData.ask > 0 && 
-                          stockData.bidSize > 0 && 
-                          stockData.askSize > 0);
+        // NEW LOGIC: Send to ModelManager when data is complete AND/OR tick-by-tick data changed
+        bool shouldSendData = cacheResult.isComplete && cacheResult.tickByTickChanged;
         
-        if (isComplete) {
-        
-        // Get thread ID for logging
-        std::stringstream threadIdStr;
-        threadIdStr << std::this_thread::get_id();
-        
-        // Log the data being sent to ModelManager (compact format)
-        std::cout << "[Data][" << m_symbol << "] "
-                  << "Last:" << (stockData.last > 0 ? std::to_string(stockData.last) : "-") << " "
-                  << "Bid:" << (stockData.bid > 0 ? std::to_string(stockData.bid) : "-") << " "
-                  << "Ask:" << (stockData.ask > 0 ? std::to_string(stockData.ask) : "-") << " "
-                  << "V:" << (stockData.volume > 0 ? std::to_string(stockData.volume) : "-") << " "
-                  << "BidSize:" << (stockData.bidSize > 0 ? std::to_string(stockData.bidSize) : "-") << " "
-                  << "AskSize:" << (stockData.askSize > 0 ? std::to_string(stockData.askSize) : "-") << " "
-                  << "OHLC:" << (stockData.open > 0 ? std::to_string(stockData.open) : "-") << "/"
-                            << (stockData.high > 0 ? std::to_string(stockData.high) : "-") << "/"
-                            << (stockData.low > 0 ? std::to_string(stockData.low) : "-") << "/"
-                            << (stockData.close > 0 ? std::to_string(stockData.close) : "-") << " "
-                  << "Ex:" << (!stockData.exchange.empty() ? stockData.exchange : "-") << " "
-                  << "Cond:" << (!specialConditions.empty() ? specialConditions : "-") << " " 
-                  << "Time:" << (stockData.timestamp > 0 ? std::to_string(stockData.timestamp) : "-") << " "
-                  << "VWAP:" << (stockData.vwap > 0 ? std::to_string(stockData.vwap) : "-") << "\n ready to send" << "\n" << std::endl;
-        
-        // Add debug output to see if we have any OHLC data
-        if (stockData.open > 0 || stockData.high > 0 || stockData.low > 0 || stockData.close > 0) {
-            std::cout << "[DEBUG][OHLC] Received valid OHLC data: " 
-                      << stockData.open << "/" << stockData.high << "/" << stockData.low << "/" << stockData.close << std::endl;
-        }
-        
-        // Add debug output for VWAP
-        if (stockData.vwap > 0) {
-            std::cout << "[DEBUG][VWAP] StockData with VWAP: " << stockData.vwap << " ready to send" << std::endl;
-        }
-        
-        // Send to ModelManager
-        m_modelManager->addTick(stockData);
+        if (shouldSendData) {
+            // Send to ModelManager
+            m_modelManager->addTick(stockData);
         } else {
-            // Log that we're skipping incomplete data
-            std::cout << "[Data][" << m_symbol << "] Incomplete data, waiting for more fields before processing" << std::endl;
+            // Log why we're not sending
+            if (!cacheResult.isComplete) {
+                std::cout << "[Data][" << m_symbol << "] Incomplete data, waiting for more fields before processing" << std::endl;
+            } else if (!cacheResult.tickByTickChanged) {
+                std::cout << "[Data][" << m_symbol << "] Data complete but no tick-by-tick changes, skipping" << std::endl;
+            }
         }
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // STRING DATA CALLBACK : Sends VWAP only to ModelManager ✅
+    // STRING DATA CALLBACK : Sends VWAP & VOLUME(Total Market) to ModelManager ✅
     // Processes string data (primarily timestamps) and routes relevant info to ModelManager
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickString(TickerId tickerId, TickType field, const std::string& value) {
@@ -367,11 +337,11 @@ namespace connection {
                 
                 std::cout << std::endl;
             }
-        }
-        
-        // Comment out the routing to ModelManager for now
-        if (m_modelManager && tickerId == m_requestId) {
-            routeTickToModelManager(0, 0, 0, 0, 0, 0, 0, "", "", 0, 0, 0, 0, result.vwap);
+            
+            // Route to ModelManager (moved inside the if block where result is available)
+            if (m_modelManager && tickerId == m_requestId) {
+                routeTickToModelManager(0, result.volume, 0, 0, 0, 0, 0, "", "", 0, 0, 0, 0, result.vwap);
+            }
         }
     }
 
@@ -521,14 +491,13 @@ namespace connection {
         // Step 5: Keep routing commented out as requested
         if (m_modelManager && reqId == m_requestId) {
              // Handle individual trade data from tickByTickAllLast to build the volume profile in model manager
-            if (price > 0 && volume > 0) {
+            if (price > 0 && analyzedData.volume > 0) {
                 std::cout << "[IndividualTrade][" << m_symbol << "] "
-                        << "Processing individual trade: " << volume << " shares at $" << price 
+                        << "Processing individual trade: " << analyzedData.volume << " shares at $" << price 
                         << " (Conditions: " << (!specialConditions.empty() ? specialConditions : "none") << ")" << std::endl;
                 
                 // Send individual trade data directly to ModelManager (separate from cache)
-                // need to implement this
-                m_modelManager->addIndividualTrade(analyzedData.price, analyzedData.volume);
+                m_modelManager->addTradeTick(analyzedData.price, analyzedData.volume);
             }
         }
     }

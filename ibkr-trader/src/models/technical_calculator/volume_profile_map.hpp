@@ -12,6 +12,7 @@
 #include <set>
 #include <string>
 #include <utility>
+#include <iostream>
 
 namespace volume_profile_map {
 

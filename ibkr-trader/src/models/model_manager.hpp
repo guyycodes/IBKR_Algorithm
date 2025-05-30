@@ -223,7 +223,7 @@ public:
      * @param price The trade price
      * @param volume The trade volume
      */
-    void addIndividualTrade(double price, int volume);
+    void addTradeTick(double price, int volume);
     
     /**
      * Get the symbol this model is for

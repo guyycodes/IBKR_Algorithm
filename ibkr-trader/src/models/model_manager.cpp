@@ -334,6 +334,45 @@ bool ModelManager::initFromJson(const nlohmann::json& jsonData) {
  * @param tick The new market data tick to add
  */
 void ModelManager::addTick(const stock_data_tick::StockData& tick) {
+    // ========== SUCCESSFULLY RECEIVED COMPLETE TICK DATA ==========
+    std::cout << "\n[ModelManager] ✅ addTick() CALLED SUCCESSFULLY" << std::endl;
+    std::cout << "Symbol: " << tick.symbol << " | Timestamp: " << tick.timestamp << std::endl;
+    
+    // Display core tick-by-tick data
+    std::cout << "TICK-BY-TICK DATA:" << std::endl;
+    std::cout << "  Last Price: $" << std::fixed << std::setprecision(4) << tick.last << std::endl;
+    std::cout << "  Bid: $" << std::fixed << std::setprecision(4) << tick.bid 
+              << " x " << std::fixed << std::setprecision(0) << tick.bidSize << std::endl;
+    std::cout << "  Ask: $" << std::fixed << std::setprecision(4) << tick.ask 
+              << " x " << std::fixed << std::setprecision(0) << tick.askSize << std::endl;
+    std::cout << "  Spread: $" << std::fixed << std::setprecision(4) << (tick.ask - tick.bid) 
+              << " (" << std::fixed << std::setprecision(2) << ((tick.ask - tick.bid) / tick.last * 100) << "%)" << std::endl;
+    
+    // Display OHLC data (if available)
+    if (tick.open > 0 || tick.high > 0 || tick.low > 0 || tick.close > 0) {
+        std::cout << "OHLC DATA:" << std::endl;
+        if (tick.open > 0) std::cout << "  Open: $" << std::fixed << std::setprecision(4) << tick.open << std::endl;
+        if (tick.high > 0) std::cout << "  High: $" << std::fixed << std::setprecision(4) << tick.high << std::endl;
+        if (tick.low > 0) std::cout << "  Low: $" << std::fixed << std::setprecision(4) << tick.low << std::endl;
+        if (tick.close > 0) std::cout << "  Close: $" << std::fixed << std::setprecision(4) << tick.close << std::endl;
+    } else {
+        std::cout << "OHLC DATA: Not yet available (waiting for first 5-second bar)" << std::endl;
+    }
+    
+    // Display additional market data (if available)
+    if (tick.volume > 0 || tick.vwap > 0 || tick.wap > 0) {
+        std::cout << "MARKET DATA:" << std::endl;
+        if (tick.volume > 0) std::cout << "  Volume: " << std::fixed << std::setprecision(0) << tick.volume << " shares" << std::endl;
+        if (tick.vwap > 0) std::cout << "  VWAP: $" << std::fixed << std::setprecision(4) << tick.vwap << std::endl;
+        if (tick.wap > 0) std::cout << "  WAP: $" << std::fixed << std::setprecision(4) << tick.wap << std::endl;
+    }
+    
+    if (!tick.exchange.empty()) {
+        std::cout << "  Exchange: " << tick.exchange << std::endl;
+    }
+    
+    std::cout << "========================================" << std::endl;
+    
     // Calculate derived metrics
     stock_data_tick::StockData enrichedTick = tick;
     enrichedTick.calculateDerivedMetrics();
@@ -745,7 +784,7 @@ size_t ModelManager::processQueueData(size_t maxItems) {
  * @param price The trade price
  * @param volume The trade volume
  */
-void ModelManager::addIndividualTrade(double price, int volume) {
+void ModelManager::addTradeTick(double price, int volume) {
     if (volume <= 0) {
         return; // Skip invalid volume
     }

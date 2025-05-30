@@ -3,8 +3,12 @@
 // It stores the last known complete state for each symbol to handle IBKR's
 // incremental update pattern where only changed fields are sent
 //
-// IMPORTANT: This cache has no size limit or cleanup mechanism. It will grow
-// without bounds as more symbols are added, which could lead to memory issues
+// MEMORY CHARACTERISTICS FOR SINGLE-SYMBOL USAGE:
+// - Each ConnectionCache instance handles ONLY ONE symbol
+// - Cache contains exactly ONE StockData object that is reused indefinitely
+// - All updates are IN-PLACE modifications - no new allocations after first creation
+// - Memory footprint: ~200-300 bytes total (fixed, never grows)
+// - Pruning is a safety mechanism but essentially a no-op for single-symbol usage
 
 // connection_cache.hpp
 
@@ -30,7 +34,10 @@ namespace connection {
  * This cache exists because IBKR sends incremental updates (only changed fields) rather than 
  * complete snapshots. The cache maintains the last known full state for each symbol.
  * 
- * Each connection owns its own instance to ensure thread safety.
+ * SINGLE-SYMBOL DESIGN:
+ * Each connection owns its own instance to ensure thread safety and handles exactly ONE symbol.
+ * The cache performs in-place updates on a single StockData object, ensuring fixed memory usage.
+ * Pruning exists as a safety mechanism but is essentially a no-op for single-symbol usage.
  */
 class ConnectionCache {
 public:
@@ -53,7 +60,7 @@ public:
     stock_data_tick::StockData& getSymbolData(const std::string& symbol);
     
     /**
-     * @brief Merge new data with cached data, updating only non-zero/non-empty fields.
+     * @brief Merge new data with cached data and return both the merged data and change indicators
      * @param symbol The stock symbol
      * @param timestamp Current timestamp
      * @param price Last price (or 0 if not updated)
@@ -68,8 +75,33 @@ public:
      * @param low Low price (or 0 if not updated)
      * @param close Close price (or 0 if not updated)
      * @param wap Weighted average price (or 0 if not updated)
-     * @return StockData object with merged data
+     * @return MergeResult struct containing merged data and change indicators
      */
+    struct MergeResult {
+        stock_data_tick::StockData data;
+        bool tickByTickChanged;  // True if bid, ask, bidSize, askSize, or midPoint changed
+        bool isComplete;         // True if data has all required fields
+    };
+    
+    // Enhanced merge method that tracks tick-by-tick changes
+    MergeResult mergeWithCacheAndTrackChanges(
+        const std::string& symbol,
+        uint64_t timestamp,
+        double price,
+        double volume,
+        double bid,
+        double ask,
+        double bidSize,
+        double askSize,
+        const std::string& exchange,
+        double open,
+        double high,
+        double low,
+        double close,
+        double wap
+    );
+
+    // Original method for backward compatibility
     stock_data_tick::StockData mergeWithCache(
         const std::string& symbol,
         uint64_t timestamp,
