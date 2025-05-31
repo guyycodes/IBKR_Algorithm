@@ -2,7 +2,7 @@
 #define MODEL_MANAGER_HPP
 
 #include "raw_data_model/raw_data_model.hpp"
-#include "technical_calculator/volume_profile_map.hpp"
+#include "volume_profile/volume_profile_map.hpp"
 #include "../connection_manager/connection_manager.hpp"
 #include "../util/time_ordered_tick_buffer/time_ordered_tick_buffer.hpp"
 #include "../util/time_ordered_tick_buffer/ring_buffer_trade_handler.hpp"
