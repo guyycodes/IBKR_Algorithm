@@ -11,19 +11,8 @@
 #include <algorithm>
 #include <mutex>
 #include "../../models/metrics_model/stock_data_tick.hpp"
-#include "../../models/technical_calculator/technical_calculator.hpp"
 #include <cstdint>
 
-// Forward declarations
-namespace technical_calculator {
-    class TechnicalCalculator;
-    
-    namespace config {
-        extern const int ALMA_WINDOW_SIZE;
-        extern const double ALMA_SIGMA;
-        extern const double ALMA_OFFSET;
-    }
-}
 
 namespace time_ordered_tick_buffer {
 
@@ -130,8 +119,6 @@ private:
     double m_almaSigma;
     double m_almaOffset;
     
-    // Technical calculator (using a pointer to avoid circular dependency)
-    std::unique_ptr<technical_calculator::TechnicalCalculator> m_calculator;
     
     // Last time we updated candles
     int64_t m_lastCandleUpdateTime;
@@ -174,6 +161,12 @@ private:
     // void updateChaikinForCandle(const Candle& candle, int64_t minuteIndex, bool isFirstTime);
     void updateRSIForCandle(double close);
     void updateATRForCandle(const Candle& prev, const Candle& curr);
+    double calculateALMA(
+        const std::vector<double>& prices,
+        int windowSize,
+        double sigma,
+        double offset
+    ) const;
     
     // Ring buffer and ALMA optimization methods
     void initializeAlmaWeights();

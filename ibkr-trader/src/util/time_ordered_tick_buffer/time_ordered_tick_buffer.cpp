@@ -61,7 +61,7 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
       m_windowMinutes(static_cast<size_t>(std::max<int64_t>(1, windowSizeMs / MS_PER_MINUTE))),
       m_lastCandleUpdateTime(0),
       m_candleUpdateFrequencyMs(1000),  // Default 1 second update frequency
-      m_calculator(std::make_unique<technical_calculator::TechnicalCalculator>()),
+
       m_almaDot(0.0),
       // --- NEW -------------------------------------------------------------
       m_priceRingHead(0),
@@ -102,7 +102,7 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
               << " second time window (" << m_windowMinutes << " minute ring buffers)" << std::endl;
 }
 
-// Destructor - unique_ptr automatically cleans up m_calculator
+// Destructor - unique_ptr automatically cleans up
 TimeOrderedTickBuffer::~TimeOrderedTickBuffer() = default;
 
 /**
@@ -445,7 +445,7 @@ TechnicalIndicators TimeOrderedTickBuffer::computeIndicatorsFromCandles() {
         if (closes.empty()) {
             indicators.alma = 0.0;
         } else {
-            indicators.alma = m_calculator->calculateALMA(
+            indicators.alma = calculateALMA(
                 closes,
                 m_almaSizeWindow,
                 m_almaSigma,
@@ -540,7 +540,7 @@ void TimeOrderedTickBuffer::updateRSIForCandle(double close) {
  * Computes the Gaussian-like weight vector for ALMA once during initialization.
  * This enables O(1) incremental ALMA updates instead of O(M) recalculation.
  * 
- * FIXED: Matches the traditional ALMA algorithm from TechnicalCalculator
+ * FIXED: Matches the traditional ALMA algorithm
  */
 void TimeOrderedTickBuffer::initializeAlmaWeights()
 {
@@ -654,6 +654,51 @@ void TimeOrderedTickBuffer::updateATRForCandle(const Candle& prev, const Candle&
     else {                                        // Wilder smoothing
         m_atr += (tr - m_atr) / ATR_PERIOD;       // 100% numerically stable
     }
+}
+
+/**
+ * calculateALMA() - ALMA Calculation
+ * 
+ * Computes the ALMA value for a given price series.
+ * Uses optimized calculation to avoid unnecessary memory allocations.
+ */
+double TimeOrderedTickBuffer::calculateALMA(
+    const std::vector<double>& prices,
+    int windowSize,
+    double sigma,
+    double offset
+) const
+{
+    // Need at least windowSize data points
+    if ((int)prices.size() < windowSize || windowSize <= 0) {
+        return 0.0;
+    }
+
+    // Constrain parameters to valid ranges
+    sigma = std::max(0.1, std::min(sigma, 1.0));
+    offset = std::max(0.0, std::min(offset, 10.0));
+
+    // Calculate distribution center point
+    double m = offset;
+    
+    // Calculate standard deviation factor
+    double s = windowSize / (sigma * 10.0);
+
+    // Build weights - optimized to avoid unnecessary memory allocations
+    double sumW = 0.0;
+    double weightedSum = 0.0;
+    int startIdx = static_cast<int>(prices.size()) - windowSize;
+
+    // Calculate weighted sum in a single pass
+    for (int i = 0; i < windowSize; ++i) {
+        double x = (double)i - m;
+        double weight = std::exp(-(x * x) / (2.0 * s * s));
+        sumW += weight;
+        weightedSum += prices[startIdx + i] * weight;
+    }
+
+    // Normalize and return
+    return (sumW > 0.0) ? (weightedSum / sumW) : 0.0;
 }
 
 /*

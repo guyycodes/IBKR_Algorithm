@@ -2,7 +2,6 @@
 #define MODEL_MANAGER_HPP
 
 #include "raw_data_model/raw_data_model.hpp"
-#include "technical_calculator/technical_calculator.hpp"
 #include "technical_calculator/volume_profile_map.hpp"
 #include "../connection_manager/connection_manager.hpp"
 #include "../util/time_ordered_tick_buffer/time_ordered_tick_buffer.hpp"
@@ -107,8 +106,6 @@ private:
     // This is the primary data model that contains all trading parameters and market data
     std::shared_ptr<raw_data_model::RawDataModel> m_rawDataModel;
     
-    // Technical calculator for this model
-    technical_calculator::TechnicalCalculator m_calculator;
     
     // Volume profile map for tracking order flow at different price levels
     volume_profile_map::VolumeProfileMap m_volumeProfile;
@@ -206,13 +203,6 @@ public:
      */
     std::shared_ptr<raw_data_model::RawDataModel> getRawDataModel() const;
     
-    /**
-     * Get the technical calculator for this model
-     * @return Reference to the technical calculator
-     */
-    technical_calculator::TechnicalCalculator& getCalculator() {
-        return m_calculator;
-    }
     
     /**
      * Get the volume profile map for this model
@@ -277,12 +267,6 @@ public:
      */
     void setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit);
     
-    /**
-     * Process a batch of data items from the queue
-     * @param maxItems Maximum number of items to process in one batch
-     * @return Number of items actually processed
-     */
-    size_t processQueueData(size_t maxItems);
     
     /**
      * Get the number of connection attempts made so far

@@ -426,26 +426,7 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
     enrichedTick.alma = indicators.alma;
     enrichedTick.atr = indicators.atr;
     
-    
-    // Check trading conditions
-    bool isValidCandidate = false;
-    if (indicators.isValid()) {
-        // Convert candle data for technical analysis
-        std::vector<double> prices, volumes;
-        
-        // Here we would extract prices and volumes from recent candles
-        // For simplicity we can use our indicators directly
-        
-        // Check if this is a valid trading candidate
-        isValidCandidate = m_calculator.isValidTradingCandidate(
-            prices, volumes, indicators.vwap);
-        
-        if (isValidCandidate) {
-            std::cout << "[ModelManager] VALID TRADING CANDIDATE FOUND: " << enrichedTick.symbol << std::endl;
-            // Here you would trigger your trading logic
-        }
-    }
-    
+
     // Get thread ID for logging
     std::stringstream threadIdStr;
     threadIdStr << std::this_thread::get_id();
@@ -486,7 +467,6 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
               << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
               << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
               << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
-              << "\n  Trading Candidate: " << (isValidCandidate ? "YES" : "NO")
               << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
               << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;
 
@@ -714,137 +694,5 @@ void ModelManager::setTimeWindow(size_t windowSize, TimeWindowUnit windowUnit) {
     pruneOldData();
 }
 
-/**
- * Process a batch of data items from the queue
- * 
- * This method is designed to be called from the ModelManager's thread.
- * It fetches a batch of items from the queue and processes them according
- * to the trading rules for this symbol.
- * 
- * @param maxItems Maximum number of items to process in one batch
- * @return Number of items actually processed
- */
-size_t ModelManager::processQueueData(size_t maxItems) {
-    // Check if we need to attempt connection
-    if (!isConnected()) {
-        // Don't attempt to connect if max retries have been reached
-        if (m_connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
-            connectToIBKR();
-        } else if (m_connectionAttempts == MAX_CONNECTION_ATTEMPTS) {
-            // Only print this message once when we hit the limit
-            std::cerr << "[ModelManager] Max connection attempts reached for " << getSymbol() 
-                      << ". Will continue processing without market data." << std::endl;
-            m_connectionAttempts++; // Increment to avoid printing this message again
-        }
-    }
-    
-    // Get the queue
-    auto* queue = m_rawDataModel->getStockQueue();
-    if (!queue) return 0;
-    
-    size_t processedCount = 0;
-    stk_q::STK_Q_Data data;
-    
-    // Process up to maxItems from the queue
-    for (size_t i = 0; i < maxItems; i++) {
-        // Process this tick data according to trading rules
-        // For now, just count it as processed
-        processedCount++;
-    }
-    
-    // Run calculations using TechnicalCalculator if we have enough data
-    if (queue->size() > 10) {  // A minimal threshold, adjust as needed
-        try {
-            // Get ticks in the current time window
-            auto ticks = getTicksInWindow();
-            
-            // Skip if we don't have enough data
-            if (ticks.size() < 10) {
-                return processedCount;
-            }
-            
-            // Extract prices and volumes for analysis
-            std::vector<double> prices;
-            std::vector<double> volumes;
-            std::vector<double> highs;
-            std::vector<double> lows;
-            std::vector<double> closes;
-            
-            for (const auto& tick : ticks) {
-                // In our simplified model, we use the same price for high/low/close
-                double price = tick.last;
-                prices.push_back(price);
-                highs.push_back(price);
-                lows.push_back(price);
-                closes.push_back(price);
-                volumes.push_back(tick.volume);
-            }
-            
-            // 1. Calculate VWAP
-            double vwap = m_calculator.calculateVWAP(prices, volumes);
-            
-            // 2. Check if this is a valid trading candidate (initial filter)
-            bool isValid = m_calculator.isValidTradingCandidate(prices, volumes, vwap);
-            
-            // 3. Calculate advanced indicators
-            // These will be useful for ongoing monitoring and exit decisions
-            double chaikinValue = 0.0;
-            double almaValue = 0.0;
-            
-            if (isValid && prices.size() >= 10) {
-                // Calculate Chaikin Oscillator (helps detect money flow)
-                chaikinValue = m_calculator.calculateChaikinOscillator(
-                    highs, lows, closes, volumes, 3, 10);
-                
-                // Calculate ALMA (smooth moving average for trend)
-                almaValue = m_calculator.calculateALMA(closes, 9, 0.85, 6.0);
-                
-                // In debug mode, we'll print advanced insights
-                #ifdef DEBUG
-                double atr = m_calculator.calculateATR(highs, lows, closes, 3);
-                
-                std::cout << "[TechnicalAnalysis][Symbol: " << getSymbol() << "] "
-                          << "Latest price: " << prices.back() 
-                          << ", VWAP: " << vwap 
-                          << ", Valid candidate: " << (isValid ? "YES" : "NO") << std::endl;
-                
-                std::cout << "[AdvancedMetrics][Symbol: " << getSymbol() << "] "
-                          << "ATR: " << atr
-                          << ", Chaikin: " << chaikinValue 
-                          << ", ALMA: " << almaValue
-                          << ", Price vs ALMA: " << (prices.back() > almaValue ? "ABOVE" : "BELOW")
-                          << ", Money Flow: " << (chaikinValue > 0 ? "POSITIVE" : "NEGATIVE") << std::endl;
-                #endif
-                
-                // Entry indicator example (not triggering actual trades here, just logging)
-                bool strongMoneyFlow = (chaikinValue > 0);
-                bool aboveAlma = (prices.back() > almaValue);
-                
-                if (isValid && strongMoneyFlow && aboveAlma) {
-                    std::cout << "[SIGNAL][Symbol: " << getSymbol() << "] "
-                              << "*** BULL SIGNAL ACTIVE *** "
-                              << "Price: " << prices.back() 
-                              << ", Chaikin: " << chaikinValue << std::endl;
-                }
-            }
-        } catch (const std::exception& e) {
-            // Just log the error and continue - don't let calculation errors
-            // disrupt the main data processing pipeline
-            std::cerr << "[Calculator][Symbol: " << getSymbol() << "] "
-                      << "Error calculating metrics: " << e.what() << std::endl;
-        }
-    }
-    
-    // Get thread ID for logging
-    if (processedCount > 0) {
-        std::stringstream threadIdStr;
-        threadIdStr << std::this_thread::get_id();
-        
-        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-                  << "Processed " << processedCount << " queue items" << std::endl;
-    }
-    
-    return processedCount;
-}
 
 } // namespace model_manager 
