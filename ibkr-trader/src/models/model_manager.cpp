@@ -423,7 +423,7 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
     enrichedTick.ema9 = indicators.ema9;
     enrichedTick.ema26 = indicators.ema26;
     enrichedTick.alma = indicators.alma;
-    enrichedTick.chaikin = indicators.chaikin;
+    // enrichedTick.chaikin = indicators.chaikin;
     
     // Check trading conditions
     bool isValidCandidate = false;
@@ -476,7 +476,7 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
               << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
               << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
               << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
-              << " ALMA=" << enrichedTick.alma << " Chaikin=" << enrichedTick.chaikin
+              << " ALMA=" << enrichedTick.alma
               << "\n  Trading Candidate: " << (isValidCandidate ? "YES" : "NO")
               << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
               << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;

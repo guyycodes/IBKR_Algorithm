@@ -37,7 +37,7 @@ struct TechnicalIndicators {
     double ema9 = 0.0;
     double ema26 = 0.0;
     double alma = 0.0;
-    double chaikin = 0.0;
+    // double chaikin = 0.0;  // Commented out temporarily
 
     bool isValid() const {
         // Check if we have valid indicator values
@@ -131,11 +131,11 @@ private:
     const int64_t m_candleUpdateFrequencyMs;   // Update frequency
     
     // Chaikin Oscillator state for incremental calculation
-    double m_runningADL = 0.0;        // Accumulation/Distribution Line
-    double m_emaADL_fast = std::numeric_limits<double>::quiet_NaN();  // Fast EMA of ADL
-    double m_emaADL_slow = std::numeric_limits<double>::quiet_NaN();  // Slow EMA of ADL
-    double m_lastChaikin = 0.0;       // Most recent Chaikin value for quick access
-    std::map<int64_t, double> m_candleMFV;  // Track MFV by minute timestamp for rolling window
+    // double m_runningADL = 0.0;        // Accumulation/Distribution Line
+    // double m_emaADL_fast = std::numeric_limits<double>::quiet_NaN();  // Fast EMA of ADL
+    // double m_emaADL_slow = std::numeric_limits<double>::quiet_NaN();  // Slow EMA of ADL
+    // double m_lastChaikin = 0.0;       // Most recent Chaikin value for quick access
+    // std::map<int64_t, double> m_candleMFV;  // Track MFV by minute timestamp for rolling window
     
     // RSI state for incremental calculation
     double m_prevClose = std::numeric_limits<double>::quiet_NaN();
@@ -158,7 +158,7 @@ private:
     void pruneOldTicks();
     void updateCandles();
     TechnicalIndicators computeIndicatorsFromCandles();
-    void updateChaikinForCandle(const Candle& candle, int64_t minuteIndex, bool isFirstTime);
+    // void updateChaikinForCandle(const Candle& candle, int64_t minuteIndex, bool isFirstTime);
     void updateRSIForCandle(double close);
     
     // Ring buffer and ALMA optimization methods

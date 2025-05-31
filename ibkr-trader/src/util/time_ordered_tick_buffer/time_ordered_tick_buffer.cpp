@@ -70,14 +70,15 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
       m_candleRingCount(0),
       m_lastProcessedMinute(-1),
       m_prevClose(std::numeric_limits<double>::quiet_NaN()),
-      m_emaADL_fast(std::numeric_limits<double>::quiet_NaN()),
-      m_emaADL_slow(std::numeric_limits<double>::quiet_NaN()),
+      // m_emaADL_fast(std::numeric_limits<double>::quiet_NaN()),
+      // m_emaADL_slow(std::numeric_limits<double>::quiet_NaN()),
       m_emaPriceFast(std::numeric_limits<double>::quiet_NaN()),
       m_emaPriceSlow(std::numeric_limits<double>::quiet_NaN()),
       m_avgGain(0.0),
       m_avgLoss(0.0),
       m_rsiWarmupCount(0),
       m_lastRSI(50.0)
+      // m_lastChaikin(0.0)  // Initialize Chaikin to neutral starting value
       // --------------------------------------------------------------------
 {
     // Initialize fixed-size ring buffers for O(1) operations
@@ -274,22 +275,23 @@ void TimeOrderedTickBuffer::updateCandles() {
     int64_t windowStart = (currentTime - m_windowSizeMs) / MS_PER_MINUTE;
     
     // Maintain rolling ADL by removing old candles' MFV contributions
-    auto mfvIt = m_candleMFV.begin();
-    while (mfvIt != m_candleMFV.end()) {
-        if (mfvIt->first < windowStart) {
-            m_runningADL -= mfvIt->second;
-            mfvIt = m_candleMFV.erase(mfvIt);
-        } else {
-            break;
-        }
-    }
+    // auto mfvIt = m_candleMFV.begin();
+    // while (mfvIt != m_candleMFV.end()) {
+    //     if (mfvIt->first < windowStart) {
+    //         m_runningADL -= mfvIt->second;
+    //         mfvIt = m_candleMFV.erase(mfvIt);
+    //     } else {
+    //         break;
+    //     }
+    // }
     
     // Clamp ADL to prevent numerical drift
-    if (!std::isfinite(m_runningADL)) {
-        m_runningADL = 0.0;
-    }
+    // if (!std::isfinite(m_runningADL)) {
+    //     m_runningADL = 0.0;
+    // }
     
-    bool isFirstTime = std::isnan(m_emaADL_fast);
+    // bool isFirstTime = std::isnan(m_emaADL_fast);
+    bool isFirstTime = true;  // Simplified since Chaikin is disabled
     
     // Process NEW candles from ring buffer
     std::vector<std::pair<int64_t, TemporaryCandle*>> newCandles;
@@ -318,7 +320,7 @@ void TimeOrderedTickBuffer::updateCandles() {
         );
         
         // Update technical indicators
-        updateChaikinForCandle(candle, minuteIndex, isFirstTime);
+        // updateChaikinForCandle(candle, minuteIndex, isFirstTime);
         updateRSIForCandle(candle.close);
         
         // Update price EMAs incrementally
@@ -434,51 +436,53 @@ TechnicalIndicators TimeOrderedTickBuffer::computeIndicatorsFromCandles() {
     
     // Use incremental RSI and Chaikin calculations
     indicators.rsi = m_lastRSI;
-    indicators.chaikin = m_lastChaikin;
+    // indicators.chaikin = m_lastChaikin;
     
     std::cout << "[TimeOrderedTickBuffer] Calculated indicators: "
               << "VWAP=" << std::fixed << std::setprecision(4) << indicators.vwap
               << ", EMA9=" << indicators.ema9 
               << ", EMA26=" << indicators.ema26
               << ", RSI=" << std::setprecision(1) << indicators.rsi
-              << ", ALMA=" << std::setprecision(4) << indicators.alma << " (fixed incremental)"
-              << ", Chaikin=" << std::setprecision(6) << indicators.chaikin << std::endl;
+              << ", ALMA=" << std::setprecision(4) << indicators.alma << " (fixed incremental)" << std::endl;
+              // << ", Chaikin=" << std::setprecision(6) << indicators.chaikin << std::endl;
     
     std::cout.unsetf(std::ios_base::fixed);  // Restore default formatting
     
     return indicators;
 }
 
+/*
 /**
  * updateChaikinForCandle() - Consolidated Chaikin Oscillator Calculation
  * 
  * Single entry point for Chaikin calculation with rolling window support.
  * Computes MFM, MFV, updates ADL, EMAs, and stores MFV for rolling window.
  */
-void TimeOrderedTickBuffer::updateChaikinForCandle(const Candle& candle,
-                                                   int64_t minuteIndex,
-                                                   bool    isFirstTime)
-{
-    const double range = candle.high - candle.low;
-    const double mfm   = (range == 0.0) ? 0.0
-                         : std::clamp((2.0 * candle.close - candle.high - candle.low) / range,
-                                      -1.0, 1.0);
+// void TimeOrderedTickBuffer::updateChaikinForCandle(const Candle& candle,
+//                                                    int64_t minuteIndex,
+//                                                    bool    isFirstTime)
+// {
+//     const double range = candle.high - candle.low;
+//     const double mfm   = (range == 0.0) ? 0.0
+//                          : std::clamp((2.0 * candle.close - candle.high - candle.low) / range,
+//                                       -1.0, 1.0);
 
-    const double mfv = mfm * candle.volume;
+//     const double mfv = mfm * candle.volume;
 
-    // --- running ADL and EMA update ---------------------------------
-    m_runningADL += mfv;
+//     // --- running ADL and EMA update ---------------------------------
+//     m_runningADL += mfv;
 
-    if (isFirstTime) {
-        m_emaADL_fast = m_emaADL_slow = m_runningADL;
-    } else {
-        m_emaADL_fast += ALPHA_FAST * (m_runningADL - m_emaADL_fast);
-        m_emaADL_slow += ALPHA_SLOW * (m_runningADL - m_emaADL_slow);
-    }
+//     if (isFirstTime) {
+//         m_emaADL_fast = m_emaADL_slow = m_runningADL;
+//     } else {
+//         m_emaADL_fast += ALPHA_FAST * (m_runningADL - m_emaADL_fast);
+//         m_emaADL_slow += ALPHA_SLOW * (m_runningADL - m_emaADL_slow);
+//     }
 
-    m_lastChaikin = m_emaADL_fast - m_emaADL_slow;
-    m_candleMFV[minuteIndex] = mfv;
-}
+//     m_lastChaikin = m_emaADL_fast - m_emaADL_slow;
+//     m_candleMFV[minuteIndex] = mfv;
+// }
+
 
 /**
  * updateRSIForCandle() - Incremental RSI Calculation with Wilder's Smoothing
