@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <sstream>
 #include <random>
-
+#include <thread>
 namespace model_manager {
 
 //
@@ -44,6 +44,10 @@ ModelManager::ModelManager(const std::string& symbol, size_t windowSize, TimeWin
               << (m_windowUnit == TimeWindowUnit::SECONDS ? "seconds" : 
                  (m_windowUnit == TimeWindowUnit::MINUTES ? "minutes" : "hours"))
               << std::endl;
+
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[ModelManager constructor] [thread_id: " << threadIdStr.str() << "] " << std::endl;
 }
 
 /**
@@ -149,6 +153,11 @@ bool ModelManager::connectToIBKR() {
         // PAPER TRADING SETUP:
         // Set market data type to live data (1)
         std::cout << "[ModelManager] Setting market data type for " << getSymbol() << std::endl;
+
+        std::stringstream threadIdStr;
+        threadIdStr << std::this_thread::get_id();
+        std::cout << "[ModelManager] [thread_id: " << threadIdStr.str() << "] " << std::endl;
+
         client->reqMarketDataType(1); 
         
         // Generate a random request ID (to prevent conflicts with other instances)

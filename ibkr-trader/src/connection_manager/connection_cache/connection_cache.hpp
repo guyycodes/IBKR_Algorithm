@@ -119,13 +119,13 @@ public:
         double wap
     );
     
-    /**
-     * @brief Process potential special size values, decoding if necessary.
-     * @param value The value to check and possibly decode
-     * @param field The tick type field for context
-     * @return Decoded value
-     */
-    double decodeSpecialValue(double value, int field);
+    // /**
+    //  * @brief Process potential special size values, decoding if necessary.
+    //  * @param value The value to check and possibly decode
+    //  * @param field The tick type field for context
+    //  * @return Decoded value
+    //  */
+    // double decodeSpecialValue(double value, int field);
     
     /**
      * @brief Prune entries older than the specified number of minutes

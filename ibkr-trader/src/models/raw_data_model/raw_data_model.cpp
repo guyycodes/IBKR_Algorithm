@@ -1,5 +1,9 @@
 // raw_data_model.cpp
 #include "raw_data_model.hpp"
+#include <thread>
+#include <sstream>
+#include <iostream>
+
 
 namespace raw_data_model {
 
@@ -9,6 +13,11 @@ namespace raw_data_model {
 
 RawDataModel::RawDataModel(const std::string& symbol)
     : m_symbol(symbol) {
+    // Print thread ID
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[RawDataModel][Constructor] [thread_id: " << threadIdStr.str() << "] Created for symbol: " << symbol << std::endl;
+    
     // Initialize trading parameters with default values
     m_params = {};
     m_status = "initialized";
@@ -105,6 +114,11 @@ stk_q::STK_Q_Data RawDataModel::convertTickToQueueData(const stock_data_tick::St
 void RawDataModel::addTick(const stock_data_tick::StockData& stockData) {
     std::lock_guard<std::mutex> lock(m_mutex);
     
+    // Print thread ID
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[RawDataModel][addTick] [thread_id: " << threadIdStr.str() << "] Adding tick for symbol: " << m_symbol << std::endl;
+    
     // ********************************************************************
     // IMPORTANT DESIGN DECISION:
     // The ModelManager will prune the queue based on time window settings.
@@ -175,6 +189,11 @@ void RawDataModel::clearTicks() {
 
 // Get the most recent tick directly from the queue (more accurate with current design)
 bool RawDataModel::getLatestTickFromQueue(stock_data_tick::StockData& outTick) const {
+    // Print thread ID
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[RawDataModel][getLatestTickFromQueue] [thread_id: " << threadIdStr.str() << "] Reading latest tick for symbol: " << m_symbol << std::endl;
+    
     if (!m_stockQueue || m_stockQueue->empty()) {
         return false;
     }

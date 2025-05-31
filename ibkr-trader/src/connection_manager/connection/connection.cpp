@@ -5,6 +5,7 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>  // For std::hex, std::setw, etc.
+#include <thread>   // For std::this_thread::get_id()
 #include "../decoder/decoder.hpp"  // Include IBKRDecoder for special size value handling
 #include "../decoder/frame_analyzer.hpp"  // Include FrameAnalyzer for tick string field 48 analysis
 
@@ -32,6 +33,9 @@ namespace connection {
           m_symbol(""),
           m_contract()
     {
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[Connection][Constructor] [thread_id: " << threadIdStr.str() << "] Created IBKRTrader" << std::endl;
     }
     
     // Destructor implementation
@@ -176,9 +180,13 @@ namespace connection {
             std::cerr << "[ERROR] Cannot request scalping data: not connected" << std::endl;
             return;
         }
+        // Print thread ID
+        std::stringstream threadIdStr;
+        threadIdStr << std::this_thread::get_id();
         
         std::cout << "\n==================================================\n";
         std::cout << "SUBSCRIBING TO SCALPING DATA FOR: " << symbol << "\n";
+        std::cout << "[connection] [ThreadID: " << threadIdStr.str() << "] " << m_symbol << std::endl;
         std::cout << "==================================================\n";
         
         // Set to use real-time data instead of delayed
@@ -255,6 +263,10 @@ namespace connection {
                                            double bid, double ask, double bidSize, double askSize,
                                            const std::string& exchange, const std::string& specialConditions,
                                            double open, double high, double low, double close, double vwap) {
+        std::stringstream threadIdStr;
+        threadIdStr << std::this_thread::get_id();
+        std::cout << "[Connection][routeTickToModelManager] [thread_id: " << threadIdStr.str() << "] " << m_symbol << std::endl;
+                                    
         // Only process if we have a ModelManager
         if (!m_modelManager) {
             return;
@@ -323,6 +335,9 @@ namespace connection {
     // Processes string data (primarily timestamps) and routes relevant info to ModelManager
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void IBKRTrader::tickString(TickerId tickerId, TickType field, const std::string& value) {
+        std::stringstream threadIdStr;
+        threadIdStr << std::this_thread::get_id();
+        std::cout << "[Connection][tickString] [thread_id: " << threadIdStr.str() << "] " << m_symbol << std::endl;
         // Delegate to frame analyzer for clean processing
         if (m_frameAnalyzer) {
             auto result = m_frameAnalyzer->analyzeTickStringData(tickerId, field, value);
@@ -510,7 +525,9 @@ namespace connection {
     void IBKRTrader::tickByTickBidAsk(int reqId, time_t time, double bidPrice, double askPrice, 
                                     Decimal bidSize, Decimal askSize, 
                                     const TickAttribBidAsk& tickAttribBidAsk) {
-        
+        std::stringstream threadIdStr;
+        threadIdStr << std::this_thread::get_id();
+        std::cout << "[Connection][tickByTickBidAsk] [thread_id: " << threadIdStr.str() << "] " << m_symbol << std::endl;
         // Step 1: Convert the callback parameters to our clean structure using the frame analyzer
         // Get analyzed data instead of just calling analyze
         auto analyzedData = m_frameAnalyzer->analyzeTickByTickBidAskData(
@@ -629,3 +646,56 @@ namespace connection {
     }
 
 } // namespace connection
+
+
+// Legend:
+// “owns →” arrows denote “parent thread creates and manages the lifecycle of the child thread.”
+// Left‐pointing arrows ← denote data or control flowing from one component into another.
+// All components listed under a thread box execute on that thread ID.
+// 🧵  Main Thread
+// │
+// ├─ main.cpp / main()    ←──────────────────────── input_manager (program entry-point logic - receives user input from input_manager)
+// │
+// └──app_state.cpp / main()   ←───manager classes   (recieve thread requests like an api from manager classes - manages thread lifcycle in one place)
+//         │
+//         └── owns ──▶ 🧵 Thread #1
+//                 │
+//                 ├─ InputManager              ←──────────────────────── Local API
+//                 │
+//                 ├─  Local API (HTTP server)  ←──────────────────────────────── External_clients
+//                 │
+//                 └─ ModelManagerFactory (factory pattern generates model manager)
+//                         │
+//                         └── owns ──▶ 🧵 Thread #2
+//                                 │
+//                                 └─ model_manager(singleton) ←──────────────────────── time_ordered_tick_buffer, app_state, connection_manager, raw_data_model, volume_profile_map , ring_buffer_trade_handler
+//                                         │
+//                                         ├─ stock_data_tick ←────────────────────────  connection
+//                                         │
+//                                         ├─time_ordered_tick_buffer  ←──────────────────────── stock_data_tick
+//                                         │
+//                                         ├─ time_ordered_tick_buffer (signal generation) ←────────── ring_buffer_trade_handler
+//                                         │
+//                                         ├─ ring_buffer_trade_handler             ←──────────────────────── stock_data_tick, time_ordered_tick_buffer
+//                                         │
+//                                         ├─ connection
+//                                         │     └──connection.cpp         ←──────────────────────── connection_cache, frame_analyzer, decoder, account_summary
+//                                         │
+//                                         ├─ connection_manager
+//                                         │     └──connection_manager.cpp  ←──────────── connection
+//                                         │
+//                                         ├─ connection_cache
+//                                         │       └──connection_cache.cpp  ←──────────────────────── stock_data_tick
+//                                         │
+//                                         ├─ decoder
+//                                         │     ├─ frame_analyzer.cpp  ←──────────────────────── decoder
+//                                         │     └──decoder.cpp  ←──────────────────────── frame_analyzer
+//                                         │
+//                                         ├─ models
+//                                         │     ├─ stock_data_tick  
+//                                         │     ├─ volume_profile_map                                 
+//                                         │     └─ raw_data_model     ←──────────────────────── STK_Q, stock_data_tick
+//                                         ├─ STK_Q
+//                                         │
+//                                         └─ position_handler (risk manager / P&L / Logs)  ←──────────────────────── ring_buffer_trade_handler 
+                                                                

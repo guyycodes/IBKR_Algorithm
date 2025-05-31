@@ -2,6 +2,7 @@
 #include "model_manager.hpp"
 #include "../util/app_state/app_state.hpp"
 #include <iostream>
+#include <thread>
 
 namespace model_manager {
 
@@ -12,6 +13,11 @@ std::mutex ModelManagerFactory::s_instanceMutex;
 // Get the singleton instance of the factory
 ModelManagerFactory& ModelManagerFactory::getInstance() {
     std::lock_guard<std::mutex> lock(s_instanceMutex);
+
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[factory] [factory_thread: " << threadIdStr.str() << "] " << std::endl;
+
     if (!s_instance) {
         s_instance = std::unique_ptr<ModelManagerFactory>(new ModelManagerFactory());
     }
@@ -25,7 +31,7 @@ std::shared_ptr<ModelManager> ModelManagerFactory::createModelManager(
     TimeWindowUnit windowUnit
 ) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    
+
     // Create new model manager with the specified symbol and time window
     auto manager = std::make_shared<ModelManager>(symbol, windowSize, windowUnit);
     m_managers[symbol] = manager;

@@ -166,3 +166,261 @@ When testing in a container environment, ensure:
 1. The port used by the API server (default: 9000) is exposed in your container configuration
 2. Use the container IP or hostname instead of localhost in curl commands from your host machine
 3. For complete container isolation, you may need to use `docker-compose` to set up networking between services 
+
+
+🧵  Main thread
+src/
+│   ├─ main.cpp ← program entry-point
+│   │   ├─ variables
+│   │   │   └─ useCliMode
+│   │   └─ methods
+│   │       ├─ signalHandler()
+│   │       ├─ main()
+│   │       └─ g_shutdownRequested()
+│   ├─ main.hpp
+│   │   ├─ variables
+│   │   └─ methods
+│   ├─ app_state.hpp
+│   │   ├─ Roles:
+│   │   │   ├─ recieve thread requests like an api from manager classes
+│   │   │   ├─ manages thread lifcycle in one place
+│   │   │   ├─ proper thread cleanup and creation
+│   │   │   └─ keep inventory of all threads
+│   │   ├─ variables
+│   │   └─ methods
+│   └─ app_state.cpp
+│       ├─ variables
+│       └─ methods
+└──owns ──► 🧵 Thread #1
+            │
+        input_manager/
+            │     └─ input_manager.cpp ⇢ model_manager_factory & postition_handler
+            │         │    │   ├─ variables
+            │         │    │   └─ methods
+            │         │    ├─Roles:
+            │         │    ├─ recieve position details from postition_handler.cpp
+            │         │    ├─ process stk_q elements and passes to local_api.cpp
+            │         │    └─ recieve HTTP input payloads from local_api.cpp pass JSON to model_manager_factory & postition_handler
+            │         ├─local_api.cpp (HTTP server)   ⇢  (input_manager.cpp)
+            │         │   │   ├─ variables
+            │         │   │   └─ methods
+            │         │   ├─Roles:
+            │         │   ├─ recieve position details from postition_handler.cpp
+            │         │   ├─ process stk_q elements and passes to local_api.cpp
+            │         │   └─ recieve HTTP input payloads from local_api.cpp pass JSON to model_manager_factory & postition_handler
+            │         └─ local_api.hpp
+            │            ├─ variables
+            │            └─ methods
+        model_manager_factory/
+            │     └─ model_manager_factory.cpp (factory pattern)
+            │         │   ├─ variables:
+            │         │   └─ methods
+            │         ├─Roles:
+            │         │   ├─ Factory Pattern, spawns / reuses model_manager singletons per symbol ──►  model_manager.cpp (Thread #2)
+            │         │   └─ recieves user input from input_manager.cpp to setup model_manager singletons on thread #2
+            │         └─ model_manager_factory.hpp
+            │             ├─ variables
+            │             └─ methods
+            └──owns ──► 🧵 Thread #2  (per symbol)
+                        ⬚
+                        │
+                    model_manager/
+                        │     └─ model_manager.cpp (singleton pattern)
+                        │         │   │   ├─ variables
+                        │         │   │   └─ methods
+                        │         │   ├─Roles:
+                        │         │   ├─ instantiates connection.cpp, time_ordered_tick_buffer.cpp, ring_buffer_trade_handler.cpp, trade_handler.cpp, position_handler.cpp, stk_q.cpp, raw_data_model.cpp, connection_cache.cpp
+                        │         │   ├─ prunes tick data from stk_q
+                        │         │   ├─ delegate
+                        │         │   └─ makes initial call to  ⇢  (reqmarketdata() in connection.cpp)
+                        │         └─ model_manager.hpp
+                        │             │   ├─ variables
+                        │             │   └─ methods
+                        │             ├─Roles:
+                        │             ├─ 
+                        │             ├─ 
+                        │             └─ 
+                    model_manager_factory/
+                        │     └─ model_manager_factory.cpp ──► spawns / reuses  ──►  ModelManager (Thread #2)
+                        │         │   ├─ variables:
+                        │         │   └─ methods
+                        │         ├─Roles:
+                        │         │   ├─ Factory Pattern, spawns / reuses model_manager singletons ──►  model_manager.cpp (Thread #2)
+                        │         │   └─ recieves user input from input_manager.cpp to setup model_manager singletons on thread #2
+                        │         └─ model_manager_factory.hpp
+                        │             ├─ variables
+                        │             └─ methods
+                    connection_manager/
+                        │     └─ connection_manager.cpp
+                        │         │   │   ├─ variables:
+                        │         │   │   └─ methods
+                        │         │   ├─Roles:
+                        │         │   ├─ wrapper for the IBKR connection setup
+                        │         │   ├─ implements the connection.cpp
+                        │         │   └─ 
+                        │         └─ connection_manager.hpp
+                        │             │   ├─ variables
+                        │             │   └─ methods
+                        │             ├─Roles:
+                        │             └─ 
+                    connection/
+                        │   ├─ connection.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ recieves tick data from IBKR api
+                        │   │   ├─ hold all the callback methods for IBKR api
+                        │   │   ├─ injects itself with model_manager.cpp
+                        │   │   ├─ uses frame_analyzer.cpp to inspect incoming tick data
+                        │   │   ├─ uses the decoder to decode BID64 data
+                        │   │   ├─ routes complete stock_ticks to the model manager
+                        │   │   └─ sends ticks and real time bars into connection_cache.cpp
+                        │   └─ connection.hpp
+                        │       │   ├─ variables
+                        │       │   └─ methods
+                        │       ├─Roles:
+                        │       ├─ 
+                        │       ├─ 
+                        │       └─ 
+                    connection_cache/
+                        │   ├─ connection_cache.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ recieves tick data from connection.cpp
+                        │   │   ├─ uses in place efficent aggregation methods
+                        │   │   ├─ aggregates tick data from partial streams into a useable stoch_data_tick.cpp
+                        │   │   └─ sends completed stock_data_tick back to connection.cpp to be routed to model_manager.cpp
+                        │   ├─ connection_cache.hpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   ├─ 
+                        │   │   └─ 
+                      decoder/
+                        │   ├─ decoder.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ implemented through frame_analyzer.cpp
+                        │   │   ├─ essentiall is a wrapper for IBKR official decoder
+                        │   │   └─ uses IBKR official decode to decode data
+                        │   ├─ decoder.hpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   ├─ frame_analyzer.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ recieves tick data from connection.cpp
+                        │   │   ├─ uses decoder.cpp to decode data
+                        │   │   └─ sends completed data back to connection.cpp
+                        │   ├─ frame_analyzer.hpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                    account_summary/    
+                        │   ├─ account_summary.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   └─  account_summary.hpp
+                        │       │   ├─ variables
+                        │       │   └─ methods
+                        │       ├─Roles:
+                        │       ├─ 
+                        │       └─ 
+                       models/  
+                        │   ├─ stock_data_tick.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   ├─ stock_data_tick.hpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   ├─ volume_profile_map.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   ├─  volume_profile_map.hpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   ├─ raw_data_model.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   └─  raw_data_model.hpp
+                        │       │   ├─ variables
+                        │       │   └─ methods
+                        │       ├─Roles:
+                        │       ├─ 
+                        │       └─ 
+                       utils/
+                        │   ├─ app_state.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   ├─  app_state.hpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        time_ordered_tick_buffer/
+                        │   ├─  time_ordered_tick_buffer.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   ├─  time_ordered_tick_buffer.hpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   ├─ ring_buffer_trade_handler.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   └─ ring_buffer_trade_handler.hpp
+                        │       │   ├─ variables
+                        │       │   └─ methods
+                        │       ├─Roles:
+                        │       ├─ 
+                        │       └─ 
+                        stk_q/
+                        │   ├─ stk_q.cpp
+                        │   │   │   ├─ variables
+                        │   │   │   └─ methods
+                        │   │   ├─Roles:
+                        │   │   ├─ 
+                        │   │   └─ 
+                        │   └─ stk_q.hpp
+                        │       │   ├─ variables
+                        │       │   └─ methods
+                        │       ├─Roles:
+                        │       ├─ 
+                        │       └─ 

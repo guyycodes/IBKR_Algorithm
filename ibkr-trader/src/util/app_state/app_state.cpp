@@ -5,7 +5,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-
+#include <thread>
 namespace app_state {
 
 // Initialize static members
@@ -18,7 +18,9 @@ AppState::AppState()
     , m_shutdownInProgress(false)
     , m_shutdownInitiator("none")
 {
-    std::cout << "[AppState] Initializing" << std::endl;
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[AppState] *create* [app_state_thread: " << threadIdStr.str() << "] " << std::endl;
 }
 
 // Get singleton instance with thread-safe initialization
@@ -40,17 +42,13 @@ void runModelManagerThread(std::shared_ptr<model_manager::ModelManager> manager,
     std::stringstream threadIdStr;
     threadIdStr << std::this_thread::get_id();
     
-    std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Started for symbol: " << symbol << std::endl;
-    
-    // Connect to IBKR API 
-    std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Connecting to IBKR API for symbol: " << symbol << std::endl;
     bool connected = manager->connectToIBKR();
     
     if (connected) {
-        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Successfully connected to IBKR API for symbol: " << symbol << std::endl;
+        std::cout << "[app_state][ThreadID " << symbol << " is: " << threadIdStr.str() << "] Successfully connected to IBKR API" << std::endl;
     } else {
-        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Warning: Failed to connect to IBKR API for symbol: " << symbol << std::endl;
-        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Will continue running but no live data will be received." << std::endl;
+        std::cout << "[app_state][ThreadID" << symbol << " is: " << threadIdStr.str() << "] Warning: Failed to connect to IBKR API" << std::endl;
+        std::cout << "[app_state][ThreadID" << symbol << " is: " << threadIdStr.str() << "] Will continue running but no live data will be received." << std::endl;
     }
     
     // Get reference to AppState for emergency shutdown check
@@ -76,18 +74,18 @@ void runModelManagerThread(std::shared_ptr<model_manager::ModelManager> manager,
         
         // Check for emergency shutdown again
         if (appState.isEmergencyShutdown()) {
-            std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Emergency shutdown detected for symbol: " << symbol << std::endl;
+            std::cout << "[app_state][ThreadID: " << threadIdStr.str() << "] Emergency shutdown detected for symbol: " << symbol << std::endl;
             break;
         }
     }
     
     // Disconnect from IBKR API when thread is stopping
     if (connected) {
-        std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Disconnecting from IBKR API for symbol: " << symbol << std::endl;
+        std::cout << "[app_state][ThreadID: " << threadIdStr.str() << "] Disconnecting from IBKR API for symbol: " << symbol << std::endl;
         manager->disconnectFromIBKR();
     }
     
-    std::cout << "[Thread][ThreadID: " << threadIdStr.str() << "] Stopped for symbol: " << symbol << std::endl;
+    std::cout << "[app_state][ThreadID: " << threadIdStr.str() << "] Stopped for symbol: " << symbol << std::endl;
 }
 
 // Register a new thread for a ModelManager and start it
@@ -112,8 +110,9 @@ void AppState::registerModelThread(const std::string& symbol,
     
     // Set thread state to RUNNING
     m_threadStates[symbol] = ThreadState::RUNNING;
-    
-    std::cout << "[AppState] Registered thread for symbol: " << symbol << std::endl;
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[AppState] Registered thread for symbol: "  << symbol<< " with threadID: " << threadIdStr.str() << std::endl;
 }
 
 // Internal implementation of single thread stop
@@ -149,7 +148,7 @@ void AppState::_stopThread(const std::string& symbol) {
             m_threadStates.erase(stateIt);
         }
         
-        std::cout << "[AppState] Removed thread for symbol: " << symbol << std::endl;
+        std::cout << "[app_state] Removed thread for symbol: " << symbol << std::endl;
     }
 }
 
@@ -175,12 +174,13 @@ void AppState::_stopAllThreads() {
     m_threadRunFlags.clear();
     m_threadStates.clear();
     
-    std::cout << "[AppState] Stopped all threads" << std::endl;
+    std::cout << "[app_state] Stopped all threads" << std::endl;
 }
 
 // Internal implementation of emergency stop
 void AppState::_emergencyStopThreads(int timeoutMs) {
     // WARNING: This method should ONLY be called when m_threadMutex is already locked!
+    // the caller locks this already
     
     // Set emergency shutdown flag
     m_emergencyShutdown.store(true);
@@ -241,7 +241,7 @@ void AppState::_emergencyStopThreads(int timeoutMs) {
             joinedThreads.push_back(symbol);
         } else {
             // Thread didn't join within timeout, detach it
-            std::cout << "[AppState] WARNING: Thread for symbol " << symbol 
+            std::cout << "[app_state] WARNING: Thread for symbol " << symbol 
                       << " did not respond to stop signal within timeout. Detaching!" << std::endl;
             threadPtr->detach();
             detachedThreads.push_back(symbol);
@@ -285,7 +285,7 @@ void AppState::_emergencyStopThreads(int timeoutMs) {
         m_threadStates[symbol] = ThreadState::DETACHED;
     }
     
-    std::cout << "[AppState] Emergency stop completed: " << joinedThreads.size() 
+    std::cout << "[app_state] Emergency stop completed: " << joinedThreads.size() 
               << " threads stopped normally, " << detachedThreads.size() 
               << " threads detached due to timeout" << std::endl;
 }
@@ -299,19 +299,19 @@ bool AppState::requestThreadStop(const std::string& symbol, const std::string& r
     
     // Check if thread exists
     if (threadIt == m_modelThreads.end()) {
-        std::cout << "[AppState] Thread for symbol " << symbol 
+        std::cout << "[app_state] Thread for symbol " << symbol 
                   << " not found (requested by " << requestor << ")" << std::endl;
         return false;
     }
     
     // Check if thread is already stopping
     if (stateIt != m_threadStates.end() && stateIt->second == ThreadState::STOPPING) {
-        std::cout << "[AppState] Thread for symbol " << symbol 
+        std::cout << "[app_state] Thread for symbol " << symbol 
                   << " is already stopping (new request by " << requestor << ")" << std::endl;
         return false;
     }
     
-    std::cout << "[AppState] Stopping thread for symbol " << symbol 
+    std::cout << "[app_state] Stopping thread for symbol " << symbol 
               << " (requested by " << requestor << ")" << std::endl;
     
     // Stop the thread
@@ -325,7 +325,7 @@ bool AppState::requestAllThreadsStop(const std::string& requestor) {
     
     // Check if shutdown is already in progress
     if (m_shutdownInProgress.load()) {
-        std::cout << "[AppState] Shutdown already in progress (initiated by " 
+        std::cout << "[app_state] Shutdown already in progress (initiated by " 
                   << m_shutdownInitiator << ", new request by " << requestor << ")" << std::endl;
         return false;
     }
@@ -334,7 +334,7 @@ bool AppState::requestAllThreadsStop(const std::string& requestor) {
     m_shutdownInProgress.store(true);
     m_shutdownInitiator = requestor;
     
-    std::cout << "[AppState] Stopping all threads (requested by " << requestor << ")" << std::endl;
+    std::cout << "[app_state] Stopping all threads (requested by " << requestor << ")" << std::endl;
     
     // Stop all threads
     _stopAllThreads();
@@ -360,7 +360,7 @@ bool AppState::requestEmergencyStop(int timeoutMs, const std::string& requestor)
     m_shutdownInProgress.store(true);
     m_shutdownInitiator = requestor;
     
-    std::cout << "[AppState] EMERGENCY STOP of all threads with " << timeoutMs << "ms timeout "
+    std::cout << "[app_state] EMERGENCY STOP of all threads with " << timeoutMs << "ms timeout "
               << "(requested by " << requestor << ")" << std::endl;
     
     // Perform emergency stop (this will handle the mutex unlock/lock internally)

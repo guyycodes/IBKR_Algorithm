@@ -18,12 +18,12 @@ stock_data_tick::StockData& ConnectionCache::getSymbolData(const std::string& sy
     return dataCache[symbol];
 }
 
-double ConnectionCache::decodeSpecialValue(double value, int field) {
-    if (m_decoder.isSpecialSizeValue(value)) {
-        return m_decoder.interpretSizeValue(value, field);
-    }
-    return value;
-}
+// double ConnectionCache::decodeSpecialValue(double value, int field) {
+//     if (m_decoder.isSpecialSizeValue(value)) {
+//         return m_decoder.interpretSizeValue(value, field);
+//     }
+//     return value;
+// }
 
 // Enhanced merge method that tracks tick-by-tick changes
 ConnectionCache::MergeResult ConnectionCache::mergeWithCacheAndTrackChanges(

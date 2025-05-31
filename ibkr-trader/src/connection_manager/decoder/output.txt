@@ -1017,3 +1017,239 @@ MARKET DATA:
   Technical Indicators: RSI=68.590252 EMA9=134.969439 EMA26=134.967202 ALMA=nan Chaikin=0.000000
   Trading Candidate: NO
 [ModelManager-Queue] New queue size after adding tick: 666 ✗
+
+
+
+
+IBKR Trading System
+[Main] [Main_Thread: 140737471039296] 
+=================
+
+[LocalAPI] [INFO] LocalAPI instance created
+[InputManager] [INFO] InputManager instance created
+[InputManager] [INFO] Setting log level to 2
+[LocalAPI] [INFO] Setting log level to 2
+[InputManager] [DEBUG] Initializing InputManager
+[LocalAPI] [DEBUG] Registering trade callback
+[LocalAPI] [DEBUG] Registering error callback
+[LocalAPI] [DEBUG] Initializing LocalAPI
+[LocalAPI] [INFO] LocalAPI initialized successfully
+[InputManager] [INFO] InputManager initialized successfully
+[InputManager] [INFO] Starting API server on port 8080
+[InputManager] [INFO] Starting InputManager with source: API
+[LocalAPI] [INFO] Starting LocalAPI server on port 8080
+[LocalAPI] [INFO] HTTP server started on port 8080
+[LocalAPI] [INFO] LocalAPI server started
+[InputManager] [INFO] InputManager started successfully
+
+=======================================
+       IBKR Scalping Tool v1.0        
+=======================================
+
+=== API SERVER RUNNING ===
+
+The server is now running and listening for HTTP requests on port 8080
+Available endpoints:
+  GET  /status      - Get server status
+  GET  /trades      - Get current trades
+  GET  /pending     - Get pending (queued) trades
+  GET  /queue-data?symbol=AAPL - Get all market data ticks for a symbol
+  POST /trade       - Queue a trade request
+  POST /confirm     - Confirm all queued requests
+  POST /clear       - Clear a symbol
+  POST /clear-all   - Clear all symbols
+  POST /emergency-stop - Trigger emergency stop
+  POST /set-auto-confirm - Enable/disable auto-confirmation
+
+Example curl commands:
+  curl -X GET http://localhost:8080/status
+  curl -X GET http://localhost:8080/trades
+  curl -X GET http://localhost:8080/pending
+  curl -X GET http://localhost:8080/queue-data?symbol=AAPL
+  curl -X POST -H "Content-Type: application/json" -d '{"symbol":"AAPL","params":{"lots":5,"margin":".10","stopLoss":".05","maxTrades":10,"lossThreshold":3,"winThreshold":5,"minWinRate":".50","maxHoldSeconds":3600}}' http://localhost:8080/trade
+  curl -X POST http://localhost:8080/confirm
+  curl -X POST -H "Content-Type: application/json" -d '{"symbol":"AAPL"}' http://localhost:8080/clear
+  curl -X POST http://localhost:8080/clear-all
+  curl -X POST http://localhost:8080/emergency-stop
+  curl -X POST -H "Content-Type: application/json" -d '{"autoConfirm":true}' http://localhost:8080/set-auto-confirm
+
+API server is running. Press Enter to stop the server...
+[LocalAPI] [INFO] HTTP server listening on port 8080
+[LocalAPI] [DEBUG] Received HTTP request: 
+POST /trade HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.7.1
+Accept: */*
+Content-Type: application/json
+Content-Length: 160
+
+{"symbol":"NVDA","params":{"lots":5,"margin":".10","stopLoss":".05","maxTrades":10,"lossThreshold":3,"winThreshold":5,"minWinRate":".50","maxHoldSeconds":3600}}
+[LocalAPI] [DEBUG] Extracted request body: {"symbol":"NVDA","params":{"lots":5,"margin":".10","stopLoss":".05","maxTrades":10,"lossThreshold":3,"winThreshold":5,"minWinRate":".50","maxHoldSeconds":3600}}
+[LocalAPI] [INFO] Queueing trade request: {"params":{"lossThreshold":3,"lots":5,"margin":".10","maxHoldSeconds":3600,"maxTrades":10,"minWinRate":".50","stopLoss":".05","winThreshold":5},"symbol":"NVDA"}
+[LocalAPI] [DEBUG] Queuing trading request for symbol: NVDA
+[LocalAPI] [INFO] Request queued successfully (pending confirmation)
+[LocalAPI] [DEBUG] Received HTTP request: 
+POST /confirm HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.7.1
+Accept: */*
+
+
+[LocalAPI] [DEBUG] Extracted request body: 
+[LocalAPI] [INFO] Confirming 1 pending requests
+[LocalAPI] [DEBUG] Executing request for symbol: NVDA
+[LocalAPI] [INFO] Request executed successfully
+[factory] [factory_thread: 140737471034944] 
+
+===== INPUT FROM API =====
+JSON Structure:
+{
+  "NVDA": {
+    "params": {
+      "lossThreshold": 3,
+      "lots": 5,
+      "margin": ".10",
+      "maxHoldSeconds": 3600,
+      "maxTrades": 10,
+      "minWinRate": ".50",
+      "stopLoss": ".05",
+      "winThreshold": 5
+    },
+    "status": "executed",
+    "symbol": "NVDA",
+    "timestamp": 1748702130553265513
+  }
+}
+======================
+[InputManager] [INFO] Processing output JSON with 1 symbols
+[InputManager] [DEBUG] Symbol NVDA request processed
+[InputManager] [INFO] Executing trade callback with processed output
+
+===== DIRECT MODEL PROCESSING =====
+Direct processing with 1 symbols
+NOTE: Each symbol will establish its own IBKR connection in a separate thread
+[DEBUG] Processing symbol: NVDA
+[DEBUG] Getting ModelManagerFactory instance...
+[factory] [factory_thread: 140737471034944] 
+
+[STRUCTURE] MODEL MANAGER FACTORY:
+  ╔═══════════════════════════════════════════════════════════╗
+  ║ ModelManagerFactory (Singleton)                           ║
+  ║ Purpose: Creates and manages ModelManager instances        ║
+  ║ Contains: Map<symbol_string, ModelManager_ptr>            ║
+  ╚═══════════════════════════════════════════════════════════╝
+  Currently managing 0 symbols: 
+
+[DEBUG] Initializing model from JSON data...
+Properly structured JSON for RawDataModel:
+{
+  "NVDA": {
+    "params": {
+      "lossThreshold": 3,
+      "lots": 5,
+      "margin": ".10",
+      "maxHoldSeconds": 3600,
+      "maxTrades": 10,
+      "minWinRate": ".50",
+      "stopLoss": ".05",
+      "winThreshold": 5
+    },
+    "status": "executed",
+    "symbol": "NVDA",
+    "timestamp": 1748702130553265513
+  }
+}
+[DEBUG] Using backward compatibility method to get/create model...
+[TimeOrderedTickBuffer] ALMA weights ready (M=9, σ=0.85, offset=6)
+[TimeOrderedTickBuffer] Initialized with 0 second time window (1 minute ring buffers)
+[RawDataModel][Constructor] [thread_id: 140737471034944] Created for symbol: NVDA
+[Connection][Constructor] [thread_id: 140737471034944] Created IBKRTrader
+[ModelManager] Created for symbol: NVDA with time window: 60 minutes
+[ModelManager] [thread_id: 140737471034944] 
+[ModelManagerFactory] Created new ModelManager for NVDA
+[AppState] *create* [app_state_thread: 140737471034944] 
+[ModelManagerFactory] Registering new thread for NVDA
+[ModelManager] Connection attempt 1/5 for symbol: NVDA
+[ModelManager] Using client ID: 1297 for symbol: NVDA
+[AppState] Registered thread for symbol: NVDA with threadID: 140737471034944
+[DEBUG] Model successfully initialized
+[DEBUG] Getting model manager for symbol: NVDA
+[input_manager] [ThreadID: 140737471034944]
+
+[input_manager] MODEL MANAGER OBJECT HIERARCHY:
+  ╔═══════════════════════════════════════════════════════════╗
+  ║ ModelManager (for symbol: NVDA)                           ║
+  ║ Address: 0x7ffff8003a50                                   ║
+  ║ Connection Status: NOT CONNECTED                           ║
+  ║ ┌───────────────────────────────────────────────────────┐ ║
+  ║ │ Contains:                                             │ ║
+  ║ │ 1. RawDataModel (shared_ptr)                          │ ║
+  ║ │    - Stores actual trade parameters                   │ ║
+  ║ │    - Address: 0x7ffff8003d20                     │ ║
+  ║ │                                                       │ ║
+  ║ │    - Contains STK_Q (stock queue)                     │ ║
+  ║ │      * Address: 0x7ffff8002850                             │ ║
+  ║ │      * Queue size: 0                                   │ ║
+  ║ │                                                       │ ║
+  ║ │ 2. ring_buffer_trade_handler                          │ ║
+  ║ │    - Processes queue data for metrics and signals     │ ║
+  ║ │    - Calculates in the same thread as queue processing│ ║
+  ║ │                                                       │ ║
+  ║ │ 3. Time Window Configuration                          │ ║
+[INFO] Connection initiated to host.docker.internal:4002 with client ID: 1297
+[ModelManager] Waiting for connection to fully establish...
+[ERROR] ReqId: -1 Code: 2104 Msg: Market data farm connection is OK:usfarm
+[ERROR] ReqId: -1 Code: 2106 Msg: HMDS data farm connection is OK:ushmds
+[ERROR] ReqId: -1 Code: 2158 Msg: Sec-def data farm connection is OK:secdefil
+[IBKRTrader] Set ModelManager for symbol: NVDA
+[ModelManager] Setting market data type for NVDA
+[INFO] Automatically requesting scalping data for symbol: NVDA and contract: NVDA
+[INFO] Making initial data subscriptions for NVDA
+
+==================================================
+SUBSCRIBING TO SCALPING DATA FOR: NVDA
+[connection] [ThreadID: 140737462642240] NVDA
+==================================================
+[1] Requesting Account Information
+[3] Subscribing to Tick-by-Tick Data for NVDA
+[4] Subscribing to Market Depth for NVDA
+[6] Subscribing to Real-time Bar Data for NVDA
+
+==================================================
+DATA SUBSCRIPTIONS ACTIVE - RECEIVING CALLBACKS
+==================================================
+[ModelManager] Connected to IBKR API for symbol: NVDA with request ID: 22503
+[app_state][ThreadID for: NVDA is: 140737462642240] Successfully connected to IBKR API
+[INFO] Starting account data refresh thread
+  ║ │    - Window Size: 60                                   │ ║
+  ║ │    - Window Unit: MINUTES                         │ ║
+  ║ │                                                       │ ║
+  ║ │ 4. Own IBKR API Connection                           │ ║
+  ║ │    - Direct connection to IBKR API                   │ ║
+  ║ │    - Fetches data specifically for NVDA                     │ ║
+  ║ └───────────────────────────────────────────────────────┘ ║
+  ╚═══════════════════════════════════════════════════════════╝
+
+[ModelManager] Initialized model for symbol: NVDA
+  Memory address: 0x7ffff8003a50 (C++ ModelManager object)
+[DEBUG] Getting raw data model...
+  Raw data model address: 0x7ffff8003d20 (C++ RawDataModel object)
+  Symbol from model: NVDA
+
+[DATA] Trade parameters stored in model:
+  Lots: 5
+  Margin: .10
+  Stop Loss: .05
+  Max Trades: 10
+  Loss Threshold: 3
+  Win Threshold: 5
+  Min Win Rate: .50
+  Max Hold Seconds: 3600
+  Current tick count: 0
+[DEBUG] Getting time window...
+  Time window: 60 minutes
+
+===== RUNNING MODEL THREADS =====
+Currently running 1 symbol threads:
+[factory] [factory_thread: 140737471034944] 
+  - NVDA [CONNECTED]

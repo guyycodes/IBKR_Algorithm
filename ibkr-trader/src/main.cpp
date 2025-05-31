@@ -67,6 +67,9 @@ void printUsage(const char* programName) {
 
 int main(int argc, char* argv[]) {
     std::cout << "IBKR Trading System" << std::endl;
+    std::stringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[Main] [Main_Thread: " << threadIdStr.str() << "] " << std::endl;
     std::cout << "=================\n" << std::endl;
     
     // Register signal handler for CTRL+C

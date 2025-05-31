@@ -610,6 +610,16 @@ void InputManager::processOutput() {
                 
                 std::cout << "[DEBUG] Processing symbol: " << symbol << std::endl;
                 
+                // Check if this symbol already has a running thread - if so, skip verbose processing
+                auto& appState = app_state::AppState::getInstance();
+                auto& factory = model_manager::ModelManagerFactory::getInstance();
+                
+                // Skip if symbol already has a running thread AND exists in the factory
+                if (appState.hasRunningThread(symbol) && factory.hasModel(symbol)) {
+                    std::cout << "[INFO] Symbol " << symbol << " already running with established connection, skipping" << std::endl;
+                    continue;
+                }
+                
                 try {
                     // Get the ModelManagerFactory singleton instance
                     // This ensures we're working with the same set of models across the application
@@ -654,6 +664,7 @@ void InputManager::processOutput() {
                     // Use ModelManagerFactory's backward compatibility method
                     // which handles both creation and thread management
                     std::cout << "[DEBUG] Using backward compatibility method to get/create model..." << std::endl;
+                    
                     auto model = factory.getModelManager(
                         symbol,         // symbol to process
                         true,           // should start thread
@@ -672,11 +683,11 @@ void InputManager::processOutput() {
                         std::stringstream threadIdStr;
                         threadIdStr << std::this_thread::get_id();
                         
-                        std::cout << "\n[STRUCTURE] MODEL MANAGER OBJECT HIERARCHY:" << std::endl;
+                        std::cout << "[input_manager] [ThreadID: " << threadIdStr.str() << "]" << std::endl;
+                        std::cout << "\n[input_manager] MODEL MANAGER OBJECT HIERARCHY:" << std::endl;
                         std::cout << "  ╔═══════════════════════════════════════════════════════════╗" << std::endl;
                         std::cout << "  ║ ModelManager (for symbol: " << std::left << std::setw(30) << symbol + ")" << "  ║" << std::endl;
                         std::cout << "  ║ Address: " << std::left << std::setw(48) << model.get() << " ║" << std::endl;
-                        std::cout << "  ║ ThreadID: " << threadIdStr.str() << " ║" << std::endl;
                         std::cout << "  ║ Connection Status: " << std::left << std::setw(15) << 
                                    (model->isConnected() ? "CONNECTED" : "NOT CONNECTED") << "                         ║" << std::endl;
                         std::cout << "  ║ ┌───────────────────────────────────────────────────────┐ ║" << std::endl;
@@ -690,7 +701,7 @@ void InputManager::processOutput() {
                         std::cout << "  ║ │      * Address: " << std::left << std::setw(35) << rawModel->getStockQueue() << "        │ ║" << std::endl;
                         std::cout << "  ║ │      * Queue size: " << std::left << std::setw(5) << rawModel->getQueueSize() << "                               │ ║" << std::endl;
                         std::cout << "  ║ │                                                       │ ║" << std::endl;
-                        std::cout << "  ║ │ 2. TechnicalCalculator (ThreadID: " << threadIdStr.str() << ")│ ║" << std::endl;
+                        std::cout << "  ║ │ 2. ring_buffer_trade_handler                          │ ║" << std::endl;
                         std::cout << "  ║ │    - Processes queue data for metrics and signals     │ ║" << std::endl;
                         std::cout << "  ║ │    - Calculates in the same thread as queue processing│ ║" << std::endl;
                         std::cout << "  ║ │                                                       │ ║" << std::endl;
