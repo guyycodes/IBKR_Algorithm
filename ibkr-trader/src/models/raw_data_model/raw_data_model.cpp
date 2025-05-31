@@ -91,7 +91,7 @@ stk_q::STK_Q_Data RawDataModel::convertTickToQueueData(const stock_data_tick::St
     queueData.ema9 = stockData.ema9;
     queueData.ema26 = stockData.ema26;
     queueData.alma = stockData.alma;
-    queueData.chaikin = stockData.chaikin;
+    queueData.atr = stockData.atr;
     
     // Backward compatibility fields
     queueData.price = stockData.last;     // For any code still using 'price'
@@ -213,7 +213,7 @@ bool RawDataModel::getLatestTickFromQueue(stock_data_tick::StockData& outTick) c
         outTick.ema9 = data.ema9;
         outTick.ema26 = data.ema26;
         outTick.alma = data.alma;
-        outTick.chaikin = data.chaikin;
+        outTick.atr = data.atr;
         
         return true;
     }

@@ -72,13 +72,18 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
       m_prevClose(std::numeric_limits<double>::quiet_NaN()),
       // m_emaADL_fast(std::numeric_limits<double>::quiet_NaN()),
       // m_emaADL_slow(std::numeric_limits<double>::quiet_NaN()),
-      m_emaPriceFast(std::numeric_limits<double>::quiet_NaN()),
-      m_emaPriceSlow(std::numeric_limits<double>::quiet_NaN()),
       m_avgGain(0.0),
       m_avgLoss(0.0),
       m_rsiWarmupCount(0),
-      m_lastRSI(50.0)
-      // m_lastChaikin(0.0)  // Initialize Chaikin to neutral starting value
+      m_lastRSI(50.0),
+      m_atr(std::numeric_limits<double>::quiet_NaN()),
+      m_atrWarmupCount(0),
+      m_emaPriceFast(std::numeric_limits<double>::quiet_NaN()),
+      m_emaPriceSlow(std::numeric_limits<double>::quiet_NaN()),
+      m_almaSizeWindow(9),
+      m_almaSigma(0.85),
+      m_almaOffset(6.0)
+      // m_lastChaikin(0.0)  // Initialize Chaikin to neutral starting value (commented out)
       // --------------------------------------------------------------------
 {
     // Initialize fixed-size ring buffers for O(1) operations
@@ -86,9 +91,7 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
     m_minuteRing.resize(m_windowMinutes);
     m_minuteIndices.resize(m_windowMinutes, -1);  // Initialize to invalid
     
-    // Initialize ALMA ring buffer and pre-compute weights
-    size_t almaWindowSize = technical_calculator::config::ALMA_WINDOW_SIZE;
-    m_priceRing.resize(almaWindowSize);
+    m_priceRing.resize(m_almaSizeWindow);
     
     // Initialize all price ring slots to prevent NaN accumulation
     std::fill(m_priceRing.begin(), m_priceRing.end(), 0.0);
@@ -319,6 +322,14 @@ void TimeOrderedTickBuffer::updateCandles() {
             minuteIndex * MS_PER_MINUTE
         );
         
+        // Skip candles with invalid OHLC data to prevent NaN poisoning
+        if (!std::isfinite(candle.open) || !std::isfinite(candle.high) || 
+            !std::isfinite(candle.low) || !std::isfinite(candle.close)) {
+            std::cout << "[TimeOrderedTickBuffer] Skipping candle with invalid OHLC data at minute " 
+                      << minuteIndex << std::endl;
+            continue;  // Skip this candle entirely
+        }
+        
         // Update technical indicators
         // updateChaikinForCandle(candle, minuteIndex, isFirstTime);
         updateRSIForCandle(candle.close);
@@ -333,6 +344,14 @@ void TimeOrderedTickBuffer::updateCandles() {
         
         // Add to ring buffer with O(1) insertion
         addCandleToRing(candle);
+        
+        // Update ATR incrementally with access to previous candle
+        if (m_candleRingCount >= 2) {  // Need at least 2 candles for TR calculation
+            // Get previous candle from ring buffer
+            size_t prevIdx = (m_candleRingHead + m_windowMinutes - 2) % m_windowMinutes;
+            const Candle& prevCandle = m_candleRing[prevIdx];
+            updateATRForCandle(prevCandle, candle);
+        }
         
         // Update ALMA incrementally with O(1) operation
         updateAlmaIncremental(candle.close);
@@ -408,7 +427,7 @@ TechnicalIndicators TimeOrderedTickBuffer::computeIndicatorsFromCandles() {
     indicators.ema26 = std::isnan(m_emaPriceSlow) ? 0.0 : m_emaPriceSlow;
     
     // Use O(1) incremental ALMA calculation
-    if (m_priceRingCount >= technical_calculator::config::ALMA_WINDOW_SIZE) {
+    if (m_priceRingCount >= m_almaSizeWindow) {
         indicators.alma = std::isfinite(m_almaDot) ? m_almaDot : 0.0;
     } else {
         // Still warming up - fall back to traditional calculation temporarily
@@ -428,61 +447,36 @@ TechnicalIndicators TimeOrderedTickBuffer::computeIndicatorsFromCandles() {
         } else {
             indicators.alma = m_calculator->calculateALMA(
                 closes,
-                technical_calculator::config::ALMA_WINDOW_SIZE,
-                technical_calculator::config::ALMA_SIGMA,
-                technical_calculator::config::ALMA_OFFSET);
+                m_almaSizeWindow,
+                m_almaSigma,
+                m_almaOffset);
         }
     }
     
-    // Use incremental RSI and Chaikin calculations
+    // Use incremental RSI and ATR calculations
     indicators.rsi = m_lastRSI;
+    indicators.atr = std::isnan(m_atr) ? 0.0 : m_atr;
     // indicators.chaikin = m_lastChaikin;
+    
+    // Save stream state to prevent side effects
+    std::ios_base::fmtflags originalFlags = std::cout.flags();
+    std::streamsize originalPrecision = std::cout.precision();
     
     std::cout << "[TimeOrderedTickBuffer] Calculated indicators: "
               << "VWAP=" << std::fixed << std::setprecision(4) << indicators.vwap
               << ", EMA9=" << indicators.ema9 
               << ", EMA26=" << indicators.ema26
               << ", RSI=" << std::setprecision(1) << indicators.rsi
+              << ", ATR=" << std::setprecision(4) << indicators.atr
               << ", ALMA=" << std::setprecision(4) << indicators.alma << " (fixed incremental)" << std::endl;
               // << ", Chaikin=" << std::setprecision(6) << indicators.chaikin << std::endl;
     
-    std::cout.unsetf(std::ios_base::fixed);  // Restore default formatting
+    // Restore original stream state
+    std::cout.flags(originalFlags);
+    std::cout.precision(originalPrecision);
     
     return indicators;
 }
-
-/*
-/**
- * updateChaikinForCandle() - Consolidated Chaikin Oscillator Calculation
- * 
- * Single entry point for Chaikin calculation with rolling window support.
- * Computes MFM, MFV, updates ADL, EMAs, and stores MFV for rolling window.
- */
-// void TimeOrderedTickBuffer::updateChaikinForCandle(const Candle& candle,
-//                                                    int64_t minuteIndex,
-//                                                    bool    isFirstTime)
-// {
-//     const double range = candle.high - candle.low;
-//     const double mfm   = (range == 0.0) ? 0.0
-//                          : std::clamp((2.0 * candle.close - candle.high - candle.low) / range,
-//                                       -1.0, 1.0);
-
-//     const double mfv = mfm * candle.volume;
-
-//     // --- running ADL and EMA update ---------------------------------
-//     m_runningADL += mfv;
-
-//     if (isFirstTime) {
-//         m_emaADL_fast = m_emaADL_slow = m_runningADL;
-//     } else {
-//         m_emaADL_fast += ALPHA_FAST * (m_runningADL - m_emaADL_fast);
-//         m_emaADL_slow += ALPHA_SLOW * (m_runningADL - m_emaADL_slow);
-//     }
-
-//     m_lastChaikin = m_emaADL_fast - m_emaADL_slow;
-//     m_candleMFV[minuteIndex] = mfv;
-// }
-
 
 /**
  * updateRSIForCandle() - Incremental RSI Calculation with Wilder's Smoothing
@@ -491,6 +485,11 @@ TechnicalIndicators TimeOrderedTickBuffer::computeIndicatorsFromCandles() {
  * Uses Wilder's smoothing method for accurate RSI calculation.
  */
 void TimeOrderedTickBuffer::updateRSIForCandle(double close) {
+    // Skip bad data to prevent NaN poisoning
+    if (!std::isfinite(close)) {
+        return;  // skip bad data
+    }
+    
     // First candle ever - initialize
     if (std::isnan(m_prevClose)) {
         m_prevClose = close;
@@ -545,9 +544,9 @@ void TimeOrderedTickBuffer::updateRSIForCandle(double close) {
  */
 void TimeOrderedTickBuffer::initializeAlmaWeights()
 {
-    const size_t M      = technical_calculator::config::ALMA_WINDOW_SIZE;
-    const double sigma  = technical_calculator::config::ALMA_SIGMA;   // e.g. 6
-    const double offset = technical_calculator::config::ALMA_OFFSET;  // usually 0.85
+    const size_t M      = m_almaSizeWindow;
+    const double sigma  = m_almaSigma;
+    const double offset = m_almaOffset; 
 
     m_almaWeights.resize(M);
 
@@ -597,6 +596,11 @@ void TimeOrderedTickBuffer::addCandleToRing(const Candle& candle) {
  */
 void TimeOrderedTickBuffer::updateAlmaIncremental(double newClose)
 {
+    // Skip bad data to prevent NaN poisoning
+    if (!std::isfinite(newClose)) {
+        return;  // skip bad data
+    }
+    
     const size_t M = m_almaWeights.size();
 
     m_priceRing[m_priceRingHead] = newClose;
@@ -621,5 +625,67 @@ void TimeOrderedTickBuffer::updateAlmaIncremental(double newClose)
     if (!std::isfinite(m_almaDot)) m_almaDot = 0.0;
     m_almaDot = std::clamp(m_almaDot, -1e12, 1e12);  // Support high-value instruments like BRK-A
 }
+
+/**
+ * updateATRForCandle() - Incremental ATR Calculation with Wilder's Method
+ * 
+ * Maintains rolling ATR state without recalculating from scratch.
+ * Uses proper Wilder's method: SMA seed for first 14 TRs, then exponential smoothing.
+ */
+void TimeOrderedTickBuffer::updateATRForCandle(const Candle& prev, const Candle& curr) {
+    // Skip bad data to prevent NaN poisoning
+    if (!std::isfinite(curr.close) || !std::isfinite(curr.high) || !std::isfinite(curr.low) ||
+        !std::isfinite(prev.close) || !std::isfinite(prev.high) || !std::isfinite(prev.low)) {
+        return;  // skip bad data
+    }
+    
+    double tr = std::max({ curr.high - curr.low,
+                          std::fabs(curr.high - prev.close),
+                          std::fabs(curr.low - prev.close) });
+
+    if (m_atrWarmupCount < ATR_PERIOD) {          // seeding
+        if (std::isnan(m_atr)) m_atr = 0.0;
+        m_atr += tr;
+        ++m_atrWarmupCount;
+
+        if (m_atrWarmupCount == ATR_PERIOD)
+            m_atr /= ATR_PERIOD;                  // finish SMA seed
+    }
+    else {                                        // Wilder smoothing
+        m_atr += (tr - m_atr) / ATR_PERIOD;       // 100% numerically stable
+    }
+}
+
+/*
+/**
+ * updateChaikinForCandle() - Consolidated Chaikin Oscillator Calculation
+ * 
+ * Single entry point for Chaikin calculation with rolling window support.
+ * Computes MFM, MFV, updates ADL, EMAs, and stores MFV for rolling window.
+ */
+// void TimeOrderedTickBuffer::updateChaikinForCandle(const Candle& candle,
+//                                                    int64_t minuteIndex,
+//                                                    bool    isFirstTime)
+// {
+//     const double range = candle.high - candle.low;
+//     const double mfm   = (range == 0.0) ? 0.0
+//                          : std::clamp((2.0 * candle.close - candle.high - candle.low) / range,
+//                                       -1.0, 1.0);
+
+//     const double mfv = mfm * candle.volume;
+
+//     // --- running ADL and EMA update ---------------------------------
+//     m_runningADL += mfv;
+
+//     if (isFirstTime) {
+//         m_emaADL_fast = m_emaADL_slow = m_runningADL;
+//     } else {
+//         m_emaADL_fast += ALPHA_FAST * (m_runningADL - m_emaADL_fast);
+//         m_emaADL_slow += ALPHA_SLOW * (m_runningADL - m_emaADL_slow);
+//     }
+
+//     m_lastChaikin = m_emaADL_fast - m_emaADL_slow;
+//     m_candleMFV[minuteIndex] = mfv;
+// }
 
 } // namespace time_ordered_tick_buffer 

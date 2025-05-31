@@ -25,7 +25,8 @@ ModelManager::ModelManager(const std::string& symbol, size_t windowSize, TimeWin
       m_windowUnit(windowUnit),
       m_lastPruneTime(std::chrono::system_clock::now()),
       // Initialize with the correct window size from the start
-      m_timeOrderedBuffer(windowToMilliseconds()), 
+      m_timeOrderedBuffer(windowToMilliseconds()),
+      m_ringBufferTradeHandler(&m_timeOrderedBuffer),
       m_requestId(-1),
       m_connected(false),
       m_connectionAttempts(0),
@@ -423,7 +424,8 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
     enrichedTick.ema9 = indicators.ema9;
     enrichedTick.ema26 = indicators.ema26;
     enrichedTick.alma = indicators.alma;
-    // enrichedTick.chaikin = indicators.chaikin;
+    enrichedTick.atr = indicators.atr;
+    
     
     // Check trading conditions
     bool isValidCandidate = false;
@@ -459,6 +461,13 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
 
     // No need to create a new StockData object since we already have one
     // Just pass it directly to the raw data model with the enriched indicators
+    
+    // Quick trade opportunity check using ring buffer
+    if (m_ringBufferTradeHandler.checkForTradeOpportunity(enrichedTick)) {
+        std::cout << "[TradeAlert] Opportunity detected for " << getSymbol() 
+                  << " at price: " << enrichedTick.last << std::endl;
+    }
+    
     m_rawDataModel->addTick(enrichedTick);
     
     // Get queue size after adding the tick
@@ -476,7 +485,7 @@ void ModelManager::addTick(const stock_data_tick::StockData& tick) {
               << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
               << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
               << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
-              << " ALMA=" << enrichedTick.alma
+              << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
               << "\n  Trading Candidate: " << (isValidCandidate ? "YES" : "NO")
               << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
               << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;
@@ -623,8 +632,8 @@ std::vector<stock_data_tick::StockData> ModelManager::getTicksInWindow() const {
         tick.ema9 = data.ema9;
         tick.ema26 = data.ema26;
         tick.alma = data.alma;
-        tick.chaikin = data.chaikin;
-        
+        tick.atr = data.atr;
+
         // Add to vector
         windowTicks.push_back(tick);
     }

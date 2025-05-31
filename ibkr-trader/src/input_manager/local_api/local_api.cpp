@@ -1158,7 +1158,7 @@ nlohmann::json LocalAPI::getSymbolQueueData(const std::string& symbol) const {
                     tickData["ema9"] = tick.ema9;
                     tickData["ema26"] = tick.ema26;
                     tickData["alma"] = tick.alma;
-                    tickData["chaikin"] = tick.chaikin;
+                    tickData["atr"] = tick.atr;
                     
                     // Add OHLC data
                     tickData["open"] = tick.open;
@@ -1210,7 +1210,7 @@ nlohmann::json LocalAPI::getSymbolQueueData(const std::string& symbol) const {
                             tickData["ema9"] = latestTick.ema9;
                             tickData["ema26"] = latestTick.ema26;
                             tickData["alma"] = latestTick.alma;
-                            tickData["chaikin"] = latestTick.chaikin;
+                            tickData["atr"] = latestTick.atr;
                             
                             // Add OHLC data
                             tickData["open"] = latestTick.open;

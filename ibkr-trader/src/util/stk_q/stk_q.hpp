@@ -45,7 +45,8 @@ namespace stk_q
         double ema9 = 0.0;
         double ema26 = 0.0;
         double alma = 0.0;
-        double chaikin = 0.0;
+        double atr = 0.0;
+
 
         // Backward compatibility - keep original fields
         double price = 0.0;  // Maps to 'last' for compatibility

@@ -37,6 +37,7 @@ struct TechnicalIndicators {
     double ema9 = 0.0;
     double ema26 = 0.0;
     double alma = 0.0;
+    double atr = 0.0;
     // double chaikin = 0.0;  // Commented out temporarily
 
     bool isValid() const {
@@ -97,6 +98,11 @@ public:
     // Get most recent technical indicators
     TechnicalIndicators calculateIndicators();
     
+    // Ring buffer access for trade handlers
+    const std::vector<TemporaryCandle>& getMinuteRing() const { return m_minuteRing; }
+    const std::vector<int64_t>& getMinuteIndices() const { return m_minuteIndices; }
+    size_t getWindowMinutes() const { return m_windowMinutes; }
+    
 private:
     // Map with timestamp as key ensures automatic chronological ordering
     std::map<int64_t, stock_data_tick::StockData> m_orderedTicks;
@@ -120,6 +126,9 @@ private:
     size_t m_priceRingHead;                    // Next price slot to overwrite
     size_t m_priceRingCount;                   // Number of valid price slots
     double m_almaDot;                          // Running ALMA dot product
+    size_t m_almaSizeWindow;
+    double m_almaSigma;
+    double m_almaOffset;
     
     // Technical calculator (using a pointer to avoid circular dependency)
     std::unique_ptr<technical_calculator::TechnicalCalculator> m_calculator;
@@ -143,12 +152,16 @@ private:
     double m_avgLoss;
     double m_lastRSI;
     static constexpr int RSI_PERIOD = 14;
+    static constexpr int ATR_PERIOD = 14;
     int m_rsiWarmupCount;
+    
+    // ATR state for incremental calculation
+    double m_atr = std::numeric_limits<double>::quiet_NaN();
+    int m_atrWarmupCount = 0;
     
     // Price EMA state for incremental calculation
     double m_emaPriceFast = std::numeric_limits<double>::quiet_NaN();
     double m_emaPriceSlow = std::numeric_limits<double>::quiet_NaN();
-    
     // Track the last minute processed to avoid double-counting candles
     int64_t m_lastProcessedMinute = std::numeric_limits<int64_t>::min();
     
@@ -160,6 +173,7 @@ private:
     TechnicalIndicators computeIndicatorsFromCandles();
     // void updateChaikinForCandle(const Candle& candle, int64_t minuteIndex, bool isFirstTime);
     void updateRSIForCandle(double close);
+    void updateATRForCandle(const Candle& prev, const Candle& curr);
     
     // Ring buffer and ALMA optimization methods
     void initializeAlmaWeights();

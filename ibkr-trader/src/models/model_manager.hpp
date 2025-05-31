@@ -6,6 +6,7 @@
 #include "technical_calculator/volume_profile_map.hpp"
 #include "../connection_manager/connection_manager.hpp"
 #include "../util/time_ordered_tick_buffer/time_ordered_tick_buffer.hpp"
+#include "../util/time_ordered_tick_buffer/ring_buffer_trade_handler.hpp"
 #include <chrono>
 #include <memory>
 #include <string>
@@ -114,6 +115,9 @@ private:
     
     // Time-ordered buffer for technical analysis
     time_ordered_tick_buffer::TimeOrderedTickBuffer m_timeOrderedBuffer;
+    
+    // Ring buffer handler for trade opportunities
+    ring_buffer_trade_handler::RingBufferTradeHandler m_ringBufferTradeHandler;
     
     // Time window settings for historical data retention
     size_t m_windowSize;                // Size of the time window

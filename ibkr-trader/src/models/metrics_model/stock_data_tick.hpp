@@ -75,8 +75,9 @@ public:
     double ema9 = 0.0;          // 9-period Exponential Moving Average
     double ema26 = 0.0;         // 26-period Exponential Moving Average
     double alma = 0.0;          // Arnaud Legoux Moving Average
-    double chaikin = 0.0;       // Chaikin Oscillator
+    double atr = 0.0;           // Average True Range
 
+    
     // Constructors
     StockData() = default;
     StockData(const std::string& sym, timestamp_t ts, double bidPrice, double askPrice, double lastPrice = 0.0);
