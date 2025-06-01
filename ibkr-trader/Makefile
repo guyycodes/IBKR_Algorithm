@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -w -g
+CXXFLAGS = -std=c++20 -w -g
 INCLUDES = -I./include \
            -I./include/ibkr/cppclient/client \
            -I./include/ibkr/cppclient/client/protobufUnix \
@@ -20,7 +20,8 @@ SOURCES = $(wildcard $(SRCDIR)/*.cpp) \
           $(wildcard $(SRCDIR)/*/*.cpp) \
           $(wildcard $(SRCDIR)/*/*/*.cpp) \
           $(wildcard $(IBKR_SRCDIR)/*.cpp) \
-          $(wildcard $(IBKR_SRCDIR)/protobufUnix/*.cc)
+          $(wildcard $(IBKR_SRCDIR)/protobufUnix/*.cc) \
+          util/app_state.cpp
 
 # Exclude official_example_connections directory
 SOURCES := $(filter-out $(SRCDIR)/connection_manager/official_example_connections/%.cpp, $(SOURCES))
@@ -28,7 +29,8 @@ SOURCES := $(filter-out $(SRCDIR)/connection_manager/official_example_connection
 # Update OBJECTS to handle both src and include files
 OBJECTS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(filter $(SRCDIR)/%.cpp,$(SOURCES))) \
           $(patsubst $(IBKR_SRCDIR)/%.cpp,$(OBJDIR)/ibkr/%.o,$(filter $(IBKR_SRCDIR)/%.cpp,$(SOURCES))) \
-          $(patsubst $(IBKR_SRCDIR)/protobufUnix/%.cc,$(OBJDIR)/ibkr/protobuf/%.o,$(filter $(IBKR_SRCDIR)/protobufUnix/%.cc,$(SOURCES)))
+          $(patsubst $(IBKR_SRCDIR)/protobufUnix/%.cc,$(OBJDIR)/ibkr/protobuf/%.o,$(filter $(IBKR_SRCDIR)/protobufUnix/%.cc,$(SOURCES))) \
+          $(patsubst util/%.cpp,$(OBJDIR)/util/%.o,$(filter util/%.cpp,$(SOURCES)))
           
 TARGET = $(BINDIR)/ibkr-trader
 
@@ -73,6 +75,11 @@ $(OBJDIR)/ibkr/%.o: $(IBKR_SRCDIR)/%.cpp
 
 # Rule for protobuf files
 $(OBJDIR)/ibkr/protobuf/%.o: $(IBKR_SRCDIR)/protobufUnix/%.cc
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+# Rule for util files
+$(OBJDIR)/util/%.o: util/%.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

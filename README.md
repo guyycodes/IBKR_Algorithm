@@ -424,3 +424,54 @@ src/
                         │       ├─Roles:
                         │       ├─ 
                         │       └─ 
+Legend:
+“owns →” arrows denote “parent thread creates and manages the lifecycle of the child thread.”
+Left‐pointing arrows ← denote data or control flowing from one component into another.
+All components listed under a thread box execute on that thread ID.
+🧵  Main Thread
+│
+├─ main.cpp / main()    ←──────────────────────── input_manager (program entry-point logic - receives user input from input_manager)
+│
+└──app_state.cpp / main()   ←───manager classes   (recieve thread requests like an api from manager classes - manages thread lifcycle in one place)
+        │
+        └── owns ──▶ 🧵 Thread #1
+                │
+                ├─ InputManager              ←──────────────────────── Local API
+                │
+                ├─  Local API (HTTP server)  ←──────────────────────────────── External_clients
+                │
+                └─ ModelManagerFactory (factory pattern generates model manager)
+                        │
+                        └── owns ──▶ 🧵 Thread #2
+                                │
+                                └─ model_manager(singleton) ←──────────────────────── time_ordered_tick_buffer, app_state, connection_manager, raw_data_model, volume_profile_map , ring_buffer_trade_handler
+                                        │
+                                        ├─ stock_data_tick ←────────────────────────  connection
+                                        │
+                                        ├─time_ordered_tick_buffer  ←──────────────────────── stock_data_tick
+                                        │
+                                        ├─ time_ordered_tick_buffer (signal generation) ←────────── ring_buffer_trade_handler
+                                        │
+                                        ├─ ring_buffer_trade_handler             ←──────────────────────── stock_data_tick, time_ordered_tick_buffer
+                                        │
+                                        ├─ connection
+                                        │     └──connection.cpp         ←──────────────────────── connection_cache, frame_analyzer, decoder, account_summary
+                                        │
+                                        ├─ connection_manager
+                                        │     └──connection_manager.cpp  ←──────────── connection
+                                        │
+                                        ├─ connection_cache
+                                        │       └──connection_cache.cpp  ←──────────────────────── stock_data_tick
+                                        │
+                                        ├─ decoder
+                                        │     ├─ frame_analyzer.cpp  ←──────────────────────── decoder
+                                        │     └──decoder.cpp  ←──────────────────────── frame_analyzer
+                                        │
+                                        ├─ models
+                                        │     ├─ stock_data_tick  
+                                        │     ├─ volume_profile_map                                 
+                                        │     └─ raw_data_model     ←──────────────────────── STK_Q, stock_data_tick
+                                        ├─ STK_Q
+                                        │
+                                        └─ position_handler (risk manager / P&L / Logs)  ←──────────────────────── ring_buffer_trade_handler 
+                                                                

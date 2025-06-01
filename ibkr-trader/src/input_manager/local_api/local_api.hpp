@@ -1,131 +1,103 @@
 #pragma once
-
-#include <string>
-#include <functional>
-#include <vector>
+// ────────────────────────────────────────────────────────────────────────────────
+//  local_api.hpp – lightweight single-thread HTTP façade
+// ────────────────────────────────────────────────────────────────────────────────
 #include <nlohmann/json.hpp>
-#include <memory>
-#include <thread>
+
 #include <atomic>
+#include <functional>
+#include <memory>
 #include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
 
-// Forward declaration
-namespace input_manager {
-    class InputManager;
-}
-
-namespace model_manager {
-    class ModelManager;
-}
+namespace input_manager { class InputManager; }
 
 namespace local_api {
 
 class LocalAPI {
 public:
-    // Constructor and destructor
     LocalAPI();
     ~LocalAPI();
-    
-    // Set the input manager reference
-    void setInputManager(std::shared_ptr<input_manager::InputManager> inputManager);
-    
-    // Initialize the API
-    bool initialize(const std::string& configPath = "");
-    
-    // Start/stop the API server
-    bool start(int port = 9000);
+
+    /* one-off init (optional config file in JSON) */
+    bool initialize(const std::string& cfgPath = "");
+
+    /* lifecycle – *blocking* HTTP server on its own worker thread               */
+    bool start(int port = 9'000);        // returns immediately
     void stop();
-    
-    // Process trading requests (direct processing, backward compatibility)
-    bool processTradingRequest(const nlohmann::json& request);
-    bool processBatchRequests(const std::vector<nlohmann::json>& requests);
-    
-    // Queue and confirm trading requests
-    bool queueTradingRequest(const nlohmann::json& request);
+
+    /* queue -> confirm workflow (thread-safe)                                    */
+    bool queueTradingRequest (const nlohmann::json& req);
     bool confirmQueuedRequests();
-    
-    // Symbol management
-    
-    // Clears a specific symbol from queues and stops its associated thread
-    // Directly accesses AppState to manage threads (NOT via InputManager)
-    bool clearSymbol(const std::string& symbol);
-    
-    // Clears all symbols from queues and stops all active threads
-    // Directly accesses AppState to manage threads (NOT via InputManager)
+
+    /* direct immediate execution (legacy)                                        */
+    bool processTradingRequest (const nlohmann::json& req);
+    bool processBatchRequests  (const std::vector<nlohmann::json>& batch);
+
+    /* symbol helpers (no recursion into InputManager to avoid tight coupling)    */
+    bool clearSymbol  (const std::string& symbol);
     void clearAllRequests();
-    
-    // Status and information
-    nlohmann::json getStatus() const;
-    nlohmann::json getRequestStatus(const std::string& requestId) const;
+
+    /* status endpoints                                                           */
+    nlohmann::json getStatus()            const;
     nlohmann::json getFormattedRequests() const;
-    nlohmann::json getPendingRequests() const;
+    nlohmann::json getPendingRequests()   const;
     nlohmann::json getSymbolQueueData(const std::string& symbol) const;
-    
-    // Configuration
-    void setAutoConfirm(bool autoConfirm);
-    bool getAutoConfirm() const;
-    
-    // Callback registration
-    void registerTradeCallback(std::function<void(const nlohmann::json&)> callback);
-    void registerErrorCallback(std::function<void(const std::string&, const std::string&)> callback);
-    
-    // Utility functions
-    void setLogLevel(int level);
-    
-    // Emergency stop functionality
-    
-    // Emergency stop handler - force close the server and clean up
+
+    /* misc settings                                                              */
+    void setLogLevel(int lvl);
+    void setAutoConfirm(bool ac);   bool getAutoConfirm() const;
+
+    /* callbacks back to InputManager                                             */
+    void registerTradeCallback (std::function<void(const nlohmann::json&)> cb);
+    void registerErrorCallback (std::function<void(const std::string&,
+                                                   const std::string&)> cb);
+
+    /* hard kill                                                                  */
     void emergencyStop();
-    
-    // Handle the /emergency-stop HTTP endpoint
-    void handleEmergencyStop(int clientSocket);
-    
+
+    /* back reference into owning InputManager (weak)                             */
+    void setInputManager(std::shared_ptr<input_manager::InputManager> im);
+
 private:
-    // HTTP server functionality
-    void startHttpServer(int port);
-    void stopHttpServer();
-    void httpServerThread();
-    void handleHttpRequest(int clientSocket);
-    std::string processHttpRequest(const std::string& request);
-    std::string buildHttpResponse(int statusCode, const std::string& responseBody, const std::string& contentType);
-    
-    // Request processing
-    bool validateRequest(const nlohmann::json& request) const;
-    bool executeRequest(const nlohmann::json& request);
-    
-    // Utility functions
-    void logMessage(int level, const std::string& message) const;
-    bool parseConfig(const std::string& configPath);
-    void notifyRequestQueueChanged();
-    
-    // Data members
-    std::weak_ptr<input_manager::InputManager> m_inputManager;
-    nlohmann::json m_config;
-    std::vector<nlohmann::json> m_requestQueue;
-    std::vector<nlohmann::json> m_pendingQueue;
-    bool m_isRunning;
-    int m_logLevel;
-    bool m_autoConfirm;
-    
-    // Mutex for thread-safe queue operations
-    std::mutex m_queueMutex;
-    
-    // Connection status tracking
-    nlohmann::json m_lastConnectionResults;
-    bool m_hasConnectionIssues;
-    
-    // Callbacks
-    std::function<void(const nlohmann::json&)> m_tradeCallback;
-    std::function<void(const std::string&, const std::string&)> m_errorCallback;
-    
-    // HTTP server
-    std::thread m_serverThread;
-    std::atomic<bool> m_serverRunning;
-    int m_serverSocket;
-    int m_serverPort;
-    
-    // Flag to track if emergency stop is in progress
-    bool m_isEmergencyStop = false;
+    /* HTTP plumbing                                                              */
+    void        serverWorker(int port);
+    void        handleClient(int sock);
+    std::string processHttpRequest(const std::string& raw);
+    std::string buildHttpResp(int code, std::string_view body,
+                              std::string_view mime = "application/json") const;
+
+    /* helpers                                                                    */
+    bool validateRequest (const nlohmann::json&) const;
+    bool executeRequest  (const nlohmann::json&);
+
+    void notifyParent();                        // push queue -> tradeCallback
+    void log(int lvl, std::string_view msg) const;
+    bool parseConfig(const std::string& path);
+    void printHelpBanner(int port) const;       // ←-- required banner
+
+    /* data                                                                       */
+    std::weak_ptr<input_manager::InputManager> m_parent;
+
+    nlohmann::json              m_cfg;
+    std::vector<nlohmann::json> m_queue;
+    std::vector<nlohmann::json> m_pending;
+    mutable std::mutex          m_mx;           // guards queues
+
+    int                m_logLvl{0};
+    bool               m_autoConfirm{false};
+    bool               m_running{false};
+    std::atomic<int>   m_sock{-1};
+    std::thread        m_worker;
+
+    // last connection diagnostics (populated by confirmQueuedRequests)
+    nlohmann::json     m_ibkrConnDiag;
+    bool               m_ibkrProblems{false};
+
+    std::function<void(const nlohmann::json&)>          m_tradeCB;
+    std::function<void(const std::string&,std::string)> m_errorCB;
 };
 
 } // namespace local_api

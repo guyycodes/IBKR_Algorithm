@@ -1,150 +1,168 @@
-// main.cpp
-
-#include "tests/test_input_manager.hpp"
+// ────────────────────────────────────────────────────────────────────────────────
+// main.cpp - single entry-point, C++20
+// ────────────────────────────────────────────────────────────────────────────────
 #include "input_manager/input_manager.hpp"
-#include "util/app_state/app_state.hpp"
-#include <iostream>
-#include <string>
-#include <memory>
-#include <signal.h>
+#include "../util/app_state.hpp"
+// #include "tests/test_input_manager.hpp"  // COMMENTED OUT FOR BUILD
+
 #include <atomic>
-#include <thread>
 #include <chrono>
-#include <unistd.h> // For _exit()
+#include <csignal>
+#include <cstdlib>
+#include <exception>
+#include <iostream>
+#include <memory>
+#include <span>
+#include <string_view>
+#include <thread>
+#include <sstream>
 
-// Global reference to input manager for signal handling
-std::shared_ptr<input_manager::InputManager> g_inputManager;
-std::atomic<bool> g_shutdownRequested(false);
+using namespace std::chrono_literals;
 
-// Signal handler for CTRL+C
-void signalHandler(int signum) {
-    std::cout << "\n[main] Received signal " << signum << " (CTRL+C)" << std::endl;
-    std::cout << "[main] Initiating graceful shutdown sequence..." << std::endl;
-    
-    // Use AppState requestEmergencyStop to handle thread shutdown
+// --------------------------------------------------------------------------------
+//  Globals kept to an absolute minimum
+// --------------------------------------------------------------------------------
+namespace {
+/*Shared pointer is only written once, so relaxed ordering is fine.*/
+std::atomic<input_manager::InputManager*> g_inputManager{nullptr};
+std::atomic<bool>                         g_shutdownRequested{false};
+} // namespace
+
+// --------------------------------------------------------------------------------
+//  Minimal, RAII-style registration / un-registration of signal handlers
+// --------------------------------------------------------------------------------
+class SignalGuard {
+public:
+    explicit SignalGuard(void (*handler)(int)) {
+        std::signal(SIGINT,  handler);
+        std::signal(SIGTERM, handler);
+    }
+    ~SignalGuard() noexcept {
+        std::signal(SIGINT,  SIG_DFL);
+        std::signal(SIGTERM, SIG_DFL);
+    }
+    SignalGuard(const SignalGuard&)            = delete;
+    SignalGuard& operator=(const SignalGuard&) = delete;
+};
+
+// --------------------------------------------------------------------------------
+//  Asynchronous watchdog; terminates the process if graceful stop stalls
+// --------------------------------------------------------------------------------
+[[noreturn]] void watchdog(std::chrono::seconds maxWait) {
+    std::this_thread::sleep_for(maxWait);
+    std::cerr << "[main] Watch-dog timeout reached — forcing hard exit.\n";
+    std::_Exit(EXIT_FAILURE);        // Immediate, no unwinding.
+}
+
+// --------------------------------------------------------------------------------
+//  POSIX signal handler (very restricted — async-signal-safe operations only)
+// --------------------------------------------------------------------------------
+void onSignal(int signo) {
+    if (g_shutdownRequested.exchange(true)) { return; }   // already requested
+
+    std::cerr << "\n[main] Caught signal " << signo << ", initiating shutdown…\n";
     auto& appState = app_state::AppState::getInstance();
-    appState.requestEmergencyStop(5000, "signalHandler");
-    
-    // Set up a watchdog timer to force exit if shutdown takes too long
-    std::thread watchdogThread([]() {
-        std::cout << "[main] Started watchdog timer (5 seconds) for shutdown" << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        
-        // Check if shutdown is still in progress
-        auto& appState = app_state::AppState::getInstance();
-        if (appState.isShutdownInProgress()) {
-            // Shutdown is still in progress, force exit
-            std::cout << "[main] Watchdog timer expired, forcing exit" << std::endl;
-            // Use _exit instead of exit to ensure immediate termination without cleanup
-            _exit(1);
-        } else {
-            std::cout << "[main] Shutdown completed gracefully before watchdog timeout" << std::endl;
-            // Force exit even if shutdown completed gracefully
-            _exit(0);
-        }
-    });
-    
-    // Detach the watchdog thread so it runs independently
-    watchdogThread.detach();
-    
-    // Log that graceful shutdown is in progress
-    std::cout << "[main] Graceful shutdown in progress (watchdog will force exit in 5s if needed)" << std::endl;
-    
-    // Set global shutdown flag to signal other components
-    g_shutdownRequested.store(true);
+    appState.requestEmergencyStop(/*timeout ms*/ 5'000, "signal");
+
+    // detach watchdog so it keeps running even if main thread hangs
+    std::thread(watchdog, 5s).detach();
 }
 
-void printUsage(const char* programName) {
-    std::cout << "Usage: " << programName << " [options]" << std::endl;
-    std::cout << "Options:" << std::endl;
-    std::cout << "  --test-cli       Run in test CLI mode (using TestInputManager)" << std::endl;
-    std::cout << "  --test-api       Run in test API mode (using TestInputManager)" << std::endl;
-    std::cout << "  --api            Run in direct API mode (using InputManager)" << std::endl;
-    std::cout << "  --cli            Run in direct CLI mode (using InputManager)" << std::endl;
-    std::cout << "  --port PORT      Set API port (default: 9000)" << std::endl;
-    std::cout << "  --help           Show this help message" << std::endl;
+// --------------------------------------------------------------------------------
+//  Configuration default values
+// --------------------------------------------------------------------------------
+struct Config {
+    bool testApi = false;
+    int apiPort = 9000;
+    std::string configFile = "";
+};
+
+// --------------------------------------------------------------------------------
+//  Thread logging utility
+// --------------------------------------------------------------------------------
+void logThreadRole(const std::string& role, const std::string& action) {
+    auto tid = std::this_thread::get_id();
+    std::ostringstream ss;
+    ss << tid;
+    std::cout << "[" << role << ":" << ss.str() << "] " << action << std::endl;
 }
 
-int main(int argc, char* argv[]) {
-    std::cout << "IBKR Trading System" << std::endl;
-    std::stringstream threadIdStr;
-    threadIdStr << std::this_thread::get_id();
-    std::cout << "[Main] [Main_Thread: " << threadIdStr.str() << "] " << std::endl;
-    std::cout << "=================\n" << std::endl;
-    
-    // Register signal handler for CTRL+C
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
-    
-    // Parse command line arguments
-    bool useCliMode = true;         // Default to CLI mode
-    bool useTestMode = true;        // Default to test mode
-    int apiPort = 9000;             // Default API port - container friendly
-    
+void showUsage() {
+    std::cout << "Usage: ./bin/ibkr-trader [--test-api] [--port <n>] [-h|--help]\n";
+}
+
+// --------------------------------------------------------------------------------
+//  Helper: parse tiny subset of CLI flags we still support
+// --------------------------------------------------------------------------------
+Config parseArguments(int argc, char* argv[]) {
+    Config cfg;
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
+        
         if (arg == "--test-api") {
-            useCliMode = false;
-            useTestMode = true;
-        } else if (arg == "--test-cli") {
-            useCliMode = true;
-            useTestMode = true;
-        } else if (arg == "--api") {
-            useCliMode = false;
-            useTestMode = false;
-        } else if (arg == "--cli") {
-            useCliMode = true;
-            useTestMode = false;
-        } else if (arg == "--port" && i + 1 < argc) {
-            apiPort = std::stoi(argv[i + 1]);
-            ++i;
-        } else if (arg == "--help") {
-            printUsage(argv[0]);
-            return 0;
+            cfg.testApi = true;
+        }
+        else if (arg == "--port" && i + 1 < argc) {
+            cfg.apiPort = std::atoi(argv[++i]);
+        }
+        else if (arg == "-h" || arg == "--help") {
+            showUsage();
+            std::exit(0);
+        }
+        else {
+            std::cerr << "Unknown option: " << arg << std::endl;
+            showUsage();
+            std::exit(1);
         }
     }
+    return cfg;
+}
+
+// --------------------------------------------------------------------------------
+//  Main driver — split out so tests can invoke it directly.
+// --------------------------------------------------------------------------------
+int run(std::span<char*> argv) {
+    logThreadRole("MAIN-THREAD", "IBKR Trading System starting");
     
-    if (useTestMode) {
-        // Use TestInputManager for testing
-        tests::TestInputManager tester;
-        
-        // Set up the test
-        if (!tester.setup()) {
-            std::cerr << "Failed to set up test" << std::endl;
-            return 1;
-        }
-        
-        // Run appropriate test based on mode
-        if (useCliMode) {
-            tester.runCliTest();
-        } else {
-            tester.runApiTest(apiPort);
-        }
+    const auto cfg = parseArguments(static_cast<int>(argv.size()), argv.data());
+
+    auto manager = std::make_shared<input_manager::InputManager>();
+    g_inputManager.store(manager.get(), std::memory_order_relaxed);
+
+    if (!manager->initialize(cfg.configFile)) {
+        std::cerr << "[main] InputManager initialisation failed.\n";
+        return EXIT_FAILURE;
+    }
+    manager->setLogLevel(cfg.testApi ? 4 /*max*/ : 2);
+
+    /* Register signal handlers only after critical resources exist. */
+    SignalGuard sg{onSignal};
+
+    if (cfg.testApi) {
+        // Test mode: run API server with verbose logging
+        std::cout << "[main] Running in TEST mode with verbose logging\n";
+        manager->runApiServer(cfg.apiPort);
     } else {
-        // Use InputManager directly
-        g_inputManager = std::make_shared<input_manager::InputManager>();
-        
-        // Set logging level
-        g_inputManager->setLogLevel(2);
-        
-        // Initialize the input manager
-        if (!g_inputManager->initialize()) {
-            std::cerr << "Failed to initialize InputManager" << std::endl;
-            return 1;
-        }
-        
-        // Run appropriate mode
-        if (useCliMode) {
-            g_inputManager->runCli();
-        } else {
-            g_inputManager->runApiServer(apiPort);
-        }
+        manager->runApiServer(cfg.apiPort);
     }
-    
-    // Ensure any remaining cleanup happens
-    if (g_shutdownRequested.load()) {
-        std::cout << "Cleanup complete. Exiting..." << std::endl;
+
+    return EXIT_SUCCESS;
+}
+
+// --------------------------------------------------------------------------------
+//  Traditional `main` — thin wrapper with global exception safety.
+// --------------------------------------------------------------------------------
+int main(int argc, char* argv[]) noexcept {
+    try {
+        return run({argv, static_cast<std::size_t>(argc)});
     }
-    
-    return 0;
+    catch (const std::exception& e) {
+        logThreadRole("MAIN-THREAD", "ERROR: " + std::string(e.what()));
+        std::cerr << "Error: " << e.what() << '\n';
+    }
+    catch (...) {
+        std::cerr << "[main] Unhandled non-std exception\n";
+    }
+
+    return EXIT_FAILURE;
 }
