@@ -1,3 +1,7 @@
+// ───────────────────────────────────────────────────────────────────────────────
+//  app_state.hpp
+// ───────────────────────────────────────────────────────────────────────────────
+
 #ifndef APP_STATE_HPP
 #define APP_STATE_HPP
 
@@ -52,6 +56,7 @@ public:
     bool joinable() const { return m_thread.joinable(); }
     void join() { if (m_thread.joinable()) m_thread.join(); }
     void detach() { if (m_thread.joinable()) m_thread.detach(); }
+    std::thread::id get_id() const { return m_thread.get_id(); }
     
     ThreadWrapper(const ThreadWrapper&) = delete;
     ThreadWrapper& operator=(const ThreadWrapper&) = delete;
@@ -112,10 +117,9 @@ public:
 private:
     AppState();                                     // private ctor (singleton)
 
-    // internal helpers (all expect m_mutex to be locked)
-    void _stopThreadUnlocked   (const std::string& name);
-    void _stopAllThreadsUnlocked();
-    void _emergencyStopUnlocked(int timeoutMs);
+    // NOTE: Old internal helper functions removed to avoid lock-order inversion deadlocks.
+    // The logic has been moved into the public methods to ensure blocking operations
+    // happen outside the critical section.
 
     //───────────────────────────────────────────────────────────────────────────
     struct ThreadEntry {

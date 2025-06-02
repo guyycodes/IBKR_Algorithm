@@ -22,6 +22,16 @@ using namespace std::chrono_literals;
 namespace local_api {
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Thread logging utility - same as other components for consistency
+// ────────────────────────────────────────────────────────────────────────────────
+void logThreadRole(const std::string& role, const std::string& action) {
+    auto tid = std::this_thread::get_id();
+    std::ostringstream ss;
+    ss << tid;
+    std::cout << "[" << role << ":" << ss.str() << "] " << action << std::endl;
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
 // ctor / dtor
 // ────────────────────────────────────────────────────────────────────────────────
 LocalAPI::LocalAPI() {
@@ -55,13 +65,24 @@ void LocalAPI::stop(){
     // wake select/accept by closing the listening socket
     if (int s = m_sock.exchange(-1); s != -1) ::shutdown(s,SHUT_RDWR);
 
-    if (m_worker.joinable()) m_worker.join();
+    if (m_worker.joinable()) {
+        if (m_worker.get_id() == std::this_thread::get_id()) {
+            m_worker.detach();                     // <─ critical change: never self-join
+        } else {
+            m_worker.join();
+        }
+    }
 }
 
 /*─ server worker (select-loop on listen socket) ─*/
 void LocalAPI::serverWorker(int port){
+    logThreadRole("HTTP-SERVER", "HTTP server thread started on port " + std::to_string(port));
+    
     int srv = ::socket(AF_INET, SOCK_STREAM, 0);
-    if (srv < 0) { log(2,"socket err"); return; }
+    if (srv < 0) { 
+        log(2,"socket err"); 
+        return; 
+    }
 
     int opt=1;  ::setsockopt(srv,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
     ::fcntl(srv,F_SETFL, ::fcntl(srv,F_GETFL,0) | O_NONBLOCK);
@@ -94,8 +115,29 @@ void LocalAPI::serverWorker(int port){
 void LocalAPI::handleClient(int sock){
     char buf[4096]; int n = ::read(sock,buf,sizeof(buf));
     if (n<=0) return;
-    std::string resp = processHttpRequest({buf,(size_t)n});
-    ::send(sock,resp.data(),resp.size(),0);
+    
+    std::string resp;
+    try {
+        resp = processHttpRequest({buf,(size_t)n});
+    } catch (const std::exception& e) {
+        log(2, "Exception processing request: " + std::string(e.what()));
+        resp = buildHttpResp(500, "{\"error\":\"internal server error\"}", "application/json");
+    } catch (...) {
+        log(2, "Unknown exception processing request");
+        resp = buildHttpResp(500, "{\"error\":\"unknown error\"}", "application/json");
+    }
+    
+    // Ensure we always try to send a response
+    if (resp.empty()) {
+        resp = buildHttpResp(500, "{\"error\":\"empty response\"}", "application/json");
+    }
+    
+    ssize_t sent = ::send(sock, resp.data(), resp.size(), 0);
+    if (sent < 0) {
+        log(2, "Failed to send response");
+    } else if (static_cast<size_t>(sent) != resp.size()) {
+        log(1, "Partial response sent: " + std::to_string(sent) + "/" + std::to_string(resp.size()));
+    }
 }
 
 /*─ routing logic (GET/POST minimal parser) ─*/
@@ -130,12 +172,57 @@ std::string LocalAPI::processHttpRequest(const std::string& req){
             confirmQueuedRequests()?jsonOK({{"status","confirmed"}})
                                    :jsonOK({{"status","empty"}});
         }
-        else if (path=="/clear"){ clearSymbol(j.value("symbol",""));
-                                  jsonOK({{"status","cleared"}}); }
-        else if (path=="/clear-all"){ clearAllRequests();
-                                      jsonOK({{"status","cleared_all"}}); }
-        else if (path=="/emergency-stop"){ emergencyStop();
-                                           jsonOK({{"status","stop"}}); }
+        else if (path=="/clear"){ 
+            try {
+                std::string symbol = j.value("symbol", "");
+                log(0, "Clearing symbol: '" + symbol + "'");
+                if (symbol.empty()) {
+                    code = 400; 
+                    body = "{\"error\":\"symbol parameter required\"}";
+                } else if (clearSymbol(symbol)) {
+                    jsonOK({{"status","cleared"}, {"symbol", symbol}});
+                } else {
+                    code = 500; 
+                    body = "{\"error\":\"failed to clear symbol\"}";
+                }
+            } catch (const std::exception& e) {
+                log(2, "Error in /clear: " + std::string(e.what()));
+                code = 500; 
+                body = "{\"error\":\"internal server error\"}";
+            } catch (...) {
+                log(2, "Unknown error in /clear");
+                code = 500; 
+                body = "{\"error\":\"unknown error\"}";
+            }
+        }
+        else if (path=="/clear-all"){ 
+            try {
+                clearAllRequests();
+                jsonOK({{"status","cleared_all"}}); 
+            } catch (const std::exception& e) {
+                log(2, "Error in /clear-all: " + std::string(e.what()));
+                code = 500; 
+                body = "{\"error\":\"internal server error\"}";
+            } catch (...) {
+                log(2, "Unknown error in /clear-all");
+                code = 500; 
+                body = "{\"error\":\"unknown error\"}";
+            }
+        }
+        else if (path=="/emergency-stop"){ 
+            try {
+                emergencyStop();
+                jsonOK({{"status","stop"}}); 
+            } catch (const std::exception& e) {
+                log(2, "Error in /emergency-stop: " + std::string(e.what()));
+                code = 500; 
+                body = "{\"error\":\"internal server error\"}";
+            } catch (...) {
+                log(2, "Unknown error in /emergency-stop");
+                code = 500; 
+                body = "{\"error\":\"unknown error\"}";
+            }
+        }
         else if (path=="/set-auto-confirm"){
             setAutoConfirm(j.value("autoConfirm",false));
             jsonOK({{"status","ok"},{"autoConfirm",m_autoConfirm}});
@@ -191,23 +278,41 @@ bool LocalAPI::executeRequest(const nlohmann::json& j){
 //  symbol helpers
 // ────────────────────────────────────────────────────────────────────────────────
 bool LocalAPI::clearSymbol(const std::string& sym){
-    std::lock_guard lg(m_mx);
-    auto match=[&](const nlohmann::json& r){
-        return r.contains("symbol") &&
-               r["symbol"].get<std::string>()==sym; };
-    auto eraseAll=[&](std::vector<nlohmann::json>& v){
-        v.erase(std::remove_if(v.begin(),v.end(),match),v.end()); };
-    eraseAll(m_queue); eraseAll(m_pending);
+    {
+        std::lock_guard lg(m_mx);                  // only long enough to
+        auto match=[&](const nlohmann::json& r){  // edit the containers
+            return r.contains("symbol") &&
+                   r["symbol"].get<std::string>()==sym; };
+        auto eraseAll=[&](std::vector<nlohmann::json>& v){
+            v.erase(std::remove_if(v.begin(),v.end(),match),v.end()); };
+        eraseAll(m_queue); eraseAll(m_pending);
+    } // <- mutex released *before* blocking call below
+    
+    // CRITICAL SAFETY MECHANISM: Stop thread THEN remove model (legacy ordering)
     app_state::AppState::getInstance()
         .requestThreadStop(sym,"LocalAPI::clearSymbol");
+    
+    // Remove ModelManager from factory (disconnects IBKR, destroys object)
+    model_manager::ModelManagerFactory::getInstance()
+        .removeModel(sym);
+    
     notifyParent();
     return true;
 }
 void LocalAPI::clearAllRequests(){
-    { std::lock_guard lg(m_mx);
-      m_queue.clear(); m_pending.clear();}
+    { 
+        std::lock_guard lg(m_mx);
+        m_queue.clear(); m_pending.clear();
+    } // <- mutex released *before* blocking call below
+    
+    // CRITICAL SAFETY MECHANISM: Stop threads THEN remove models (legacy ordering)
     app_state::AppState::getInstance()
         .requestAllThreadsStop("LocalAPI::clearAllRequests");
+    
+    // Remove all ModelManagers from factory (disconnects IBKR, destroys objects)
+    model_manager::ModelManagerFactory::getInstance()
+        .clearAll();
+    
     notifyParent();
 }
 
@@ -309,10 +414,17 @@ void LocalAPI::printHelpBanner(int port) const {
 
 // ────────────────────────────────────────────────────────────────────────────────
 void LocalAPI::emergencyStop(){
-    log(0,"Emergency stop");
+    log(0,"Emergency stop - initiating immediate shutdown");
     stop();
     app_state::AppState::getInstance()
-        .requestEmergencyStop(1'000,"LocalAPI::emergencyStop");
+        .requestEmergencyStop(2'000,"LocalAPI::emergencyStop");
+        
+    // Force exit after 2 seconds if graceful shutdown fails
+    std::thread([]{
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::cout << "[LocalAPI] Emergency timeout - forcing exit\n";
+        std::_Exit(EXIT_FAILURE);
+    }).detach();
 }
 
 } // namespace local_api

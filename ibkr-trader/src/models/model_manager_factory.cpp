@@ -1,3 +1,7 @@
+// ───────────────────────────────────────────────────────────────────────────────
+//  model_manager_factory.cpp
+// ───────────────────────────────────────────────────────────────────────────────
+
 #include "models/model_manager_factory.hpp"
 #include "models/model_manager.hpp"
 #include "../../util/app_state.hpp"
@@ -17,7 +21,7 @@ void logCurrentThread(const std::string& component, const std::string& action) {
     auto tid = std::this_thread::get_id();
     std::ostringstream ss;
     ss << tid;
-    std::cout << "[THREAD-ID:" << ss.str() << "][" << component << "] " << action << std::endl;
+    std::cout << "[" << component << "][THREAD-ID:" << ss.str() << "] " << action << std::endl;
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -53,7 +57,7 @@ ModelManagerFactory::createModelManager(const std::string& symbol,
 std::shared_ptr<ModelManager>
 ModelManagerFactory::getModelManager(const std::string& symbol)
 {
-    logCurrentThread("ModelManagerFactory", "Getting ModelManager for symbol: " + symbol);
+    logCurrentThread("ModelManagerFactory", "Looking for existing ModelManager for symbol: " + symbol);
     std::lock_guard lg{m_mx};
     auto it = m_managers.find(symbol);
     return it == m_managers.end() ? nullptr : it->second;
@@ -67,10 +71,7 @@ bool ModelManagerFactory::initModelFromJson(const std::string& symbol,
     logCurrentThread("ModelManagerFactory", "Initializing model from JSON for symbol: " + symbol);
     auto mm = getModelManager(symbol);
     if (!mm) mm = createModelManager(symbol, window, unit);
-    // STUB: Comment out missing initFromJson
-    // return mm->initFromJson(js);
-    std::cout << "[ModelManagerFactory] STUB: initFromJson not implemented for " << symbol << '\n';
-    return true;  // Return success for testing
+    return mm->initFromJson(js);
 }
 
 // removal / clear --------------------------------------------------------------
@@ -140,10 +141,11 @@ ModelManagerFactory::getModelManager(const std::string& symbol,
         mm = createModelManager(symbol, /*window*/60, TimeWindowUnit::MINUTES);
     }
     if (!params.is_null()) {
-        // STUB: Comment out missing initFromJson calls  
-        // if (params.contains(symbol)) mm->initFromJson(params);
-        // else                         mm->initFromJson({{symbol,params}});
-        std::cout << "[ModelManagerFactory] STUB: initFromJson not implemented for " << symbol << '\n';
+        if (params.contains(symbol)) {
+            mm->initFromJson(params);
+        } else {
+            mm->initFromJson({{symbol, params}});
+        }
     }
 
     if (startThread) {
@@ -153,16 +155,16 @@ ModelManagerFactory::getModelManager(const std::string& symbol,
         auto& as = app_state::AppState::getInstance();
         as.startThread(symbol, [mm, symbol](const app_state::StopToken& tok){
             // Log thread start from inside the worker thread
-            logCurrentThread("ModelManager::WorkerThread", 
-                           "Starting worker thread for symbol: " + symbol);
+            logCurrentThread("MODEL-WORKER - " + symbol, 
+                           "Starting worker thread");
             
             if (!mm->connectToIBKR()) {
-                logCurrentThread("ModelManager::WorkerThread", 
-                               "Failed to connect to IBKR for symbol: " + symbol);
+                logCurrentThread("MODEL-WORKER - " + symbol, 
+                               "Failed to connect to IBKR");
                 std::this_thread::sleep_for(1s);
             } else {
-                logCurrentThread("ModelManager::WorkerThread", 
-                               "Connected to IBKR for symbol: " + symbol);
+                logCurrentThread("MODEL-WORKER - " + symbol, 
+                               "Connected to IBKR");
             }
             
             while (!tok.stop_requested()) {
@@ -170,12 +172,12 @@ ModelManagerFactory::getModelManager(const std::string& symbol,
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             
-            logCurrentThread("ModelManager::WorkerThread", 
-                           "Disconnecting from IBKR for symbol: " + symbol);
+            logCurrentThread("MODEL-WORKER - " + symbol, 
+                           "Disconnecting from IBKR");
             mm->disconnectFromIBKR();
             
-            logCurrentThread("ModelManager::WorkerThread", 
-                           "Worker thread ending for symbol: " + symbol);
+            logCurrentThread("MODEL-WORKER - " + symbol, 
+                           "Worker thread ending");
         });
     }
     return mm;

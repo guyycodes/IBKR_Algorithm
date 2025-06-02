@@ -1,13 +1,17 @@
+// model_manager.hpp
+// ───────────────────────────────────────────────────────────────────────────────
+
 #ifndef MODEL_MANAGER_HPP
 #define MODEL_MANAGER_HPP
 // ────────────────────────────────────────────────────────────────────────────────
 //  ModelManager – symbol-scoped data hub (no threads)
 // ────────────────────────────────────────────────────────────────────────────────
-// #include "raw_data_model/raw_data_model.hpp"
+#include "raw_data_model/raw_data_model.hpp"
 // #include "volume_profile/volume_profile_map.hpp"
-// #include "../connection_manager/connection_manager.hpp"
+#include "../connection_manager/connection_manager.hpp"
 // #include "../util/time_ordered_tick_buffer/time_ordered_tick_buffer.hpp"
 // #include "../util/time_ordered_tick_buffer/ring_buffer_trade_handler.hpp"
+#include "../models/stock_data_tick/stock_data_tick.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -17,14 +21,6 @@
 #include <utility>
 #include <vector>
 
-namespace stock_data_tick { 
-    struct StockData {
-        std::string symbol;
-        std::uint64_t timestamp{0};
-        double last{0.0}, bid{0.0}, ask{0.0};
-        int volume{0};
-    }; 
-}
 // namespace raw_data_model { struct TradingParams; class RawDataModel; }
 
 namespace model_manager {
@@ -55,11 +51,14 @@ public:
     std::vector<stock_data_tick::StockData>
     getTicksInWindow() const;     // copy (diagnostics only – avoid in hot loops)
 
-    // const raw_data_model::TradingParams&  getParams()     const;
+    const raw_data_model::TradingParams&  getParams()     const;
     std::pair<std::size_t, TimeWindowUnit>getTimeWindow() const;
 
     void setTimeWindow(std::size_t sz, TimeWindowUnit unit);
     void clearTicks();
+
+    /* JSON initialization ----------------------------------------------- */
+    bool initFromJson(const nlohmann::json& js);
 
     /* connection-retry state (queried by LocalAPI diagnostics) ------------- */
     int  getConnectionAttempts() const { return m_connectionAttempts; }
@@ -75,17 +74,17 @@ private:
     std::chrono::milliseconds windowToDuration() const;
 
     /* members -------------------------------------------------------------- */
-    // std::shared_ptr<raw_data_model::RawDataModel>      m_rawModel;
-    // volume_profile_map::VolumeProfileMap              m_volProfile;
-    // time_ordered_tick_buffer::TimeOrderedTickBuffer    m_toBuffer;
-    // ring_buffer_trade_handler::RingBufferTradeHandler  m_rbHandler;
+    // std::unique_ptr<ring_buffer_trade_handler::RingBufferTradeHandler> m_rbHandler;
+    // std::unique_ptr<VolumeProfileMap>                                  m_volProfile;
+    std::unique_ptr<raw_data_model::RawDataModel>                      m_rawModel;
+    std::unique_ptr<connection_manager::ConnectionManager>             m_connMgr;
+    // TimeOrderedTickBuffer                                              m_toBuffer;
 
     std::string          m_symbol;        // Add basic symbol storage
     std::size_t          m_windowSize;
     TimeWindowUnit       m_windowUnit;
     std::chrono::steady_clock::time_point m_lastPrune;
 
-    // std::unique_ptr<connection_manager::ConnectionManager> m_connMgr;
     int                    m_reqId{-1};
     std::atomic<bool>      m_connected{false};
 

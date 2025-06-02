@@ -1,9 +1,15 @@
+// ───────────────────────────────────────────────────────────────────────────────
+//  model_manager.cpp
+// ───────────────────────────────────────────────────────────────────────────────
+
 #include "models/model_manager.hpp"
 #include <iomanip>
 #include <iostream>
 #include <random>
 #include <thread>
 #include <sstream>
+#include <numeric>
+#include <algorithm>
 
 using namespace std::chrono_literals;
 namespace model_manager {
@@ -31,14 +37,18 @@ ModelManager::ModelManager(std::string sym,
       // m_toBuffer(windowToDuration()),
       // m_rbHandler(&m_toBuffer)
 {
-    // m_rawModel = raw_data_model::RawDataModelManager::getInstance().getModel(sym);
-    // m_connMgr  = std::make_unique<connection_manager::ConnectionManager>();
-    logThreadRole("HTTP-WORKER", "Creating ModelManager for " + m_symbol);
+    m_rawModel   = std::make_unique<raw_data_model::RawDataModel>(m_symbol);
+    // m_volProfile = std::make_unique<VolumeProfileMap>(0.05);
+    // m_toBuffer   = TimeOrderedTickBuffer(windowToDuration().count());
+    // m_rbHandler  = std::make_unique<RingBufferTradeHandler>(
+    //                 m_toBuffer, *m_volProfile, *m_rawModel);
+    m_connMgr    = std::make_unique<connection_manager::ConnectionManager>();
+    logThreadRole("ModelManager", "Creating ModelManager for " + m_symbol);
 }
 
 ModelManager::~ModelManager() { 
     disconnectFromIBKR(); 
-    logThreadRole("MODEL-WORKER", "ModelManager destroyed for " + m_symbol);
+    logThreadRole("ModelManager", "ModelManager destroyed for " + m_symbol);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -56,53 +66,75 @@ bool ModelManager::connectToIBKR(){
     ++m_connectionAttempts;
     m_lastAttempt = std::chrono::steady_clock::now();
 
-    // STUB: Just simulate successful connection for testing
-    logThreadRole("MODEL-WORKER", "Connecting to IBKR for " + getSymbol());
-    std::this_thread::sleep_for(100ms);  // Brief delay to simulate connection time
+    // build IBKR contract
+    Contract c; 
+    c.symbol = getSymbol(); 
+    c.secType = "STK"; 
+    c.exchange = "SMART"; 
+    c.currency = "USD";
     
-    m_connectionAttempts = 0;
-    m_connected = true;
-    logThreadRole("MODEL-WORKER", "IBKR connected for " + getSymbol());
-    return true;
-
-    /* ORIGINAL COMMENTED OUT:
-    // build contract once
-    Contract c; c.symbol=getSymbol(); c.secType="STK"; c.exchange="SMART"; c.currency="USD";
-    std::random_device rd; std::mt19937 gen(rd());
+    std::random_device rd; 
+    std::mt19937 gen(rd());
     int clientId = (std::accumulate(c.symbol.begin(),c.symbol.end(),0)+1000)%9000+1000;
 
-    if (!m_connMgr->connect(clientId,getSymbol(),c)) {
-        std::cerr<<"[ModelManager] connect fail "<<getSymbol()<<'\n';
+    logThreadRole("ModelManager", "Connecting to IBKR for " + getSymbol());
+    
+    if (!m_connMgr->connect(clientId, getSymbol(), c)) {
+        logThreadRole("ModelManager", "Connection failed for " + getSymbol());
         return false;
     }
+    
     m_reqId = std::uniform_int_distribution<int>(10'000,99'999)(gen);
-    auto cli = m_connMgr->getTrader().getClient();
-    cli->setServerLogLevel(4); cli->reqMarketDataType(1);
-    m_connMgr->getTrader().setModelManager(this,getSymbol());
-    cli->reqMktData(m_reqId,c,"233,232,221",false,false,{});
+    auto& trader = m_connMgr->trader();
+    auto cli = trader.getClient();
+    if (cli) {
+        cli->setServerLogLevel(5); 
+        cli->reqMarketDataType(1);
+    }
+    trader.setModelManager(this, getSymbol());
+    
+    // Make the main market data request (like legacy code) using m_reqId
+    if (cli) {
+        std::cout << "[ModelManager] Making main market data request for " << getSymbol() 
+                  << " with requestId=" << m_reqId << "\n";
+        cli->reqMktData(m_reqId, c, "233,232,221", false, false, {});
+    }
+    
+    // Wait 1 second after reqMktData (like legacy code)
+    std::cout << "[ModelManager] Waiting after market data request...\n";
     std::this_thread::sleep_for(1s);
-    if (!m_connMgr->getTrader().isConnected()) { m_connMgr->disconnect(); return false; }
+    
+    // Now start supplementary data streams
+    trader.startDataStream(getSymbol());
+    
+    std::this_thread::sleep_for(2s);
+    if (!trader.isConnected()) { 
+        m_connMgr->disconnect(); 
+        return false; 
+    }
 
     m_connectionAttempts = 0;
     m_connected = true;
-    std::cout<<"[ModelManager] IBKR connected "<<getSymbol()<<'\n';
+    logThreadRole("ModelManager", "IBKR connected for " + getSymbol());
     return true;
-    */
 }
 
 void ModelManager::disconnectFromIBKR(){
     std::scoped_lock lg{m_mx};
     if (!m_connected) return;
     
-    // STUB: Just simulate disconnection
-    logThreadRole("MODEL-WORKER", "Disconnecting from IBKR for " + getSymbol());
-    m_connected=false; m_reqId=-1;
+    logThreadRole("ModelManager", "Disconnecting from IBKR for " + getSymbol());
     
-    /* ORIGINAL COMMENTED OUT:
-    if (m_reqId>=0) m_connMgr->getTrader().getClient()->cancelMktData(m_reqId);
+    if (m_reqId >= 0 && m_connMgr->isConnected()) {
+        auto& trader = m_connMgr->trader();
+        auto cli = trader.getClient();
+        if (cli) {
+            cli->cancelMktData(m_reqId);
+        }
+    }
     m_connMgr->disconnect();
-    m_connected=false; m_reqId=-1;
-    */
+    m_connected = false; 
+    m_reqId = -1;
 }
 
 std::string ModelManager::getConnectionStatus() const {
@@ -146,34 +178,29 @@ std::size_t ModelManager::processQueueData(std::size_t maxBatch){
     // Log only on first call to avoid spam
     static thread_local bool first_process = true;
     if (first_process) {
-        logThreadRole("MODEL-WORKER", "Starting queue processing for " + getSymbol());
+        logThreadRole("ModelManager", "Starting queue processing for " + getSymbol());
         first_process = false;
     }
     
-    // STUB: Just return 0 for now
-    // std::cout << "[ModelManager] STUB: Processing queue data for " << getSymbol() << '\n';
-    return 0;
-    
-    /* ORIGINAL COMMENTED OUT:
     std::size_t processed=0;
-    stock_data_tick::StockData tick;
+    // TODO: Implement stk_q later
+    /*
+    stk_q::STK_Q_Data tick;
     while (processed<maxBatch && m_rawModel->popNextTick(tick)){
-        m_toBuffer.addTick(tick);                       // technical stack
-        m_rbHandler.checkForTradeOpportunity(tick);     // ring-buffer logic
+        // m_toBuffer.addTick(tick);                       // technical stack
+        // m_rbHandler.checkForTradeOpportunity(tick);     // ring-buffer logic
         processed++;
     }
+    */
     if (processed) pruneOldData();
     return processed;
-    */
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
 //  data ingestion (called by connection pipeline)
 // ────────────────────────────────────────────────────────────────────────────────
 void ModelManager::addTick(const stock_data_tick::StockData& t){
-    // STUB: Just log
-    std::cout << "[ModelManager] STUB: Adding tick for " << getSymbol() << '\n';
-    // m_rawModel->addTick(t);
+    m_rawModel->addTick(t);
 }
 
 void ModelManager::addTradeTick(double p,int v){ 
@@ -185,26 +212,16 @@ void ModelManager::addTradeTick(double p,int v){
 // ────────────────────────────────────────────────────────────────────────────────
 //  misc accessors
 // ────────────────────────────────────────────────────────────────────────────────
-// std::string ModelManager::getSymbol() const { return m_rawModel->getSymbol(); }
-// const raw_data_model::TradingParams& ModelManager::getParams() const { return m_rawModel->getParams(); }
-// std::size_t ModelManager::getTickCount() const { return m_rawModel->getQueueSize(); }
-std::string ModelManager::getSymbol() const { return m_symbol; }
+std::string ModelManager::getSymbol() const { return m_rawModel->symbol(); }
 
-// const raw_data_model::TradingParams& ModelManager::getParams() const { return m_rawModel->getParams(); }
+const raw_data_model::TradingParams& ModelManager::getParams() const { return m_rawModel->params(); }
 
 std::size_t ModelManager::getTickCount() const { 
-    // STUB: Return 0
-    return 0;
-    // return m_rawModel->getQueueSize(); 
+    return m_rawModel->queueSize(); 
 }
 const stock_data_tick::StockData* ModelManager::getLatestTick() const {
-    // STUB: Return nullptr
-    return nullptr;
-    
-    /* ORIGINAL COMMENTED OUT:
     static stock_data_tick::StockData tmp;
-    return m_rawModel->getLatestTickFromQueue(tmp) ? &tmp : nullptr;
-    */
+    return m_rawModel->latestTick(tmp) ? &tmp : nullptr;
 }
 
 std::vector<stock_data_tick::StockData> ModelManager::getTicksInWindow() const {
@@ -244,8 +261,12 @@ void ModelManager::setTimeWindow(std::size_t sz,TimeWindowUnit u){
 }
 
 void ModelManager::clearTicks(){ 
-    std::cout << "[ModelManager] STUB: Clearing ticks for " << getSymbol() << '\n';
-    // m_rawModel->clearTicks(); 
+    m_rawModel->clear(); 
+}
+
+bool ModelManager::initFromJson(const nlohmann::json& js) {
+    auto result = m_rawModel->initialise(js);
+    return !result; // error_code converts to bool (true if error), so we negate it
 }
 
 } // namespace model_manager

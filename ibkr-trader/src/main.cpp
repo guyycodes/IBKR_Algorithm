@@ -157,7 +157,6 @@ int main(int argc, char* argv[]) noexcept {
         return run({argv, static_cast<std::size_t>(argc)});
     }
     catch (const std::exception& e) {
-        logThreadRole("MAIN-THREAD", "ERROR: " + std::string(e.what()));
         std::cerr << "Error: " << e.what() << '\n';
     }
     catch (...) {

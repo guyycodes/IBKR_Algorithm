@@ -31,7 +31,7 @@ void logThreadRole(const std::string& role, const std::string& action) {
 // ────────────────────────────────────────────────────────────────────────────────
 InputManager::InputManager() {
     m_localApi = std::make_unique<local_api::LocalAPI>();
-    log(0, "InputManager constructed");
+    logThreadRole("InputManager", "InputManager constructed");
 }
 
 InputManager::~InputManager() {
@@ -45,8 +45,6 @@ InputManager::~InputManager() {
 // Initialisation
 // ────────────────────────────────────────────────────────────────────────────────
 bool InputManager::initialize(const std::string& cfgPath) {
-    // main thread calls this function
-    logThreadRole("MAIN-THREAD", "InputManager initializing");
     log(1, "initialise");
 
     if (!cfgPath.empty() && !parseConfig(cfgPath)) { return false; }
@@ -73,8 +71,6 @@ bool InputManager::initialize(const std::string& cfgPath) {
 
 // ────────────────────────────────────────────────────────────────────────────────
 void InputManager::runApiServer(int port) {
-    // main thread calls this function
-    logThreadRole("MAIN-THREAD", "Starting API server on port " + std::to_string(port));
     m_activeSource = InputSource::API;
     if (!m_localApi->start(port)) {
         log(2, "LocalAPI failed to start");
@@ -84,7 +80,6 @@ void InputManager::runApiServer(int port) {
     std::cout << "[InputManager] HTTP server listening on :" << port
               << "  (press <Enter> to quit)\n";
     std::cin.get();                               // block until user stops
-    logThreadRole("MAIN-THREAD", "User pressed Enter - stopping server");
     stop();
 }
 
@@ -102,27 +97,31 @@ bool InputManager::processApiRequest(const nlohmann::json& req) {
         return false; 
     }
     
-    // Check if required fields exist
-    if (!req.contains("symbol")) {
-        log(2, "Missing 'symbol' field in API request");
+    // DEBUG: Log the exact JSON being received
+    log(0, "Received JSON: " + req.dump());
+    
+    // The JSON format is actually: {"SYMBOL": {params...}}
+    // Not: {"symbol": "SYMBOL", "params": {params...}}
+    
+    if (req.empty()) {
+        log(2, "Empty JSON request");
         return false;
     }
     
-    if (!req.contains("params")) {
-        log(2, "Missing 'params' field in API request");
-        return false;
+    // Process each symbol in the JSON (there should typically be one)
+    for (auto& [symbol, params] : req.items()) {
+        if (!params.is_object()) {
+            log(2, "Invalid params for symbol: " + symbol);
+            continue;
+        }
+        
+        // Symbol is already uppercase from LocalAPI processing
+        std::string upperSymbol = symbol;
+        log(0, "Processing symbol: " + upperSymbol);
+        
+        m_outputJson[upperSymbol] = params;
     }
     
-    std::string symbol;
-    try {
-        symbol = req["symbol"].get<std::string>();
-        std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
-    } catch (const std::exception& e) {
-        log(2, "Invalid symbol field: " + std::string(e.what()));
-        return false;
-    }
-
-    m_outputJson[symbol] = req["params"];
     processOutput();
     return true;
 }
@@ -210,14 +209,8 @@ void InputManager::processOutput() {
 
     for (auto& [symbol, params] : m_outputJson.items()) {
         if (as.hasRunningThread(symbol)) { 
+            log(0, "Thread for " + symbol + " already exists");
             continue; 
-        }
-
-        // Only log when creating the first worker thread
-        static bool first_worker = true;
-        if (first_worker) {
-            logThreadRole("HTTP-WORKER", "Creating first ModelManager worker thread for " + symbol);
-            first_worker = false;
         }
         
         // create / fetch model
@@ -226,8 +219,8 @@ void InputManager::processOutput() {
 
         // register thread in AppState; mm keeps its own copy
         as.startThread(symbol, [mm, symbol](const app_state::StopToken& tok){
-            // Log once when worker thread starts
-            logThreadRole("MODEL-WORKER", "Starting data processing for " + symbol);
+            // Log once when worker thread starts with symbol in the role
+            logThreadRole("InputManager -> ModelManager - " + symbol, "Starting thread\n");
             
             if (!mm->connectToIBKR()){ 
                 std::this_thread::sleep_for(1s); 
@@ -240,7 +233,7 @@ void InputManager::processOutput() {
             }
             
             mm->disconnectFromIBKR();
-            logThreadRole("MODEL-WORKER", "Ending data processing for " + symbol);
+            logThreadRole("MODEL-WORKER - " + symbol, "Ending data processing");
         });
     }
 }

@@ -1,20 +1,14 @@
+// ───────────────────────────────────────────────────────────────────────────────
+//  app_state.cpp
+// ───────────────────────────────────────────────────────────────────────────────
+
 #include "app_state.hpp"
 #include <iostream>
 #include <future>
 #include <iomanip>
 #include <sstream>
 #include <thread>
-
-// to implement model_manager_factory
-// somewhere in ModelManagerFactory.cpp (or similar)
-// auto& as = app_state::AppState::getInstance();
-// as.startThread(symbol, [mgr = mySharedModelManager](const StopToken& tok){
-//     while (!tok.stop_requested()) {
-//         mgr->processOnce();
-//     }
-//     mgr->disconnect();
-// });
-
+#include <optional>
 
 using namespace std::chrono_literals;
 namespace app_state {
@@ -25,6 +19,13 @@ namespace app_state {
 namespace {
 std::unique_ptr<AppState> s_instance;
 std::mutex                s_instanceMx;
+
+// ------------------------------------------------------------------
+//  Never attempt to join the thread we are running in.
+// ------------------------------------------------------------------
+inline bool isCurrentThread(const ThreadWrapper& wrapper) {
+    return wrapper.get_id() == std::this_thread::get_id();
+}
 }
 
 AppState& AppState::getInstance() {
@@ -34,7 +35,7 @@ AppState& AppState::getInstance() {
 }
 
 AppState::AppState() {
-    logCurrentThread("AppState", "CONSTRUCTOR");
+    logCurrentThread("AppState", "AppState singleton constructed");
 }
 
 AppState::~AppState() {
@@ -64,7 +65,7 @@ void AppState::logCurrentThread(const std::string& component, const std::string&
     std::ostringstream ss;
     ss << tid;
     
-    std::cout << "[THREAD-ID:" << ss.str() << "][" << component << "]";
+    std::cout << "[" << component << "][THREAD-ID:" << ss.str() << "]";
     if (!action.empty()) std::cout << " " << action;
     std::cout << std::endl;
 }
@@ -77,25 +78,24 @@ bool AppState::startThread(std::string name,
 {
     std::lock_guard<std::mutex> lg{m_mutex};
 
-    logThreadEvent("THREAD-START-REQUEST", "AppState", "Starting thread: " + name);
-
     // Stop an existing thread of the same name, if any
     if (auto it = m_threads.find(name); it != m_threads.end()) {
-        logThreadEvent("THREAD-RESTART", "AppState", "Stopping existing thread: " + name);
-        _stopThreadUnlocked(name);
+        // Inline stop logic to avoid deadlock - same pattern as requestThreadStop
+        it->second.state = ThreadState::STOPPING;
+        it->second.wrapper.request_stop();
+        if (it->second.wrapper.joinable()) {
+            if (isCurrentThread(it->second.wrapper)) {
+                it->second.wrapper.detach();
+            } else {
+                it->second.wrapper.join();
+            }
+        }
+        m_threads.erase(it);
     }
 
     ThreadEntry entry{
         ThreadWrapper([name, fn = std::move(task)](const StopToken& tok){
-            // Log thread start from inside the new thread
-            auto tid = std::this_thread::get_id();
-            std::ostringstream ss;
-            ss << tid;
-            std::cout << "[NEW-THREAD:" << ss.str() << "][" << name << "] THREAD STARTED" << std::endl;
-            
             fn(tok);
-            
-            std::cout << "[THREAD:" << ss.str() << "][" << name << "] THREAD ENDING" << std::endl;
         }),
         ThreadState::RUNNING,
         std::chrono::steady_clock::now(),
@@ -103,39 +103,91 @@ bool AppState::startThread(std::string name,
     };
     
     m_threads.emplace(std::move(name), std::move(entry));
-    logThreadEvent("THREAD-STARTED", "AppState", "Successfully started thread: " + name);
     return true;
 }
 
 bool AppState::requestThreadStop(const std::string& name,
                                  const std::string& requestor)
 {
-    std::lock_guard<std::mutex> lg{m_mutex};
-    auto it = m_threads.find(name);
-    if (it == m_threads.end()) {
-        logThreadEvent("THREAD-STOP-FAILED", "AppState", 
-                      "No thread '" + name + "' (requested by " + requestor + ")");
-        return false;
+    std::optional<ThreadWrapper> victim;   // <─ use optional to avoid default construction
+    
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // CRITICAL SECTION START - Hold m_mutex only for map operations
+    // ═══════════════════════════════════════════════════════════════════════════════
+    {
+        std::lock_guard<std::mutex> lg{m_mutex};
+        auto it = m_threads.find(name);
+        if (it == m_threads.end()) {
+            logThreadEvent("THREAD-STOP-FAILED", "AppState", 
+                          "No thread '" + name + "' (requested by " + requestor + ")");
+            return false;
+        }
+        logThreadEvent("THREAD-STOP-REQUEST", "AppState", 
+                      "Stopping '" + name + "' (requested by " + requestor + ")");
+
+        it->second.state = ThreadState::STOPPING;
+        it->second.wrapper.request_stop();
+
+        victim = std::move(it->second.wrapper);     // hand the thread object out
+        m_threads.erase(it);                        // map no longer owns it
+    }   
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // CRITICAL SECTION END - m_mutex released, safe to block on thread operations
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    // Now we can block without risking a dead-lock
+    if (victim && victim->joinable()) {
+        if (isCurrentThread(*victim))
+            victim->detach();
+        else
+            victim->join();
     }
-    logThreadEvent("THREAD-STOP-REQUEST", "AppState", 
-                  "Stopping '" + name + "' (requested by " + requestor + ")");
-    _stopThreadUnlocked(name);
     return true;
 }
 
 bool AppState::requestAllThreadsStop(const std::string& requestor)
 {
-    std::lock_guard<std::mutex> lg{m_mutex};
-    if (m_shutdownInProgress.exchange(true)) { 
-        logThreadEvent("SHUTDOWN-ALREADY-IN-PROGRESS", "AppState", "Requested by: " + requestor);
-        return false; 
+    std::vector<ThreadWrapper> victims;     // <─ collect wrappers outside lock
+    
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // CRITICAL SECTION START - Hold m_mutex only for map operations
+    // ═══════════════════════════════════════════════════════════════════════════════
+    {
+        std::lock_guard<std::mutex> lg{m_mutex};
+        if (m_shutdownInProgress.exchange(true)) { 
+            logThreadEvent("SHUTDOWN-ALREADY-IN-PROGRESS", "AppState", "Requested by: " + requestor);
+            return false; 
+        }
+
+        m_shutdownInitiator = requestor;
+        logThreadEvent("SHUTDOWN-ALL-THREADS", "AppState", 
+                      "Stop-all requested by " + requestor + " (thread count: " + 
+                      std::to_string(m_threads.size()) + ")");
+
+        // Request stop and move all wrappers out while holding lock
+        victims.reserve(m_threads.size());
+        for (auto& [n, entry] : m_threads) {
+            entry.state = ThreadState::STOPPING;
+            entry.wrapper.request_stop();
+            victims.emplace_back(std::move(entry.wrapper));
+        }
+        m_threads.clear();
+    }   
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // CRITICAL SECTION END - m_mutex released, safe to block on thread operations
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    // Now join/detach all victims without holding the lock
+    for (auto& victim : victims) {
+        if (victim.joinable()) {
+            if (isCurrentThread(victim)) {
+                victim.detach();
+            } else {
+                victim.join();
+            }
+        }
     }
 
-    m_shutdownInitiator = requestor;
-    logThreadEvent("SHUTDOWN-ALL-THREADS", "AppState", 
-                  "Stop-all requested by " + requestor + " (thread count: " + 
-                  std::to_string(m_threads.size()) + ")");
-    _stopAllThreadsUnlocked();
     m_shutdownInProgress.store(false);
     return true;
 }
@@ -143,19 +195,56 @@ bool AppState::requestAllThreadsStop(const std::string& requestor)
 bool AppState::requestEmergencyStop(int timeoutMs,
                                     const std::string& requestor)
 {
-    std::unique_lock<std::mutex> ul{m_mutex};
-    if (m_emergencyShutdown.exchange(true)) { 
-        logThreadEvent("EMERGENCY-STOP-ALREADY-ACTIVE", "AppState", "Requested by: " + requestor);
-        return false; 
+    std::vector<std::pair<std::string, ThreadWrapper>> victims; // <─ collect wrappers outside lock
+    
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // CRITICAL SECTION START - Hold m_mutex only for map operations
+    // ═══════════════════════════════════════════════════════════════════════════════
+    {
+        std::unique_lock<std::mutex> ul{m_mutex};
+        if (m_emergencyShutdown.exchange(true)) { 
+            logThreadEvent("EMERGENCY-STOP-ALREADY-ACTIVE", "AppState", "Requested by: " + requestor);
+            return false; 
+        }
+
+        m_shutdownInitiator = requestor;
+        logThreadEvent("EMERGENCY-STOP", "AppState", 
+                      "**EMERGENCY-STOP** (" + std::to_string(timeoutMs) + 
+                      " ms) by " + requestor + " (thread count: " + 
+                      std::to_string(m_threads.size()) + ")");
+
+        // Request stop and move all wrappers out while holding lock
+        victims.reserve(m_threads.size());
+        for (auto& [name, entry] : m_threads) {
+            entry.state = ThreadState::STOPPING;
+            entry.wrapper.request_stop();
+            victims.emplace_back(name, std::move(entry.wrapper));
+        }
+        m_threads.clear();
+    }   
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // CRITICAL SECTION END - m_mutex released, safe to block on thread operations
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    // Now join/detach all victims with deadline, without holding the lock
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+    for (auto& [name, victim] : victims) {
+        if (!victim.joinable()) continue;
+
+        if (isCurrentThread(victim)) {
+            // Never try to join ourselves - just detach
+            std::cerr << "[AppState]   '" << name << "' is current thread — detach.\n";
+            victim.detach();
+            continue;
+        }
+
+        auto fut = std::async(std::launch::async, [&victim]{ victim.join(); });
+        if (fut.wait_until(deadline) != std::future_status::ready) {
+            std::cerr << "[AppState]   '" << name << "' not responding — detach.\n";
+            victim.detach();
+        }
     }
 
-    m_shutdownInitiator = requestor;
-    logThreadEvent("EMERGENCY-STOP", "AppState", 
-                  "**EMERGENCY-STOP** (" + std::to_string(timeoutMs) + 
-                  " ms) by " + requestor + " (thread count: " + 
-                  std::to_string(m_threads.size()) + ")");
-
-    _emergencyStopUnlocked(timeoutMs);
     m_shutdownInProgress.store(false);
     return true;
 }
@@ -201,62 +290,9 @@ std::map<std::string,std::string> AppState::getThreadStateInfo() const {
 //───────────────────────────────────────────────────────────────────────────────
 //  Internal helpers
 //───────────────────────────────────────────────────────────────────────────────
-void AppState::_stopThreadUnlocked(const std::string& name) {
-    auto it = m_threads.find(name);
-    if (it == m_threads.end()) { return; }
-
-    it->second.state = ThreadState::STOPPING;
-    it->second.wrapper.request_stop();
-
-    // join with tiny timeout to avoid long stalls here
-    auto fut = std::async(std::launch::async, [&wrapper = it->second.wrapper] {
-        if (wrapper.joinable()) wrapper.join();
-    });
-    if (fut.wait_for(50ms) != std::future_status::ready) {
-        // still busy — detach and mark
-        if (it->second.wrapper.joinable()) it->second.wrapper.detach();
-        it->second.state = ThreadState::DETACHED;
-    }
-    m_threads.erase(it);
-}
-
-void AppState::_stopAllThreadsUnlocked() {
-    for (auto& [n, entry] : m_threads) {
-        entry.state = ThreadState::STOPPING;
-        entry.wrapper.request_stop();
-    }
-    for (auto& [n, entry] : m_threads) {
-        if (entry.wrapper.joinable()) entry.wrapper.join();
-    }
-    m_threads.clear();
-}
-
-void AppState::_emergencyStopUnlocked(int timeoutMs) {
-    // 1) request stop on every thread
-    for (auto& [n, entry] : m_threads) {
-        entry.state = ThreadState::STOPPING;
-        entry.wrapper.request_stop();
-    }
-
-    // 2) attempt to join each thread with aggregate timeout
-    const auto deadline = std::chrono::steady_clock::now()
-                        + std::chrono::milliseconds(timeoutMs);
-    for (auto it = m_threads.begin(); it != m_threads.end(); ) {
-        auto& entry = it->second;
-        if (!entry.wrapper.joinable()) { it = m_threads.erase(it); continue; }
-
-        auto fut = std::async(std::launch::async,
-                              [&wrapper = entry.wrapper]{ wrapper.join(); });
-        if (fut.wait_until(deadline) == std::future_status::ready) {
-            it = m_threads.erase(it);
-        } else {
-            std::cerr << "[AppState]   '" << it->first
-                      << "' not responding — detach.\n";
-            entry.wrapper.detach();
-            entry.state = ThreadState::DETACHED;
-            ++it;
-        }
-    }
-}
+// NOTE: Old _stopThreadUnlocked, _stopAllThreadsUnlocked, and _emergencyStopUnlocked
+// functions removed to avoid lock-order inversion deadlocks. The logic has been
+// moved into the public methods above to ensure blocking operations happen
+// outside the critical section.
 
 } // namespace app_state
