@@ -3,11 +3,13 @@
 //  IBKRDecoder – *minimal* field/stream decoder (IBKR spec)
 //  Only the pieces currently used by higher layers are included.
 // ───────────────────────────────────────────────────────────────
+#include <cassert>
+#include <cfloat>
+#include <cmath>
 #include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <cassert>
 #include "ibkr/cppclient/client/CommonDefs.h"
 #include "ibkr/cppclient/client/Decimal.h"
 
@@ -24,7 +26,7 @@ public:
     static double decimalToDouble(Decimal d)            { return DecimalFunctions::decimalToDouble(d); }
     static Decimal doubleToDecimal(double v)            { return DecimalFunctions::doubleToDecimal(v); }
 
-    /* ---------- generic “EDecoder-style” field parsers -------------- */
+    /* ---------- generic "EDecoder-style" field parsers -------------- */
     static bool checkOffset(const char* p,const char* end){ return p && p<end; }
     static const char* findFieldEnd(const char* p,const char* end);
 
