@@ -25,6 +25,7 @@
 
 #include "../decoder/frame_analyzer.hpp"
 #include "../decoder/decoder.hpp"  
+#include "../connection_cache/connection_cache.hpp"
 
 namespace model_manager { class ModelManager; }
 namespace stock_data_tick { struct StockData; }          // full type in metrics_model
@@ -94,14 +95,11 @@ public:
                             const std::string& json)               override;
 
 private:
-    /* helper that converts raw info → StockData and pushes to ModelManager */
-    void routeToModel(double   last,
-                      double   bid,
-                      double   ask,
-                      int      bidSz,
-                      int      askSz,
-                      double   vol,
-                      std::uint64_t ts_ms);
+    /* cache-based routing helper */
+    void routeViaCache(double last, double bid, double ask, int bidSz, int askSz,
+                       double vol, uint64_t ts, const std::string& exchange = "",
+                       double open = 0, double high = 0, double low = 0, 
+                       double close = 0, double vwap = 0);
 
     /* members -------------------------------------------------------------- */
     EReaderOSSignal                               m_osSignal{0};  // 0ms = non-blocking
@@ -109,6 +107,7 @@ private:
     
     std::unique_ptr<ibkr_frame_analyzer::FrameAnalyzer> m_an;
     std::unique_ptr<ibkr_decoder::IBKRDecoder>          m_dec;
+    std::unique_ptr<ConnectionCache>                    m_cache;
 
     model_manager::ModelManager*  m_mgr   {nullptr};
     std::string                   m_sym;

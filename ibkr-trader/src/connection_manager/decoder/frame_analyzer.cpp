@@ -24,6 +24,19 @@ std::vector<std::string_view> FrameAnalyzer::splitView(std::string_view in,char 
     return out;
 }
 
+// Helper function from legacy code for string splitting
+std::vector<std::string> FrameAnalyzer::splitString(const std::string& str, char delimiter) {
+    std::vector<std::string> fields;
+    std::stringstream ss(str);
+    std::string field;
+    
+    while (std::getline(ss, field, delimiter)) {
+        fields.push_back(field);
+    }
+    
+    return fields;
+}
+
 /* ─────────────── Tick-String (field 48 / 88) ─────────────── */
 TickStringResult FrameAnalyzer::analyzeTickStringData(int /*tickerId*/,int field,std::string_view v)
 {
@@ -68,11 +81,42 @@ AnalyzedBarData FrameAnalyzer::analyzeRealtimeBarData(int req,int epoch,
     a.reqId=req; a.epochTime=epoch; a.open=o; a.high=h; a.low=l; a.close=c;
     a.volume=vol; a.wap=wap; a.count=cnt;
 
-    if(o>0){ a.priceChange=c-o; a.percentChange=(a.priceChange/o)*100.0; a.hasValidPriceChange=true; }
-    if(h>0&&l>0){ a.barRange=h-l; a.hasValidRange=true; }
+    // Format time as human-readable (from legacy code)
+    time_t epochTime = static_cast<time_t>(epoch);
+    char timeStr[30];
+    struct tm timeinfo;
+    
+#ifdef _WIN32
+    localtime_s(&timeinfo, &epochTime);
+#else
+    localtime_r(&epochTime, &timeinfo);
+#endif
+    
+    strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    a.formattedTime = std::string(timeStr);
+
+    // Calculate price change for the bar (enhanced from legacy)
+    if(o>0){ 
+        a.priceChange=c-o; 
+        a.percentChange=(a.priceChange/o)*100.0; 
+        a.hasValidPriceChange=true; 
+    } else {
+        a.priceChange = 0.0;
+        a.percentChange = 0.0;
+        a.hasValidPriceChange = false;
+    }
+    
+    // Calculate bar range (enhanced from legacy)
+    if(h>0&&l>0){ 
+        a.barRange=h-l; 
+        a.hasValidRange=true; 
+    } else {
+        a.barRange = 0.0;
+        a.hasValidRange = false;
+    }
 
 #if IBKR_FRAME_VERBOSE
-    std::cout<<"[FA] RTBar Δ="<<a.priceChange<<" rng="<<a.barRange<<'\n';
+    std::cout<<"[FA] RTBar "<<a.formattedTime<<" Δ="<<a.priceChange<<" rng="<<a.barRange<<'\n';
 #endif
     return a;
 }

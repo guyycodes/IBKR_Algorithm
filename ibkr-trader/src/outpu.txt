@@ -1,0 +1,836 @@
+[ModelManager:140737462642240] Connecting to IBKR for IONQ
+[IBKR][CTOR][sym:-][tid:140737462642240] IBKRTrader constructed
+[IBKR][connect][sym:IONQ][tid:140737462642240] eConnect → 2311
+[IBKR][connect][sym:IONQ][tid:140737462642240] connected & stabilised
+[ModelManager] Making main market data request for IONQ with requestId=95336
+[IBKR][ERROR][sym:IONQ][tid:140737445856832] id=-1 code=2158 'Sec-def data farm connection is OK:secdefil'
+[ModelManager] Waiting after market data request...
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887520'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '39.98;3.0000000000000000;1748887523654;109136.0000000000000000;39.3960899;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39609
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887523'
+[IBKR][startDataStream][sym:IONQ][tid:140737462642240] initialising supplementary feeds
+[IBKR][startDataStream][sym:IONQ][tid:140737462642240] feeds running
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] raw req=6000 close=39.990000 vol=5.080000
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] Δ=-0.010000 range=0.020000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@500.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@500.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@500.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@500.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '39.99;1.0000000000000000;1748887524409;109137.0000000000000000;39.39609537;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39610
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@600.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@600.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=1.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@600.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=50.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2000.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@700.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@600.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '39.98;1.0000000000000000;1748887524910;109138.0000000000000000;39.39610075;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39610
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] raw req=6000 close=39.990000 vol=7.000000
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] Δ=0.000000 range=0.010000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@600.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@600.000000 ask=40.000000@200.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.980000 sz=10.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $399.800000
+[RawDataModel] Tick received for IONQ: last=39.98
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.980000 sz=90.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3598.200000
+[RawDataModel] Tick received for IONQ: last=39.98
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@600.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=3.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $120.000000
+[RawDataModel] Tick received for IONQ: last=40
+[ModelManager:140737462642240] IBKR connected for IONQ
+[ModelManager:140737462642240] Starting queue processing for IONQ
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '39.99;1.0000000000000000;1748887526443;109139.0000000000000000;39.39610618;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39611
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887527'
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@700.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@800.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@700.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3999.000000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@800.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@800.000000 ask=40.000000@200.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@800.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@800.000000 ask=40.000000@200.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887526943;109139.0000000000000000;39.39610618;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39611
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=1.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@800.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.00;10.0000000000000000;1748887528194;109149.0000000000000000;39.39616141;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39616
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887528'
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@900.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@800.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@600.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=1000.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40000.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887528946;109149.0000000000000000;39.39616141;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39616
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.00;1.0000000000000000;1748887529050;109150.0000000000000000;39.39616694;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39617
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887529'
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@700.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@900.000000 ask=40.000000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.980000@800.000000 ask=40.000000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.050013%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=1.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.000000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887529300;109150.0000000000000000;39.39616694;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.91M VWAP=39.39617
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4000.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.950000 sz=5.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $199.750000
+[RawDataModel] Tick received for IONQ: last=39.95
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '39.99;1.0000000000000000;1748887530051;109151.0000000000000000;39.39617241;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39617
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887530'
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] raw req=6000 close=40.000000 vol=12.000000
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] Δ=0.010000 range=0.010000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3999.000000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887530553;109151.0000000000000000;39.39617241;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39617
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.00;1.0000000000000000;1748887530802;109152.0000000000000000;39.39617791;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39618
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=40.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $1600.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=1.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '39.99;2.0000000000000000;1748887531303;109154.0000000000000000;39.39618881;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39619
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887532'
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=50.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $1999.500000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=200.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $7998.000000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887532432;109154.0000000000000000;39.39618881;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39619
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '39.99;1.0000000000000000;1748887532683;109155.0000000000000000;39.39619429;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39619
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887533'
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=2.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $80.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3999.000000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887533434;109155.0000000000000000;39.39619429;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39619
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=10.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $399.900000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.000000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887534435;109155.0000000000000000;39.39619429;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39619
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=10.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $399.900000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] raw req=6000 close=40.000000 vol=4.000000
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] Δ=0.000000 range=0.010000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '39.99;2.0000000000000000;1748887535937;109157.0000000000000000;39.39620526;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39621
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887536'
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3999.000000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=39.990000 sz=150.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $5998.500000
+[RawDataModel] Tick received for IONQ: last=39.99
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.00;9.0000000000000000;1748887536938;109166.0000000000000000;39.39625512;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39626
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887537'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.01;2.0000000000000000;1748887537189;109168.0000000000000000;39.39626628;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39627
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4000.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.000000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.025003%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=70.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2800.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=12.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $480.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=200.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $8000.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4000.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@400.000000 ask=40.020000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@500.000000 ask=40.020000@600.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.000000 sz=50.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2000.000000
+[RawDataModel] Tick received for IONQ: last=40
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@600.000000 ask=40.020000@600.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@400.000000 ask=40.020000@600.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@300.000000 ask=40.020000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@400.000000 ask=40.020000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@100.000000 ask=40.020000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@100.000000 ask=40.020000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.010000 sz=200.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $8002.000000
+[RawDataModel] Tick received for IONQ: last=40.01
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.010000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4001.000000
+[RawDataModel] Tick received for IONQ: last=40.01
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@600.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@200.000000 ask=40.020000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.020000 sz=1.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40.020000
+[RawDataModel] Tick received for IONQ: last=40.02
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.010000 sz=200.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $8002.000000
+[RawDataModel] Tick received for IONQ: last=40.01
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.01;1.0000000000000000;1748887537439;109169.0000000000000000;39.39627193;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39627
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887538'
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.020000 sz=125.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $5002.500000
+[RawDataModel] Tick received for IONQ: last=40.02
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@300.000000 ask=40.020000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=39.990000@400.000000 ask=40.020000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074991%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887538941;109169.0000000000000000;39.39627193;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39627
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 ';0E-16;1748887539192;109169.0000000000000000;39.39627193;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39627
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.010000 sz=5.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $200.050000
+[RawDataModel] Tick received for IONQ: last=40.01
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@100.000000 ask=40.020000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@200.000000 ask=40.020000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@300.000000 ask=40.020000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@400.000000 ask=40.020000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@300.000000 ask=40.020000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@200.000000 ask=40.020000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@300.000000 ask=40.020000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049988%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.010000 sz=2.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $80.020000
+[RawDataModel] Tick received for IONQ: last=40.01
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.03;22.0000000000000000;1748887540195;109191.0000000000000000;39.39639936;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39640
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] raw req=6000 close=40.020000 vol=12.750000
+[IBKR][realtimeBar][sym:IONQ][tid:140737445856832] Δ=0.020000 range=0.030000
+[RawDataModel] Tick received for IONQ: last=40.02
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887540'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.05;3.0000000000000000;1748887540443;109194.0000000000000000;39.39641725;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39642
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=45 '1748887541'
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.020000 sz=200.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $8004.000000
+[RawDataModel] Tick received for IONQ: last=40.02
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.020000 sz=126.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $5042.520000
+[RawDataModel] Tick received for IONQ: last=40.02
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@300.000000 ask=40.030000@1600.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074972%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@300.000000 ask=40.030000@1500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074972%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=50.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2001.500000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@400.000000 ask=40.030000@1400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074972%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.000000@600.000000 ask=40.030000@1400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074972%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=50.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2001.500000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=62.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2481.860000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.010000@200.000000 ask=40.030000@1300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049975%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.010000@300.000000 ask=40.030000@1300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049975%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=9.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $360.270000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=2.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $80.060000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=10.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $400.300000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.010000@600.000000 ask=40.030000@1200.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049975%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.020000 sz=50.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2001.000000
+[RawDataModel] Tick received for IONQ: last=40.02
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.010000@900.000000 ask=40.030000@1200.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049975%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=9.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $360.270000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=20.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $800.600000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=80.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3202.400000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=138.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $5524.140000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=432.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $17292.960000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=500.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $20015.000000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=91.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3642.730000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.040000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024978%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=20.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $800.600000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@500.000000 ask=40.050000@1100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.020000 sz=2.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $80.040000
+[RawDataModel] Tick received for IONQ: last=40.02
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.020000 sz=1.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40.020000
+[RawDataModel] Tick received for IONQ: last=40.02
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=91.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3642.730000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@500.000000 ask=40.050000@900.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@600.000000 ask=40.050000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@600.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@700.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@500.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@200.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.030000 sz=23.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $920.690000
+[RawDataModel] Tick received for IONQ: last=40.03
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@300.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@200.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=5.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $200.200000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=1.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40.040000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=25.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $1001.000000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=10.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $400.400000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@700.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@800.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@500.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4004.000000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4004.000000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@300.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@400.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@500.000000 ask=40.050000@400.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=250.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $10012.500000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@500.000000 ask=40.050000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.05;5.0000000000000000;1748887540693;109199.0000000000000000;39.39644717;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39645
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=1.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $40.050000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@800.000000 ask=40.050000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=50.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2002.500000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4005.000000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=10.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $400.500000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=10.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $400.500000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@800.000000 ask=40.050000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4005.000000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=60.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2403.000000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=5.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $200.250000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=76.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3043.800000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=5.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $200.250000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=4.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $160.200000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=10.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $400.500000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=5.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $200.250000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@400.000000 ask=40.060000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049938%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@500.000000 ask=40.060000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049938%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@700.000000 ask=40.060000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049938%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=17.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $680.850000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1200.000000 ask=40.070000@1000.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1500.000000 ask=40.070000@1000.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1800.000000 ask=40.070000@1100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@2100.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@2200.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@2300.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.050000 sz=99.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3964.950000
+[RawDataModel] Tick received for IONQ: last=40.05
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@2000.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@2100.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@2000.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1900.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1900.000000 ask=40.070000@900.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1800.000000 ask=40.070000@900.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1800.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1700.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1400.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1300.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1300.000000 ask=40.070000@900.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1300.000000 ask=40.070000@800.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1300.000000 ask=40.070000@900.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1300.000000 ask=40.070000@1000.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1200.000000 ask=40.070000@1000.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1100.000000 ask=40.070000@1000.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.030000 (0.074897%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1000.000000 ask=40.060000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049938%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@1000.000000 ask=40.060000@200.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049938%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=55.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2202.200000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=17.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $680.680000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=30.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $1201.200000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@400.000000 ask=40.050000@300.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024972%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@300.000000 ask=40.050000@600.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024972%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=50.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $2002.000000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.040000@300.000000 ask=40.050000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024972%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4004.000000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=28.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $1121.120000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4004.000000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=100.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $4004.000000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=96.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $3843.840000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@700.000000 ask=40.040000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024978%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@800.000000 ask=40.040000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024978%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@600.000000 ask=40.040000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024978%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@600.000000 ask=40.040000@200.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024978%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@600.000000 ask=40.040000@100.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.010000 (0.024978%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@600.000000 ask=40.050000@1000.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@600.000000 ask=40.050000@900.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@600.000000 ask=40.050000@700.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] raw req=7000 type=2 p=40.040000 sz=30.000000
+[IBKR][tickByTickAllLast][sym:IONQ][tid:140737445856832] trade $1201.200000
+[RawDataModel] Tick received for IONQ: last=40.04
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@700.000000 ask=40.050000@600.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] raw req=7001 bid=40.030000@800.000000 ask=40.050000@500.000000
+[IBKR][tickByTickBidAsk][sym:IONQ][tid:140737445856832] spread=0.020000 (0.049950%)
+[RawDataModel] Tick received for IONQ: last=0
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.04;6.0000000000000000;1748887540944;109205.0000000000000000;39.39648259;false'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39648
+[IBKR][tickString][sym:IONQ][tid:140737445856832] raw id=95336 fld=48 '40.04;1.0000000000000000;1748887541195;109206.0000000000000000;39.39648851;true'
+[IBKR][tickString][sym:IONQ][tid:140737445856832] decoded [VOL+VWAP] 10.92M VWAP=39.39649

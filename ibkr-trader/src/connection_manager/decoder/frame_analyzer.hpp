@@ -73,6 +73,9 @@ private:
 
     /* helpers */
     static std::vector<std::string_view> splitView(std::string_view sv,char delim);
+    
+    // Helper function from legacy code for string processing
+    std::vector<std::string> splitString(const std::string& str, char delimiter);
 };
 
 } // namespace ibkr_frame_analyzer
