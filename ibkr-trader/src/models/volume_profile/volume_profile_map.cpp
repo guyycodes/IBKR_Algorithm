@@ -154,7 +154,8 @@ int VolumeProfileMap::get_total_inventory(double low_price, double high_price) c
 int VolumeProfileMap::getTotalVolume() const {
     int total = 0;
     for (const auto& [bucket_index, volumes] : volume_map_) {
-        total += std::accumulate(volumes.begin(), volumes.end(), 0);
+        int level_volume = std::accumulate(volumes.begin(), volumes.end(), 0);
+        total += level_volume;
     }
     return total;
 }

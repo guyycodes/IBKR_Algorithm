@@ -284,7 +284,7 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
     }
 
     //Implement on another thread owned by model manager for speed and integration with the ML model & Python///
-    // Technical analysis pipeline
+    // Technical analysis pipeline (time_ordered_tick_buffer)
     m_toBuffer->addTick(enrichedTick);
     time_ordered_tick_buffer::TechnicalIndicators indicators = m_toBuffer->calculateIndicators();
 
@@ -325,7 +325,8 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
               << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
               << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
               << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
-              << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;        
+              << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;   
+                   
     pruneOldData();
 }
 

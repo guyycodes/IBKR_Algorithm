@@ -87,10 +87,18 @@ public:
     // Get most recent technical indicators
     TechnicalIndicators calculateIndicators();
     
-    // Ring buffer access for trade handlers
+    // Ultra-low latency ring buffer access for trade handlers
     const std::vector<TemporaryCandle>& getMinuteRing() const { return m_minuteRing; }
     const std::vector<int64_t>& getMinuteIndices() const { return m_minuteIndices; }
+    const std::vector<Candle>& getCandleRing() const { return m_candleRing; }
+    const std::vector<double>& getPriceRing() const { return m_priceRing; }
     size_t getWindowMinutes() const { return m_windowMinutes; }
+    
+    // Ring buffer state for ultra-low latency access
+    size_t getCandleRingHead() const { return m_candleRingHead; }
+    size_t getCandleRingCount() const { return m_candleRingCount; }
+    size_t getPriceRingHead() const { return m_priceRingHead; }
+    size_t getPriceRingCount() const { return m_priceRingCount; }
     
 private:
     // Map with timestamp as key ensures automatic chronological ordering
@@ -145,6 +153,7 @@ private:
     // ATR state for incremental calculation
     double m_atr = std::numeric_limits<double>::quiet_NaN();
     int m_atrWarmupCount = 0;
+    double m_prevCloseForATR = std::numeric_limits<double>::quiet_NaN();  // Track previous close for ATR calculation
     
     // Price EMA state for incremental calculation
     double m_emaPriceFast = std::numeric_limits<double>::quiet_NaN();
@@ -160,7 +169,7 @@ private:
     TechnicalIndicators computeIndicatorsFromCandles();
     // void updateChaikinForCandle(const Candle& candle, int64_t minuteIndex, bool isFirstTime);
     void updateRSIForCandle(double close);
-    void updateATRForCandle(const Candle& prev, const Candle& curr);
+    void updateATRForCandle(const Candle& candle);  // Fixed: matches implementation signature
     double calculateALMA(
         const std::vector<double>& prices,
         int windowSize,

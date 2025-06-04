@@ -80,6 +80,7 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
       m_lastRSI(50.0),
       m_atr(std::numeric_limits<double>::quiet_NaN()),
       m_atrWarmupCount(0),
+      m_prevCloseForATR(std::numeric_limits<double>::quiet_NaN()),  // Initialize ATR previous close tracker
       m_emaPriceFast(std::numeric_limits<double>::quiet_NaN()),
       m_emaPriceSlow(std::numeric_limits<double>::quiet_NaN()),
       m_almaSizeWindow(9),
@@ -350,9 +351,9 @@ void TimeOrderedTickBuffer::updateCandles() {
         // Update ATR incrementally with access to previous candle
         if (m_candleRingCount >= 2) {  // Need at least 2 candles for TR calculation
             // Get previous candle from ring buffer
-            size_t prevIdx = (m_candleRingHead + m_windowMinutes - 2) % m_windowMinutes;
-            const Candle& prevCandle = m_candleRing[prevIdx];
-            updateATRForCandle(prevCandle, candle);
+            // size_t prevIdx = (m_candleRingHead + m_windowMinutes - 2) % m_windowMinutes;
+            // const Candle& prevCandle = m_candleRing[prevIdx];
+            updateATRForCandle(candle);
         }
         
         // Update ALMA incrementally with O(1) operation
@@ -634,27 +635,31 @@ void TimeOrderedTickBuffer::updateAlmaIncremental(double newClose)
  * Maintains rolling ATR state without recalculating from scratch.
  * Uses proper Wilder's method: SMA seed for first 14 TRs, then exponential smoothing.
  */
-void TimeOrderedTickBuffer::updateATRForCandle(const Candle& prev, const Candle& curr) {
-    // Skip bad data to prevent NaN poisoning
-    if (!std::isfinite(curr.close) || !std::isfinite(curr.high) || !std::isfinite(curr.low) ||
-        !std::isfinite(prev.close) || !std::isfinite(prev.high) || !std::isfinite(prev.low)) {
-        return;  // skip bad data
-    }
-    
-    double tr = std::max({ curr.high - curr.low,
-                          std::fabs(curr.high - prev.close),
-                          std::fabs(curr.low - prev.close) });
+void TimeOrderedTickBuffer::updateATRForCandle(const Candle& c)
+{
+    if (!std::isfinite(c.high) || !std::isfinite(c.low) || !std::isfinite(c.close))
+        return;                                                     // bad data guard
 
-    if (m_atrWarmupCount < ATR_PERIOD) {          // seeding
+    /* ---------- 1) compute True-Range ----------------------------------- */
+    double tr;
+    if (std::isnan(m_prevCloseForATR)) {                            // very first bar
+        tr = c.high - c.low;                                        // TR₀
+    } else {
+        tr = std::max({ c.high - c.low,
+                        std::fabs(c.high - m_prevCloseForATR),
+                        std::fabs(c.low  - m_prevCloseForATR) });
+    }
+    m_prevCloseForATR = c.close;                                    // stash for next call
+
+    /* ---------- 2) SMA seed then Wilder smoothing ---------------------- */
+    constexpr int N = ATR_PERIOD;                                   // 14 by default
+    if (m_atrWarmupCount < N) {                                     // SEED
         if (std::isnan(m_atr)) m_atr = 0.0;
         m_atr += tr;
-        ++m_atrWarmupCount;
-
-        if (m_atrWarmupCount == ATR_PERIOD)
-            m_atr /= ATR_PERIOD;                  // finish SMA seed
-    }
-    else {                                        // Wilder smoothing
-        m_atr += (tr - m_atr) / ATR_PERIOD;       // 100% numerically stable
+        if (++m_atrWarmupCount == N)                                // finished seed
+            m_atr /= N;                                             // convert sum → mean
+    } else {                                                        // SMOOTH
+        m_atr += (tr - m_atr) / N;                                  // Wilder
     }
 }
 
