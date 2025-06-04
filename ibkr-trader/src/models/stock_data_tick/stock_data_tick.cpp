@@ -19,14 +19,21 @@ StockData::StockData(const std::string& sym, const std::string& dt, double o, do
 }
 
 void StockData::calculateDerivedMetrics() {
-    // Basic derived values
-    mid = (bid + ask) / 2.0;
-    spread = ask - bid;
-    spreadPercent = (bid > 0) ? (spread / mid) * 100.0 : 0.0;
     
     // Volume-based metrics
     if (bidSize + askSize > 0) {
         imbalance = static_cast<double>(bidSize - askSize) / (bidSize + askSize);
+    }
+    
+    // Calculate spread, midpoint, and spread percentage
+    if (bid > 0 && ask > 0) {
+        spread = ask - bid;
+        midPoint = (ask + bid) / 2.0;
+        
+        // Calculate spread as percentage of midpoint
+        if (midPoint > 0) {
+            spreadPercent = (spread / midPoint) * 100.0;
+        }
     }
     
     // Note: VWAP is calculated by the time-ordered buffer, not here

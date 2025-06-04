@@ -34,14 +34,13 @@ ModelManager::ModelManager(std::string sym,
       m_windowSize(windowSize),
       m_windowUnit(unit),
       m_lastPrune(std::chrono::steady_clock::now())
-      // m_toBuffer(windowToDuration()),
-      // m_rbHandler(&m_toBuffer)
 {
     m_rawModel   = std::make_unique<raw_data_model::RawDataModel>(m_symbol);
-    // m_volProfile = std::make_unique<VolumeProfileMap>(0.05);
-    // m_toBuffer   = TimeOrderedTickBuffer(windowToDuration().count());
-    // m_rbHandler  = std::make_unique<RingBufferTradeHandler>(
-    //                 m_toBuffer, *m_volProfile, *m_rawModel);
+    m_volProfile = std::make_unique<volume_profile_map::VolumeProfileMap>(0.05);
+
+    m_toBuffer   = std::make_unique<time_ordered_tick_buffer::TimeOrderedTickBuffer>(windowToDuration().count());
+    m_rbHandler  = std::make_unique<ring_buffer_trade_handler::RingBufferTradeHandler>(
+                    *m_toBuffer, *m_volProfile, *m_rawModel);
     m_connMgr    = std::make_unique<connection_manager::ConnectionManager>();
     logThreadRole("ModelManager", "Creating ModelManager for " + m_symbol);
 }
@@ -159,22 +158,30 @@ void ModelManager::pruneOldData(){
     if (now - m_lastPrune < 5s) return;        // prune at most every 5 s
     m_lastPrune = now;
     
-    // STUB: Just log that we're pruning
-    std::cout << "[ModelManager] STUB: Pruning old data for " << getSymbol() << '\n';
-    
-    /* ORIGINAL COMMENTED OUT:
-    auto* q = m_rawModel->getStockQueue();
-    if (!q) return;
+    // Calculate cutoff time based on window duration
     auto cutoff = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch())
                 - windowToDuration();
-    q->removeOlderThan(cutoff.count());
-    */
+    
+    // Get current queue size for logging
+    size_t sizeBefore = m_rawModel->queueSize();
+    
+    // Use STK_Q's efficient removeOlderThan method via RawDataModel interface
+    m_rawModel->removeOlderThan(static_cast<uint64_t>(cutoff.count()));
+    
+    if (m_debug_logging && sizeBefore > 0) {
+        size_t sizeAfter = m_rawModel->queueSize();
+        if (sizeBefore > sizeAfter) {
+            std::cout << "[ModelManager] Pruned " << (sizeBefore - sizeAfter) 
+                      << " old ticks for " << getSymbol() 
+                      << " (cutoff: " << cutoff.count() << "ms)" << std::endl;
+        }
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-//  queue processing (called in AppState worker loop)
+//  queue processing for ML model - batch processing
 // ────────────────────────────────────────────────────────────────────────────────
-std::size_t ModelManager::processQueueData(std::size_t maxBatch){
+std::vector<stock_data_tick::StockData> ModelManager::batchQueueData(std::size_t maxBatch){
     // Log only on first call to avoid spam
     static thread_local bool first_process = true;
     if (first_process) {
@@ -182,88 +189,201 @@ std::size_t ModelManager::processQueueData(std::size_t maxBatch){
         first_process = false;
     }
     
-    std::size_t processed=0;
-    // TODO: Implement stk_q later
-    /*
-    stk_q::STK_Q_Data tick;
-    while (processed<maxBatch && m_rawModel->popNextTick(tick)){
-        // m_toBuffer.addTick(tick);                       // technical stack
-        // m_rbHandler.checkForTradeOpportunity(tick);     // ring-buffer logic
-        processed++;
+    // Use RawDataModel's batch processing method with conversion
+    std::vector<stock_data_tick::StockData> stockTicks = m_rawModel->popNextTicks(maxBatch);
+    
+    if (!stockTicks.empty()) {
+        if (m_debug_logging) {
+            std::cout << "[ModelManager] Processed " << stockTicks.size() 
+                      << " queued ticks for " << getSymbol() << std::endl;
+        }
+        pruneOldData();
     }
-    */
-    if (processed) pruneOldData();
-    return processed;
+    
+    return stockTicks;
 }
+
+// ────────────────────────────────────────────────────────────────────────────────
+//  queue processing (called in AppState worker loop)
+// ────────────────────────────────────────────────────────────────────────────────
+// std::size_t ModelManager::processQueueData(){
+//     // Log only on first call to avoid spam
+//     static thread_local bool first_process = true;
+//     if (first_process) {
+//         logThreadRole("ModelManager", "Starting queue management for " + getSymbol());
+//         first_process = false;
+//     }
+    
+//     // Check queue size - prune if it's getting large to prevent unbounded memory
+//     size_t currentSize = m_rawModel->queueSize();
+//     static constexpr size_t PRUNE_THRESHOLD = 100000;  // Prune when queue gets large
+    
+//     size_t processed = 0;
+//     if (currentSize > PRUNE_THRESHOLD) {
+//         size_t sizeBefore = currentSize;
+//         pruneOldData();  // Uses time window logic and updates m_lastPrune
+//     }
+    
+//     return processed;
+// }
 
 // ────────────────────────────────────────────────────────────────────────────────
 //  data ingestion (called by connection pipeline)
 // ────────────────────────────────────────────────────────────────────────────────
 void ModelManager::addTick(const stock_data_tick::StockData& t){
-    m_rawModel->addTick(t);
+
+    // Work with a copy for enrichment
+    stock_data_tick::StockData enrichedTick = t;
+
+    // Calculate derived metrics in-place
+    enrichedTick.calculateDerivedMetrics();
+
+    // add a print out that will confirm the data that we are geting.
+    std::cout << "==================== COMPLETE STOCKDATA VALIDATION ====================" << std::endl;
+    // Core identification
+    std::cout << "CORE DATA:" << std::endl;
+    std::cout << "  Symbol: " << enrichedTick.symbol << std::endl;
+    std::cout << "  Timestamp: " << enrichedTick.timestamp << std::endl;
+    std::cout << "  Exchange: " << (enrichedTick.exchange.empty() ? "EMPTY" : enrichedTick.exchange) << std::endl;
+    
+    // Core market data
+    std::cout << "MARKET DATA:" << std::endl;
+    std::cout << "  Last: $" << std::fixed << std::setprecision(4) << enrichedTick.last << std::endl;
+    std::cout << "  Bid: $" << std::fixed << std::setprecision(4) << enrichedTick.bid 
+              << " x " << enrichedTick.bidSize << std::endl;
+    std::cout << "  Ask: $" << std::fixed << std::setprecision(4) << enrichedTick.ask 
+              << " x " << enrichedTick.askSize << std::endl;
+    // std::cout << "  LastSize: " << enrichedTick.lastSize << std::endl;
+    // std::cout << "  Volume (Total Market): " << std::fixed << std::setprecision(2) << t.volume << "M" << std::endl;
+    std::cout << "  MidPoint: " << enrichedTick.midPoint << std::endl;
+    std::cout << "  Spread: " << enrichedTick.spread << std::endl;
+    std::cout << "  SpreadPercent: " << enrichedTick.spreadPercent << "%" << std::endl;
+    std::cout << "  PriceChange: " << enrichedTick.priceChange << std::endl;
+    std::cout << "  VWAP: $" << std::fixed << std::setprecision(4) << enrichedTick.vwap << std::endl;
+    
+    // OHLC data
+    std::cout << "OHLC DATA:" << std::endl;
+    std::cout << "  Open: " << enrichedTick.open << std::endl;
+    std::cout << "  High: " << enrichedTick.high << std::endl;
+    std::cout << "  Low: " << enrichedTick.low << std::endl;
+    std::cout << "  Close: " << enrichedTick.close << std::endl;
+    std::cout << "  BarRange: " << enrichedTick.barRange << std::endl;
+    
+    std::cout << "=======================================================================" << std::endl;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Efficient volume calculation - direct access instead of string parsing
+    int totalVolume = m_volProfile->getTotalVolume();
+    
+    if (totalVolume > 0) {
+        std::cout << "Volume from profile: " << totalVolume << " shares" << std::endl;
+        enrichedTick.volume = totalVolume;
+        if (m_debug_logging) {
+            std::cout << "[ModelManager] Volume from profile: " << totalVolume << " shares" << std::endl;
+        }
+    }
+
+    //Implement on another thread owned by model manager for speed and integration with the ML model & Python///
+    // Technical analysis pipeline
+    m_toBuffer->addTick(enrichedTick);
+    time_ordered_tick_buffer::TechnicalIndicators indicators = m_toBuffer->calculateIndicators();
+
+    // Apply technical indicators in-place
+    enrichedTick.rsi = indicators.rsi;
+    enrichedTick.ema9 = indicators.ema9;
+    enrichedTick.ema26 = indicators.ema26;
+    enrichedTick.alma = indicators.alma;
+    enrichedTick.atr = indicators.atr;
+    // will do the macd later
+    // enrichedTick.macd = indicators.macd;
+
+    size_t queueSizeBefore = m_rawModel->queueSize();
+
+    // Trade opportunity detection
+    if (m_rbHandler->evaluate(enrichedTick)) {
+        std::cout << "[TradeAlert] Opportunity detected for " << getSymbol() 
+                  << " at price: $" << enrichedTick.last << std::endl;
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Store in STK_Q and prune old data
+    m_rawModel->addTick(enrichedTick);
+    
+    size_t queueSizeAfter = m_rawModel->queueSize();
+    // Print detailed tick information with thread ID
+    std::ostringstream threadIdStr;
+    threadIdStr << std::this_thread::get_id();
+    std::cout << "[ModelManager][VALIDATION][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+              << "\n  Symbol: " << enrichedTick.symbol
+              << "\n  Timestamp: " << enrichedTick.timestamp
+              << "\n  Exchange: " << (!enrichedTick.exchange.empty() ? enrichedTick.exchange : "-")
+              << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
+              << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
+              << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
+              << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
+              << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
+              << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
+              << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
+              << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
+              << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
+              << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;        
+    pruneOldData();
 }
 
+/// adds public tape tradetick to the volume profile map
 void ModelManager::addTradeTick(double p,int v){ 
-    // STUB: Just log
+    // this is used inside connection.cpp
     std::cout << "[ModelManager] STUB: Adding trade tick for " << getSymbol() << " price=" << p << " vol=" << v << '\n';
-    // if (v>0) m_volProfile.add_transaction(p,v); 
+    if (v>0) m_volProfile->add_transaction(p,v); 
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
 //  misc accessors
 // ────────────────────────────────────────────────────────────────────────────────
+// used to get the symbol for the api
 std::string ModelManager::getSymbol() const { return m_rawModel->symbol(); }
 
+// used to get the params for the api
 const raw_data_model::TradingParams& ModelManager::getParams() const { return m_rawModel->params(); }
 
+// used to get the tick count from the stk_q
 std::size_t ModelManager::getTickCount() const { 
     return m_rawModel->queueSize(); 
 }
+
+// used to get the latest tick for the api  
 const stock_data_tick::StockData* ModelManager::getLatestTick() const {
     static stock_data_tick::StockData tmp;
     return m_rawModel->latestTick(tmp) ? &tmp : nullptr;
 }
 
+// used to get the ticks in the time window for the api
 std::vector<stock_data_tick::StockData> ModelManager::getTicksInWindow() const {
-    // STUB: Return empty vector
-    return {};
-    
-    /* ORIGINAL COMMENTED OUT:
-    auto* q = m_rawModel->getStockQueue();
-    if (!q) return {};
-    std::vector<stock_data_tick::StockData> v;
+    // Calculate cutoff time based on window duration
     std::uint64_t cutoff = std::chrono::duration_cast<std::chrono::milliseconds>(
                                std::chrono::steady_clock::now().time_since_epoch()
                            ).count() - windowToDuration().count();
-    stk_q::STK_Q_Data d;
-    std::vector<stk_q::STK_Q_Data> tmp;
-    while (q->pop(d)){ if (d.time>=cutoff) tmp.push_back(d); }
-    for (auto& x:tmp) q->push(x);
-    v.reserve(tmp.size());
-    for (auto& x:tmp){
-        stock_data_tick::StockData t;
-        t.symbol=getSymbol(); t.timestamp=x.time;
-        t.last=x.last; t.bid=x.bid; t.ask=x.ask;
-        t.volume=x.volume; v.push_back(t);
-    }
-    return v;
-    */
+    
+    return m_rawModel->getTicksInTimeWindow(cutoff);
 }
 
+// used to get the time window for the api
 std::pair<std::size_t,TimeWindowUnit> ModelManager::getTimeWindow() const {
     return {m_windowSize,m_windowUnit};
 }
 
+// used to set the time window for the api
 void ModelManager::setTimeWindow(std::size_t sz,TimeWindowUnit u){
     m_windowSize=sz; m_windowUnit=u;
     // m_toBuffer.setWindow(windowToDuration());
-    pruneOldData();
+    // pruneOldData();
 }
 
+// used to clear the ticks for the api
 void ModelManager::clearTicks(){ 
     m_rawModel->clear(); 
 }
 
+// used to initialize the model from the json for the api
 bool ModelManager::initFromJson(const nlohmann::json& js) {
     auto result = m_rawModel->initialise(js);
     return !result; // error_code converts to bool (true if error), so we negate it

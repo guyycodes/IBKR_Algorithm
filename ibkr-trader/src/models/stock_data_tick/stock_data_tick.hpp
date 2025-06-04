@@ -63,9 +63,12 @@ public:
 
     // Derived metrics for scalping
     double mid = 0.0;           // Midpoint price
+    double midPoint = 0.0;      // Alternative midpoint field
     double spread = 0.0;        // Bid-ask spread
     double spreadPercent = 0.0; // Spread as percentage of mid price
     double vwap = 0.0;          // Volume-weighted average price
+    double priceChange = 0.0;   // Price change from previous period
+    double barRange = 0.0;      // High-low range for bar data
     double imbalance = 0.0;     // Order book imbalance (bid vs ask size)
     double momentum = 0.0;      // Short-term price momentum
     double depthImbalance = 0.0; // Imbalance based on full order book (not just top of book)

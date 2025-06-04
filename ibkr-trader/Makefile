@@ -21,7 +21,10 @@ SOURCES = $(wildcard $(SRCDIR)/*.cpp) \
           $(wildcard $(SRCDIR)/*/*/*.cpp) \
           $(wildcard $(IBKR_SRCDIR)/*.cpp) \
           $(wildcard $(IBKR_SRCDIR)/protobufUnix/*.cc) \
-          util/app_state.cpp
+          util/app_state.cpp \
+          util/stk_q/stk_q.cpp \
+          util/time_ordered_tick_buffer/time_ordered_tick_buffer.cpp \
+          util/time_ordered_tick_buffer/ring_buffer_trade_handler.cpp
 
 # Exclude official_example_connections directory
 SOURCES := $(filter-out $(SRCDIR)/connection_manager/official_example_connections/%.cpp, $(SOURCES))

@@ -146,12 +146,11 @@ FrameAnalyzer::analyzeTickByTickBidAskData(int req,time_t t,double bid,double as
     a.reqId=req; a.epochTime=t; a.bidPrice=bid; a.askPrice=ask;
     a.bidSize=bidSz; a.askSize=askSz; a.bidPastLow=bpl; a.askPastHigh=aph;
 
-    if(bid>0 && ask>0){
-        a.spread=ask-bid;
-        a.midPoint=(ask+bid)/2.0;
-        a.spreadPercent=(a.spread/a.midPoint)*100.0;
-        a.hasValidSpread=a.hasValidMidPoint=true;
-    }
+    
+    a.spread=0.0;
+    a.midPoint=0.0;
+    a.spreadPercent=0.0;
+    
 
 #if IBKR_FRAME_VERBOSE
     std::cout<<"[FA] Spread "<<a.spread<<" ("<<a.spreadPercent<<"%)\n";

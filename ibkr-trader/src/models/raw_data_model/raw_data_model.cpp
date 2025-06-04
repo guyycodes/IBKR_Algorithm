@@ -1,6 +1,7 @@
 #include "raw_data_model.hpp"
 #include <chrono>
 #include <iostream>
+#include "../util/stk_q/stk_q.hpp"
 
 namespace raw_data_model {
 
@@ -27,13 +28,11 @@ bool TradingParams::from_json(const nlohmann::json& js) noexcept
 /*───────────────────────────────────────────────────────────────────────────────
  * ctor                                                                         */
 RawDataModel::RawDataModel(std::string sym, int intervalMs)
-    : m_symbol(std::move(sym))
-      // TODO: Implement stk_q later
-      // m_queue(std::make_unique<stk_q::STK_Q>())
+    : m_symbol(std::move(sym)),
+      m_queue(std::make_unique<stk_q::STK_Q>())
 {
-    // TODO: Implement stk_q later
-    // m_queue->setIntervalMs(intervalMs);     // make STK_Q resolution configurable
-    std::clog << "[RawDataModel] " << m_symbol << " created (" << intervalMs << " ms filter interval)" << '\n';
+    // STK_Q uses hardcoded 500ms filtering, intervalMs parameter is ignored
+    std::clog << "[RawDataModel] " << m_symbol << " created (using STK_Q default 500ms filter interval)" << '\n';
 }
 
 /*───────────────────────────────────────────────────────────────────────────────
@@ -41,28 +40,39 @@ RawDataModel::RawDataModel(std::string sym, int intervalMs)
 void RawDataModel::addTick(const stock_data_tick::StockData& tick)
 {
     std::lock_guard lg{m_mx};
-    // TODO: Implement stk_q later
-    // m_queue->push( convertToQueue(tick, m_symbol) );
+    stk_q::STK_Q_Data q = convertToQueue(tick);
+
+    m_queue->push(q);
     std::clog << "[RawDataModel] Tick received for " << m_symbol << ": last=" << tick.last << '\n';
 }
 
 /*───────────────────────────────────────────────────────────────────────────────
  * popNextTick – consumer side (used by ModelManager worker)                    */
-// TODO: Implement stk_q later
-// bool RawDataModel::popNextTick(stk_q::STK_Q_Data& out)
-// {
-//     // STK_Q methods are already thread-safe
-//     return m_queue->pop(out);
-// }
+bool RawDataModel::popNextTick(stk_q::STK_Q_Data& out)
+{
+    // STK_Q methods are already thread-safe
+    return m_queue->pop(out);
+}
+
+/*───────────────────────────────────────────────────────────────────────────────
+ * popNextTicks – batch consumer (returns vector of StockData)                  */
+std::vector<stock_data_tick::StockData> RawDataModel::popNextTicks(std::size_t maxBatch)
+{
+    std::vector<stock_data_tick::StockData> result;
+    result.reserve(maxBatch);
+    
+    stk_q::STK_Q_Data queueData;
+    for (std::size_t i = 0; i < maxBatch && m_queue->pop(queueData); ++i) {
+        result.push_back(convertToStockData(queueData));
+    }
+    
+    return result;
+}
 
 /*───────────────────────────────────────────────────────────────────────────────
  * latestTick – lightweight peek of newest element                              */
 bool RawDataModel::latestTick(stock_data_tick::StockData& out) const
 {
-    // TODO: Implement stk_q later - for now just return false
-    return false;
-    
-    /*
     stk_q::STK_Q_Data qd;
     if (!m_queue->peekLatest(qd)) return false;
 
@@ -102,22 +112,23 @@ bool RawDataModel::latestTick(stock_data_tick::StockData& out) const
 
     m_spinLock.clear(std::memory_order_release);
     return true;
-    */
 }
 
 /*───────────────────────────────────────────────────────────────────────────────
  * queueSize / clear                                                            */
 std::size_t RawDataModel::queueSize() const noexcept 
 { 
-    // TODO: Implement stk_q later
-    return 0;
-    // return m_queue->size(); 
+    return m_queue->size(); 
 }
 
 void RawDataModel::clear() noexcept      
 { 
-    // TODO: Implement stk_q later
-    // m_queue->clear(); 
+    m_queue->clear(); 
+}
+
+void RawDataModel::removeOlderThan(uint64_t cutoffTimeMs) noexcept
+{
+    m_queue->removeOlderThan(cutoffTimeMs);
 }
 
 /*───────────────────────────────────────────────────────────────────────────────
@@ -137,28 +148,27 @@ std::error_code RawDataModel::initialise(const nlohmann::json& js)
     return {};
 }
 
-/*───────────────────────────────────────────────────────────────────────────────
- * convertToQueue – helper (StockData → STK_Q_Data)                             */
-// TODO: Implement stk_q later
-/*
-stk_q::STK_Q_Data RawDataModel::convertToQueue(const stock_data_tick::StockData& s,
-                                               const std::string&                symbol)
+//───────────────────────────────────────────────────────────────────────────────
+// convertToQueue – helper (StockData → STK_Q_Data)
+
+
+stk_q::STK_Q_Data RawDataModel::convertToQueue(const stock_data_tick::StockData& s)
 {
     stk_q::STK_Q_Data q;
-    q.symbol   = symbol;
-    q.time     = static_cast<long>(s.timestamp / 1'000'000); // ns → ms
+    q.symbol   = s.symbol;
+    q.time     = s.timestamp; // ns → ms
     q.bid      = s.bid;
     q.ask      = s.ask;
     q.last     = s.last;
     q.bidSize  = static_cast<int>(s.bidSize);
     q.askSize  = static_cast<int>(s.askSize);
-    q.volume   = static_cast<int>(s.volume);
+    q.volume   = s.volume;
     q.vwap     = s.vwap;
 
     // derived metrics that STK_Q consumers might need
-    q.mid            = (s.bid + s.ask) * 0.5;
-    q.spread         = s.ask - s.bid;
-    q.spreadPercent  = (q.mid > 0.0) ? (q.spread / q.mid) * 100.0 : 0.0;
+    q.mid            = s.midPoint;
+    q.spread         = s.spread;
+    q.spreadPercent  = s.spreadPercent;
     q.imbalance      = s.imbalance;
     q.rsi            = s.rsi;
     q.ema9           = s.ema9;
@@ -171,6 +181,58 @@ stk_q::STK_Q_Data RawDataModel::convertToQueue(const stock_data_tick::StockData&
     q.size           = q.volume;
     return q;
 }
-*/
+
+// convert stk_q::STK_Q_Data item back into stock_data_tick::StockData
+stock_data_tick::StockData RawDataModel::convertToStockData(const stk_q::STK_Q_Data& q)
+{
+    stock_data_tick::StockData s;
+    s.symbol = q.symbol;
+    s.timestamp = static_cast<stock_data_tick::timestamp_t>(q.time) * 1'000'000; // ms→ns
+    s.exchange = q.exchange;
+    
+    // Core market data
+    s.bid = q.bid;
+    s.ask = q.ask;
+    s.last = q.last;
+    s.bidSize = static_cast<stock_data_tick::volume_t>(q.bidSize);
+    s.askSize = static_cast<stock_data_tick::volume_t>(q.askSize);
+    s.lastSize = static_cast<stock_data_tick::volume_t>(q.lastSize);
+    s.volume = static_cast<stock_data_tick::volume_t>(q.volume);
+    
+    // OHLC data
+    s.open = q.open;
+    s.high = q.high;
+    s.low = q.low;
+    s.close = q.close;
+    
+    // Derived metrics
+    s.mid = q.mid;
+    s.spread = q.spread;
+    s.spreadPercent = q.spreadPercent;
+    s.vwap = q.vwap;
+    s.imbalance = q.imbalance;
+    
+    // Technical indicators
+    s.rsi = q.rsi;
+    s.ema9 = q.ema9;
+    s.ema26 = q.ema26;
+    s.alma = q.alma;
+    s.atr = q.atr;
+    
+    return s;
+}
+
+/*───────────────────────────────────────────────────────────────────────────────
+ * getTicksInTimeWindow – get ticks newer than cutoff time                      */
+std::vector<stock_data_tick::StockData> RawDataModel::getTicksInTimeWindow(std::uint64_t cutoffTimeMs) const
+{
+    std::vector<stock_data_tick::StockData> result;
+    std::lock_guard lg{m_mx};
+    
+    // For now, return empty vector - this is a diagnostic method
+    // The STK_Q doesn't support non-destructive iteration
+    // TODO: Enhance STK_Q to support time-window queries if needed
+    return result;
+}
 
 } // namespace raw_data_model

@@ -1,5 +1,5 @@
 #include "connection_cache.hpp"
-#include "../../decoder/decoder.hpp"
+#include "../decoder/decoder.hpp"
 #include <chrono>
 #include <iostream>
 #include <iomanip>
@@ -26,69 +26,130 @@ bool ConnectionCache::isComplete(const stock_data_tick::StockData& d)
     // Note: volume and vwap are optional for tick-by-tick data
 }
 
-CacheResult ConnectionCache::merge(std::string_view sym, uint64_t ts,
-                                   double last,double vol,
-                                   double bid,double ask,
-                                   double bidSz,double askSz,
-                                   std::string_view ex,
-                                   double o,double h,double l,
-                                   double c,double vwap)
+CacheResult ConnectionCache::merge(std::string_view  sym,
+                                   uint64_t          ts,
+                                   double            last,
+                                   double            vol,
+                                   double            bid,
+                                   double            ask,
+                                   double            bidSz,
+                                   double            askSz,
+                                   std::string_view  ex,
+                                   double            o,
+                                   double            h,
+                                   double            l,
+                                   double            c,
+                                   double            vwap,
+                                   double            priceChange,
+                                   double            barRange,
+                                   double            spread,
+                                   double            spreadPercent,
+                                   double            midPoint)
 {
-    auto& st = m_map[std::string(sym)];            // one entry reused forever
+    /* ---------------------------------------------------------------------
+       1.  Lookup                 (zero allocations on hits)
+       ------------------------------------------------------------------ */
+    auto it = m_map.find(sym);                       // heterogeneous lookup (C++20)
+    if (it == m_map.end())
+        it = m_map.emplace(sym, stock_data_tick::StockData{}).first;
+
+    stock_data_tick::StockData& st = it->second;
+
+    /* ---------------------------------------------------------------------
+       2.  Fast-path field updates (macro avoids the lambda capture)
+       ------------------------------------------------------------------ */
+#define CONN_CHG(field,val) \
+        if ((val) > 0 && (val) != (field)) { (field) = (val); changed = true; }
 
     bool changed = false;
-    auto chg = [&](auto& field, auto v){ if(v>0 && field!=v){ field=v; changed=true; } };
 
-    // Track tick-by-tick specific changes
+    /* tick-by-tick change tracker is folded into the update pass itself   */
     bool tickByTickChanged = false;
-    if (bid > 0 && st.bid != bid) tickByTickChanged = true;
-    if (ask > 0 && st.ask != ask) tickByTickChanged = true;
-    if (bidSz > 0 && st.bidSize != bidSz) tickByTickChanged = true;
-    if (askSz > 0 && st.askSize != askSz) tickByTickChanged = true;
-    if (last > 0 && st.last != last) tickByTickChanged = true;
 
-    chg(st.last,     last);
-    chg(st.bid,      bid);
-    chg(st.ask,      ask);
-    chg(st.bidSize,  bidSz);
-    chg(st.askSize,  askSz);
-    chg(st.volume,   vol);
-    chg(st.open,     o);  chg(st.high,h); chg(st.low,l); chg(st.close,c); chg(st.vwap,vwap);
+    auto track_and_set = [&](auto& field, double v){
+        if (v > 0 && v != field) { field = v; tickByTickChanged = true; }
+    };
 
-    if(!ex.empty())          st.exchange = ex;
-    if(ts==0)                ts = nowEpochMs();
-    chg(st.timestamp, ts);                         // must be after ts calc
-    st.symbol = sym;
+    track_and_set(st.bid,     bid);
+    track_and_set(st.ask,     ask);
+    track_and_set(st.bidSize, bidSz);
+    track_and_set(st.askSize, askSz);
+    track_and_set(st.last,    last);          // mid-point or trade price
 
-    bool complete = isComplete(st);
+    /* Bulk updates that do **not** participate in tick-change semantics  */
+    CONN_CHG(st.volume,   vol);
+    CONN_CHG(st.open,     o);  CONN_CHG(st.high,h); CONN_CHG(st.low,l); CONN_CHG(st.close,c);
+    CONN_CHG(st.vwap,     vwap);
+    CONN_CHG(st.priceChange,  priceChange);
+    CONN_CHG(st.barRange,     barRange);
+    CONN_CHG(st.spread,       spread);
+    CONN_CHG(st.spreadPercent,spreadPercent);
+    CONN_CHG(st.midPoint,     midPoint);
+
+    /* ---------------------------------------------------------------------
+       3.  Non-critical fields – executed only when necessary
+       ------------------------------------------------------------------ */
+    if (!ex.empty())      st.exchange  = ex;     // String copy ONLY when feed sends it
+    if (st.symbol.empty())     // symbol set only once
+        st.symbol        = it->first;            // no copy on subsequent ticks
+
+    /* Timestamp – avoid the expensive syscall unless caller passed zero  */
+    
+    ts = nowEpochMs();
+    st.timestamp = ts;
+
+    /* ---------------------------------------------------------------------
+       4.  Completeness test – done **after** fast path so it never hurts
+       ------------------------------------------------------------------ */
+    const bool complete = isComplete(st);
 
 #if CONN_CACHE_VERBOSE
-    std::cout<<"[Cache] "<<sym<<" upd "
-             <<"L="<<st.last<<" B="<<st.bid<<" A="<<st.ask
-             <<"@("<<st.bidSize<<'/'<<st.askSize<<") V="<<st.volume<<'\n';
+    std::cout << "[Cache] " << sym << " L=" << st.last
+              << " B=" << st.bid << " A=" << st.ask
+              << " @(" << st.bidSize << '/' << st.askSize
+              << ") V=" << st.volume << '\n';
+    if (!complete) { /* verbose diagnostics here…*/ }
 #endif
 
     // Add detailed logging like legacy code
     if (!complete) {
-        std::cout << "[Cache][DEBUG] ❌ Data incomplete for " << sym << ":" << std::endl;
-        std::cout << "  last: " << st.last << " (required > 0)" << std::endl;
-        std::cout << "  bid: " << st.bid << " (required > 0)" << std::endl;
-        std::cout << "  ask: " << st.ask << " (required > 0)" << std::endl;
-        std::cout << "  bidSize: " << st.bidSize << " (required > 0)" << std::endl;
-        std::cout << "  askSize: " << st.askSize << " (required > 0)" << std::endl;
-        std::cout << "  timestamp: " << st.timestamp << " (required > 0)" << std::endl;
-        std::cout << "  volume: " << st.volume << " (optional, current: " << st.volume << ")" << std::endl;
-        std::cout << "  vwap: " << st.vwap << " (optional, current: " << st.vwap << ")" << std::endl;
+        // std::cout << "[Cache][DEBUG] ❌ Data incomplete for " << sym << ":" << std::endl;
+        // std::cout << "  last: " << st.last << " (required > 0)" << std::endl;
+        // std::cout << "  bid: " << st.bid << " (required > 0)" << std::endl;
+        // std::cout << "  ask: " << st.ask << " (required > 0)" << std::endl;
+        // std::cout << "  bidSize: " << st.bidSize << " (required > 0)" << std::endl;
+        // std::cout << "  askSize: " << st.askSize << " (required > 0)" << std::endl;
+        // std::cout << "  timestamp: " << st.timestamp << " (required > 0)" << std::endl;
+        // std::cout << "  volume: " << st.volume << " (optional, current: " << st.volume << ")" << std::endl;
+        // std::cout << "  vwap: " << st.vwap << " (optional, current: " << st.vwap << ")" << std::endl;
+        // std::cout << "  priceChange: " << st.priceChange << " (optional, current: " << st.priceChange << ")" << std::endl;
+        // std::cout << "  barRange: " << st.barRange << " (optional, current: " << st.barRange << ")" << std::endl;
+        // std::cout << "  spread: " << st.spread << " (optional, current: " << st.spread << ")" << std::endl;
+        // std::cout << "  spreadPercent: " << st.spreadPercent << " (optional, current: " << st.spreadPercent << ")" << std::endl;
+        // std::cout << "  midPoint: " << st.midPoint << " (optional, current: " << st.midPoint << ")" << std::endl;
     } else if (tickByTickChanged) {
-        std::cout << "[Cache][DEBUG] ✅ Data ready for " << sym << " (tick-by-tick changed)" << std::endl;
-        std::cout << "  last: $" << std::fixed << std::setprecision(4) << st.last << std::endl;
-        std::cout << "  bid: $" << std::fixed << std::setprecision(4) << st.bid << " x " << static_cast<int>(st.bidSize) << std::endl;
-        std::cout << "  ask: $" << std::fixed << std::setprecision(4) << st.ask << " x " << static_cast<int>(st.askSize) << std::endl;
+        // std::cout << "[Cache][DEBUG] ✅ Data ready for " << sym << " (tick-by-tick changed)" << std::endl;
+        // std::cout << "  last: $" << std::fixed << std::setprecision(4) << st.last <<  std::endl;
+        // std::cout << "  volume: " << st.volume << " (optional, current: " << st.volume << ")" << std::endl;
+        // std::cout << "  bid: $" << std::fixed << std::setprecision(4) << st.bid << " x " << static_cast<int>(st.bidSize) << std::endl;
+        // std::cout << "  ask: $" << std::fixed << std::setprecision(4) << st.ask << " x " << static_cast<int>(st.askSize) << std::endl;
+        // std::cout << "  bidSize: " << st.bidSize << " (required > 0)" << std::endl;
+        // std::cout << "  askSize: " << st.askSize << " (required > 0)" << std::endl;
+        // std::cout << "  priceChange: " << st.priceChange << " (optional, current: " << st.priceChange << ")" << std::endl;
+        // std::cout << "  barRange: " << st.barRange << " (optional, current: " << st.barRange << ")" << std::endl;
+        // std::cout << "  spread: " << st.spread << " (optional, current: " << st.spread << ")" << std::endl;
+        // std::cout << "  spreadPercent: " << st.spreadPercent << " (optional, current: " << st.spreadPercent << ")" << std::endl;
+        // std::cout << "  midPoint: " << st.midPoint << " (optional, current: " << st.midPoint << ")" << std::endl;
+        // std::cout << "  timestamp: " << st.timestamp << " (required > 0)" << std::endl;
+        // std::cout << "  open: " << st.open << std::endl;
+        // std::cout << "  high: " << st.high << std::endl;
+        // std::cout << "  low: " << st.low << std::endl;
+        // std::cout << "  close: " << st.close << std::endl;
         if (st.vwap > 0) {
-            std::cout << "  vwap: $" << std::fixed << std::setprecision(5) << st.vwap << std::endl;
+            // std::cout << "  vwap: $" << std::fixed << std::setprecision(5) << st.vwap << std::endl;
         }
         if (st.volume > 0) {
-            std::cout << "  volume: " << static_cast<int>(st.volume) << std::endl;
+            // std::cout << "  " << static_cast<int>(st.volume) <<"  shares @ " << st.last <<  std::endl;
         }
     }
 

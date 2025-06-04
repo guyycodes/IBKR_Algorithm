@@ -109,11 +109,12 @@ void IBKRTrader::startDataStream(const std::string& symbol)
     logCb("startDataStream", symbol, "feeds running");
 }
 
-void IBKRTrader::routeViaCache(double last,double bid,double ask,int bidSz,int askSz,
-                               double vol,uint64_t ts, const std::string& exchange,
-                               double open, double high, double low, double close, double vwap)
+void IBKRTrader::routeViaCache(double last,double bid, double ask, int bidSz, int askSz,
+                               double vol, uint64_t ts, const std::string& exchange,
+                               double open, double high, double low, double close, double vwap, double priceChange, double barRange,
+                               double spread, double spreadPercent, double midPoint)
 {
-    auto res = m_cache->merge(m_sym, ts, last, vol, bid, ask, bidSz, askSz, exchange, open, high, low, close, vwap);
+    auto res = m_cache->merge(m_sym, ts, last, vol, bid, ask, bidSz, askSz, exchange, open, high, low, close, vwap, priceChange, barRange, spread, spreadPercent, midPoint);
     if (res.isComplete && res.tickChanged && m_mgr){
         // route back to model manager here
         m_mgr->addTick(res.data);
@@ -133,37 +134,29 @@ void IBKRTrader::tickString(TickerId id, TickType field,
     auto res = m_an->analyzeTickStringData(id, field, val);
     
     if (res.hasDecodedData) {
-        std::cout << "\n========== TICK STRING ANALYSIS ==========" << std::endl;
-        std::cout << "Symbol: " << m_sym << " | Request ID: " << id << std::endl;
-        std::cout << "Thread ID: " << threadIdStr.str() << std::endl;
-        std::cout << "Field: " << field << " | Type: " << res.dataType << std::endl;
-        std::cout << "Raw Value: '" << val << "'" << std::endl;
+        // std::cout << "\n========== TICK STRING ANALYSIS ==========" << std::endl;
+        // std::cout << "Symbol: " << m_sym << " | Request ID: " << id << std::endl;
+        // std::cout << "Thread ID: " << threadIdStr.str() << std::endl;
+        // std::cout << "Field: " << field << " | Type: " << res.dataType << std::endl;
+        // std::cout << "Raw Value: '" << val << "'" << std::endl;
         
-        if (res.volume > 0.0 || res.vwap > 0.0) {
-            std::cout << "Volume (Total Market): " << std::fixed << std::setprecision(2) << res.volume << "M" << std::endl;
-            std::cout << "VWAP: $" << std::fixed << std::setprecision(5) << res.vwap << std::endl;
-        }
+        // if (res.volume > 0.0 || res.vwap > 0.0) {
+        //     std::cout << "Volume (Total Market): " << std::fixed << std::setprecision(2) << res.volume << "M" << std::endl;
+        //     std::cout << "VWAP: $" << std::fixed << std::setprecision(5) << res.vwap << std::endl;
+        // }
         
-        if (res.timestamp > 0) {
-            std::cout << "Timestamp: " << res.timestamp << std::endl;
-        }
+        // if (res.timestamp > 0) {
+        //     std::cout << "Timestamp: " << res.timestamp << std::endl;
+        // }
         
-        std::cout << "Decoded: " << res.decodedValue << std::endl;
-        std::cout << "===========================================" << std::endl;
+        // std::cout << "Decoded: " << res.decodedValue << std::endl;
+        // std::cout << "===========================================" << std::endl;
     } else {
-        std::cout << "[TickString][" << m_sym << "] Raw field=" << field << " value='" << val << "'" << std::endl;
+        // std::cout << "[TickString][" << m_sym << "] Raw field=" << field << " value='" << val << "'" << std::endl;
     }
 
-    // minimalist routing (only RTVolume gives us price/size)
-    if (field == 49) {
-        double price = 0.0, size = 0.0;
-        std::sscanf(val.c_str(), "%lf;%lf", &price, &size);
-        routeViaCache(price, 0, 0, 0, 0,
-                     size,
-                     std::chrono::duration_cast<std::chrono::milliseconds>(
-                         std::chrono::system_clock::now().time_since_epoch()).count(),
-                     "", 0, 0, 0, 0, res.vwap);
-    }
+    routeViaCache(0, 0, 0, 0, 0, 0, 0, "", 0, 0, 0, 0, res.vwap, 0, 0, 0, 0, 0);
+
 }
 
 void IBKRTrader::realtimeBar(TickerId reqId, long t,
@@ -172,15 +165,6 @@ void IBKRTrader::realtimeBar(TickerId reqId, long t,
                              Decimal wap, int cnt)
 {
 
-
-    auto bar = m_an->analyzeRealtimeBarData(reqId, static_cast<int>(t),
-                                            o, h, l, c,
-                                            DecimalFunctions::decimalToDouble(vol),
-                                            DecimalFunctions::decimalToDouble(wap),
-                                            cnt);
-    // logCb("realtimeBar", m_sym,
-    //       "Δ=" + std::to_string(bar.priceChange) +
-    //       " range=" + std::to_string(bar.barRange));
     // Step 1: Get current time for time difference calculation
     time_t currentTime = std::time(nullptr);
     
@@ -192,37 +176,37 @@ void IBKRTrader::realtimeBar(TickerId reqId, long t,
                                                      cnt);
     
     // Step 3: Print comprehensive bar analysis (legacy format)
-    std::cout << "\n========== REALTIME BAR ANALYSIS ==========" << std::endl;
-    std::cout << "Symbol: " << m_sym << " | Request ID: " << analyzedData.reqId << std::endl;
-    std::cout << "Bar Time: " << analyzedData.formattedTime << " (epoch: " << analyzedData.epochTime << ")" << std::endl;
-    std::cout << "Time Difference: " << (currentTime - analyzedData.epochTime) << " seconds" << std::endl;
-    std::cout << "Open: $" << std::fixed << std::setprecision(4) << analyzedData.open << std::endl;
-    std::cout << "High: $" << std::fixed << std::setprecision(4) << analyzedData.high << std::endl;
-    std::cout << "Low: $" << std::fixed << std::setprecision(4) << analyzedData.low << std::endl;
-    std::cout << "Close: $" << std::fixed << std::setprecision(4) << analyzedData.close << std::endl;
-    std::cout << "Volume: " << std::fixed << std::setprecision(0) << analyzedData.volume << " shares" << std::endl;
-    std::cout << "WAP: $" << std::fixed << std::setprecision(6) << analyzedData.wap << std::endl;
-    std::cout << "range: " << std::fixed << std::setprecision(4) << analyzedData.barRange << std::endl;
-    std::cout << "Price Change: $" << std::fixed << std::setprecision(4) << analyzedData.priceChange; 
-    std::cout << "Trade Count: " << analyzedData.count << std::endl;
+    // std::cout << "\n========== REALTIME BAR ANALYSIS ==========" << std::endl;
+    // std::cout << "Symbol: " << m_sym << " | Request ID: " << analyzedData.reqId << std::endl;
+    // std::cout << "Bar Time: " << analyzedData.formattedTime << " (epoch: " << analyzedData.epochTime << ")" << std::endl;
+    // std::cout << "Time Difference: " << (currentTime - analyzedData.epochTime) << " seconds" << std::endl;
+    // std::cout << "Open: $" << std::fixed << std::setprecision(4) << analyzedData.open << std::endl;
+    // std::cout << "High: $" << std::fixed << std::setprecision(4) << analyzedData.high << std::endl;
+    // std::cout << "Low: $" << std::fixed << std::setprecision(4) << analyzedData.low << std::endl;
+    // std::cout << "Close: $" << std::fixed << std::setprecision(4) << analyzedData.close << std::endl;
+    // std::cout << "Volume: " << std::fixed << std::setprecision(0) << analyzedData.volume << " shares" << std::endl;
+    // std::cout << "WAP: $" << std::fixed << std::setprecision(6) << analyzedData.wap << std::endl;
+    // std::cout << "range: " << std::fixed << std::setprecision(4) << analyzedData.barRange << std::endl;
+    // std::cout << "Price Change: $" << std::fixed << std::setprecision(4) << analyzedData.priceChange; 
+    // std::cout << "Trade Count: " << analyzedData.count << std::endl;
     
-    // Print calculated metrics if valid
-    if (analyzedData.hasValidPriceChange) {
-        std::cout << "Price Change: $" << std::fixed << std::setprecision(4) << analyzedData.priceChange 
-                  << " (" << std::showpos << std::fixed << std::setprecision(2) << analyzedData.percentChange << "%)" << std::noshowpos << std::endl;
-    }
+    // // Print calculated metrics if valid
+    // if (analyzedData.hasValidPriceChange) {
+    //     std::cout << "Price Change: $" << std::fixed << std::setprecision(4) << analyzedData.priceChange 
+    //               << " (" << std::showpos << std::fixed << std::setprecision(2) << analyzedData.percentChange << "%)" << std::noshowpos << std::endl;
+    // }
     
-    if (analyzedData.hasValidRange) {
-        std::cout << "Bar Range: $" << std::fixed << std::setprecision(4) << analyzedData.barRange << std::endl;
-    }
+    // if (analyzedData.hasValidRange) {
+    //     std::cout << "Bar Range: $" << std::fixed << std::setprecision(4) << analyzedData.barRange << std::endl;
+    // }
     
-    std::cout << "===========================================" << std::endl;
+    // std::cout << "===========================================" << std::endl;
 
-    // Step 4: Route to model manager
-    routeViaCache(c, 0, 0, 0, 0,
-                 DecimalFunctions::decimalToDouble(vol),
-                 static_cast<std::uint64_t>(t) * 1'000,
-                 "", analyzedData.open, analyzedData.high, analyzedData.low, analyzedData.close, 0);
+    
+    // Step 4: Route to model manager 
+    routeViaCache(0, 0, 0, 0, 0, 0, 0,
+                 "", analyzedData.open, analyzedData.high, analyzedData.low, analyzedData.close, 0, analyzedData.priceChange, analyzedData.barRange,
+                 0, 0, 0);
 }
 
 void IBKRTrader::tickByTickAllLast(int reqId, int type, time_t t,
@@ -241,39 +225,45 @@ void IBKRTrader::tickByTickAllLast(int reqId, int type, time_t t,
         ex, cond, attr.pastLimit, attr.unreported);
 
     // Print comprehensive trade analysis
-    std::cout << "\n========== TICK-BY-TICK TRADE ANALYSIS ==========" << std::endl;
-    std::cout << "Symbol: " << m_sym << " | Request ID: " << ana.reqId << std::endl;
-    std::cout << "Thread ID: " << threadIdStr.str() << std::endl;
-    std::cout << "Trade Time: " << ana.formattedTime << " (epoch: " << ana.epochTime << ")" << std::endl;
-    std::cout << "Tick Type: " << ana.tickType << " (" << (ana.tickType == 1 ? "Last" : "AllLast") << ")" << std::endl;
-    std::cout << "Price: $" << std::fixed << std::setprecision(4) << ana.price << std::endl;
-    std::cout << "Volume: " << std::fixed << std::setprecision(0) << ana.volume << " shares" << std::endl;
-    std::cout << "Exchange: " << (ana.exchange.empty() ? "N/A" : ana.exchange) << std::endl;
+    // std::cout << "\n========== TICK-BY-TICK TRADE ANALYSIS ==========" << std::endl;
+    // std::cout << "Symbol: " << m_sym << " | Request ID: " << ana.reqId << std::endl;
+    // std::cout << "Thread ID: " << threadIdStr.str() << std::endl;
+    // std::cout << "Trade Time: " << ana.formattedTime << " (epoch: " << ana.epochTime << ")" << std::endl;
+    // std::cout << "Tick Type: " << ana.tickType << " (" << (ana.tickType == 1 ? "Last" : "AllLast") << ")" << std::endl;
+    // std::cout << "Price: $" << std::fixed << std::setprecision(4) << ana.price << std::endl;
+    // std::cout << "Volume: " << std::fixed << std::setprecision(0) << ana.volume << " shares" << std::endl;
+    // std::cout << "Exchange: " << (ana.exchange.empty() ? "N/A" : ana.exchange) << std::endl;
     
-    // Print special conditions if present
-    if (!ana.specialConditions.empty()) {
-        std::cout << "Special Conditions: " << ana.specialConditions << std::endl;
-    }
+    // // Print special conditions if present
+    // if (!ana.specialConditions.empty()) {
+    //     std::cout << "Special Conditions: " << ana.specialConditions << std::endl;
+    // }
     
-    // Print flags if set
-    if (ana.pastLimit) {
-        std::cout << "⚠️  Trade Past Limit" << std::endl;
-    }
-    if (ana.unreported) {
-        std::cout << "⚠️  Unreported Trade" << std::endl;
-    }
+    // // Print flags if set
+    // if (ana.pastLimit) {
+    //     std::cout << "⚠️  Trade Past Limit" << std::endl;
+    // }
+    // if (ana.unreported) {
+    //     std::cout << "⚠️  Unreported Trade" << std::endl;
+    // }
     
-    // Print calculated metrics if valid
-    if (ana.hasValidTrade) {
-        std::cout << "Dollars Traded: $" << std::fixed << std::setprecision(2) << ana.dollarsTraded << std::endl;
-    }
+    // // Print calculated metrics if valid
+    // if (ana.hasValidTrade) {
+    //     std::cout << "Dollars Traded: $" << std::fixed << std::setprecision(2) << ana.dollarsTraded << std::endl;
+    // }
     
-    std::cout << "===============================================" << std::endl;
+    // std::cout << "===============================================" << std::endl;
+   
+    //goes to volume_profile_map now
+    m_mgr->addTradeTick(ana.price, ana.volume);
+    // sleep for 2ms
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
-    routeViaCache(price, 0, 0, 0, 0,
-                 DecimalFunctions::decimalToDouble(size),
-                 static_cast<std::uint64_t>(t) * 1'000,
-                 ex, 0, 0, 0, 0, 0);
+    // passes only 'last' price, exchange and timestamp to cache.
+    routeViaCache(ana.price, 0, 0, 0, 0, 0, 0,
+                 ana.exchange, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+
 }
 
 void IBKRTrader::tickByTickBidAsk(int reqId, time_t t,
@@ -292,41 +282,40 @@ void IBKRTrader::tickByTickBidAsk(int reqId, time_t t,
         attr.bidPastLow, attr.askPastHigh);
 
     // Print comprehensive bid-ask analysis
-    std::cout << "\n========== TICK-BY-TICK BID-ASK ANALYSIS ==========" << std::endl;
-    std::cout << "Symbol: " << m_sym << " | Request ID: " << ana.reqId << std::endl;
-    std::cout << "Thread ID: " << threadIdStr.str() << std::endl;
-    std::cout << "Quote Time: " << ana.formattedTime << " (epoch: " << ana.epochTime << ")" << std::endl;
-    std::cout << "Bid: $" << std::fixed << std::setprecision(4) << ana.bidPrice 
-              << " x " << std::fixed << std::setprecision(0) << ana.bidSize << std::endl;
-    std::cout << "Ask: $" << std::fixed << std::setprecision(4) << ana.askPrice 
-              << " x " << std::fixed << std::setprecision(0) << ana.askSize << std::endl;
+    // std::cout << "\n========== TICK-BY-TICK BID-ASK ANALYSIS ==========" << std::endl;
+    // std::cout << "Symbol: " << m_sym << " | Request ID: " << ana.reqId << std::endl;
+    // std::cout << "Thread ID: " << threadIdStr.str() << std::endl;
+    // std::cout << "Quote Time: " << ana.formattedTime << " (epoch: " << ana.epochTime << ")" << std::endl;
+    // std::cout << "Bid: $" << std::fixed << std::setprecision(4) << ana.bidPrice 
+    //           << " x " << std::fixed << std::setprecision(0) << ana.bidSize << std::endl;
+    // std::cout << "Ask: $" << std::fixed << std::setprecision(4) << ana.askPrice 
+    //           << " x " << std::fixed << std::setprecision(0) << ana.askSize << std::endl;
     
-    // Print flags if set
-    if (ana.bidPastLow) {
-        std::cout << "⚠️  Bid Past Low" << std::endl;
-    }
-    if (ana.askPastHigh) {
-        std::cout << "⚠️  Ask Past High" << std::endl;
-    }
+    // // Print flags if set
+    // if (ana.bidPastLow) {
+    //     std::cout << "⚠️  Bid Past Low" << std::endl;
+    // }
+    // if (ana.askPastHigh) {
+    //     std::cout << "⚠️  Ask Past High" << std::endl;
+    // }
     
-    // Print calculated metrics if valid
-    if (ana.hasValidSpread) {
-        std::cout << "Spread: $" << std::fixed << std::setprecision(4) << ana.spread 
-                  << " (" << std::fixed << std::setprecision(2) << ana.spreadPercent << "%)" << std::endl;
-    }
+    // // Print calculated metrics if valid
+    // if (ana.hasValidSpread) {
+    //     std::cout << "Spread: $" << std::fixed << std::setprecision(4) << ana.spread 
+    //               << " (" << std::fixed << std::setprecision(2) << ana.spreadPercent << "%)" << std::endl;
+    // }
     
-    if (ana.hasValidMidPoint) {
-        std::cout << "Mid Point: $" << std::fixed << std::setprecision(4) << ana.midPoint << std::endl;
-    }
+    // if (ana.hasValidMidPoint) {
+    //     std::cout << "Mid Point: $" << std::fixed << std::setprecision(4) << ana.midPoint << std::endl;
+    // }
     
-    std::cout << "===============================================" << std::endl;
+    // std::cout << "===============================================" << std::endl;
 
     routeViaCache(0, ana.bidPrice, ana.askPrice,
                  static_cast<int>(ana.bidSize),
                  static_cast<int>(ana.askSize),
-                 0,
-                 static_cast<std::uint64_t>(t) * 1'000,
-                 "", 0, 0, 0, 0, 0);
+                 0, ana.epochTime,
+                 "", 0, 0, 0, 0, 0, 0, 0, ana.spread, ana.spreadPercent, ana.midPoint);
 }
 
 void IBKRTrader::error(int id, long /*time*/, int code,

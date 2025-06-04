@@ -9,6 +9,7 @@
 #include <iostream>
 #include <thread>
 #include <sstream>
+#include <cstdlib>
 
 using namespace std::chrono_literals;  // Add this line to fix numeric literals
 
@@ -49,6 +50,12 @@ ModelManagerFactory::createModelManager(const std::string& symbol,
 {
     logCurrentThread("ModelManagerFactory", "Creating ModelManager for symbol: " + symbol);
     auto mm = std::make_shared<ModelManager>(symbol, windowSize, unit);
+    
+    // Set debug logging to false by default for production performance
+    // Can be enabled via environment variable or API call if needed
+    bool debugEnabled = std::getenv("IBKR_DEBUG_LOGGING") != nullptr;
+    mm->setDebugLogging(debugEnabled);
+    
     std::lock_guard lg{m_mx};
     m_managers[symbol] = mm;
     return mm;
@@ -148,7 +155,7 @@ ModelManagerFactory::getModelManager(const std::string& symbol,
         }
     }
 
-    if (startThread) {
+    if (startThread) { 
         logCurrentThread("ModelManagerFactory", 
                         "Requesting AppState to start worker thread for symbol: " + symbol);
         
@@ -167,10 +174,11 @@ ModelManagerFactory::getModelManager(const std::string& symbol,
                                "Connected to IBKR");
             }
             
-            while (!tok.stop_requested()) {
-                mm->processQueueData(20);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
+            // this is commented out, in case threadStart is set to true on accident we wont run 2 model manager threads for the same symbol
+            // while (!tok.stop_requested()) { 
+            //     mm->processQueueData();
+            //     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            // }
             
             logCurrentThread("MODEL-WORKER - " + symbol, 
                            "Disconnecting from IBKR");

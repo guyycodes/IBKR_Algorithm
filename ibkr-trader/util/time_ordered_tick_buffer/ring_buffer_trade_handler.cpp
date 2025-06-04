@@ -1,6 +1,6 @@
 #include "ring_buffer_trade_handler.hpp"
-#include <format>
 #include <iostream>
+#include <iomanip>
 
 namespace ring_buffer_trade_handler {
 
@@ -23,8 +23,8 @@ bool RingBufferTradeHandler::evaluate(const stock_data_tick::StockData& tick)
           rsiMomentum() && emaStack() && vwapProximity() && orderBookEdge()))
         return false;
 
-    std::cout << std::format("[RBTH] ✅ trade signal for {} at {:.2f}",
-                             tick.symbol, tick.last) << '\n';
+    std::cout << "[RBTH] ✅ trade signal for " << tick.symbol << " at " 
+              << std::fixed << std::setprecision(2) << tick.last << '\n';
     return true;
 }
 

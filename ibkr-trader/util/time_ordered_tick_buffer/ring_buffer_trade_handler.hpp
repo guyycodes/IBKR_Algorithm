@@ -1,7 +1,7 @@
 #pragma once
 #include "../../util/time_ordered_tick_buffer/time_ordered_tick_buffer.hpp"
-#include "../../util/volume_profile_map/volume_profile_map.hpp"
-#include "../raw_data_model/raw_data_model.hpp"
+#include "../../src/models/volume_profile/volume_profile_map.hpp"
+#include "../../src/models/raw_data_model/raw_data_model.hpp"
 
 namespace ring_buffer_trade_handler {
 

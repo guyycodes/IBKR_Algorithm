@@ -7,9 +7,9 @@
 #include <string>
 #include <system_error>
 #include <atomic>
+#include <vector>
 
-// TODO: Implement stk_q later
-// #include "../../util/stk_q/stk_q.hpp"
+#include "../../util/stk_q/stk_q.hpp"
 #include "../stock_data_tick/stock_data_tick.hpp"
 #include <nlohmann/json.hpp>
 
@@ -41,13 +41,15 @@ public:
     void addTick(const stock_data_tick::StockData& tick);
 
     // consumption ---------------------------------------------------------------
-    // TODO: Implement stk_q later
-    // bool popNextTick(stk_q::STK_Q_Data& out);          // non-blocking
+    bool popNextTick(stk_q::STK_Q_Data& out);          // non-blocking
+    std::vector<stock_data_tick::StockData> popNextTicks(std::size_t maxBatch); // batch processing
     [[nodiscard]] bool latestTick(stock_data_tick::StockData& out) const;
+    std::vector<stock_data_tick::StockData> getTicksInTimeWindow(std::uint64_t cutoffTimeMs) const;
 
     // admin ---------------------------------------------------------------------
     [[nodiscard]] std::size_t queueSize() const noexcept;
     void                      clear()      noexcept;
+    void                      removeOlderThan(uint64_t cutoffTimeMs) noexcept;
     std::error_code           initialise(const nlohmann::json& jsonCfg);
 
     // accessors -----------------------------------------------------------------
@@ -56,15 +58,13 @@ public:
 
 private:
     // helpers
-    // TODO: Implement stk_q later
-    // static stk_q::STK_Q_Data convertToQueue(const stock_data_tick::StockData& s,
-    //                                         const std::string& symbol);
+    static stk_q::STK_Q_Data convertToQueue(const stock_data_tick::StockData& s);
+    static stock_data_tick::StockData convertToStockData(const stk_q::STK_Q_Data& q);
 
     std::string                       m_symbol;
     TradingParams                     m_params;
 
-    // TODO: Implement stk_q later
-    // std::unique_ptr<stk_q::STK_Q>     m_queue;
+    std::unique_ptr<stk_q::STK_Q>     m_queue;
 
     // fast reader synchronisation (avoid heavy mutex for immutable getters)
     mutable std::atomic_flag          m_spinLock = ATOMIC_FLAG_INIT;

@@ -99,7 +99,8 @@ private:
     void routeViaCache(double last, double bid, double ask, int bidSz, int askSz,
                        double vol, uint64_t ts, const std::string& exchange = "",
                        double open = 0, double high = 0, double low = 0, 
-                       double close = 0, double vwap = 0);
+                       double close = 0, double vwap = 0, double priceChange = 0, double barRange = 0,
+                       double spread = 0, double spreadPercent = 0, double midPoint = 0);
 
     /* members -------------------------------------------------------------- */
     EReaderOSSignal                               m_osSignal{0};  // 0ms = non-blocking

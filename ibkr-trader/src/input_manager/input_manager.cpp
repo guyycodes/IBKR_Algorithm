@@ -228,8 +228,8 @@ void InputManager::processOutput() {
             }
             
             while (!tok.stop_requested()) {
-                mm->processQueueData(/*batch*/20);
-                std::this_thread::sleep_for(100ms);
+                // mm->processQueueData();
+                std::this_thread::sleep_for(20ms);
             }
             
             mm->disconnectFromIBKR();
