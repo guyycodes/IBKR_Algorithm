@@ -13,6 +13,10 @@
 #include "models/stock_data_tick/stock_data_tick.hpp"
 #include <cstdint>
 
+// Forward declaration
+namespace ring_buffer_trade_handler {
+    class RingBufferTradeHandler;
+}
 
 namespace time_ordered_tick_buffer {
 
@@ -84,21 +88,30 @@ public:
     // Add a tick maintaining chronological order
     void addTick(const stock_data_tick::StockData& tick);
     
-    // Get most recent technical indicators
+    // Get most recent technical indicators (delegates to calculator)
     TechnicalIndicators calculateIndicators();
+    
+    // Set the calculator for technical indicators
+    void setCalculator(ring_buffer_trade_handler::RingBufferTradeHandler* calculator);
     
     // Ultra-low latency ring buffer access for trade handlers
     const std::vector<TemporaryCandle>& getMinuteRing() const { return m_minuteRing; }
     const std::vector<int64_t>& getMinuteIndices() const { return m_minuteIndices; }
     const std::vector<Candle>& getCandleRing() const { return m_candleRing; }
     const std::vector<double>& getPriceRing() const { return m_priceRing; }
+    const std::map<int64_t, stock_data_tick::StockData>& getOrderedTicks() const { return m_orderedTicks; }
     size_t getWindowMinutes() const { return m_windowMinutes; }
+    int64_t getWindowSizeMs() const { return m_windowSizeMs; }
     
     // Ring buffer state for ultra-low latency access
     size_t getCandleRingHead() const { return m_candleRingHead; }
     size_t getCandleRingCount() const { return m_candleRingCount; }
     size_t getPriceRingHead() const { return m_priceRingHead; }
     size_t getPriceRingCount() const { return m_priceRingCount; }
+    
+    // Track the last minute processed to avoid double-counting candles
+    int64_t getLastProcessedMinute() const { return m_lastProcessedMinute; }
+    void setLastProcessedMinute(int64_t minute) { m_lastProcessedMinute = minute; }
     
 private:
     // Map with timestamp as key ensures automatic chronological ordering
@@ -117,16 +130,10 @@ private:
     std::vector<TemporaryCandle> m_minuteRing; // Ring buffer for minute aggregation
     std::vector<int64_t> m_minuteIndices;      // Track which minute each slot represents
     
-    // ALMA incremental calculation
-    std::vector<double> m_almaWeights;         // Pre-computed ALMA weight vector
+    // ALMA incremental calculation (only ring buffer, weights moved to calculator)
     std::vector<double> m_priceRing;           // Ring buffer for last M closes
     size_t m_priceRingHead;                    // Next price slot to overwrite
     size_t m_priceRingCount;                   // Number of valid price slots
-    double m_almaDot;                          // Running ALMA dot product
-    size_t m_almaSizeWindow;
-    double m_almaSigma;
-    double m_almaOffset;
-    
     
     // Last time we updated candles
     int64_t m_lastCandleUpdateTime;
@@ -134,53 +141,27 @@ private:
     // How often to update candles (in ms)
     const int64_t m_candleUpdateFrequencyMs;   // Update frequency
     
-    // Chaikin Oscillator state for incremental calculation
-    // double m_runningADL = 0.0;        // Accumulation/Distribution Line
-    // double m_emaADL_fast = std::numeric_limits<double>::quiet_NaN();  // Fast EMA of ADL
-    // double m_emaADL_slow = std::numeric_limits<double>::quiet_NaN();  // Slow EMA of ADL
-    // double m_lastChaikin = 0.0;       // Most recent Chaikin value for quick access
-    // std::map<int64_t, double> m_candleMFV;  // Track MFV by minute timestamp for rolling window
-    
-    // RSI state for incremental calculation
-    double m_prevClose = std::numeric_limits<double>::quiet_NaN();
-    double m_avgGain;
-    double m_avgLoss;
-    double m_lastRSI;
-    static constexpr int RSI_PERIOD = 14;
-    static constexpr int ATR_PERIOD = 14;
-    int m_rsiWarmupCount;
-    
-    // ATR state for incremental calculation
-    double m_atr = std::numeric_limits<double>::quiet_NaN();
-    int m_atrWarmupCount = 0;
-    double m_prevCloseForATR = std::numeric_limits<double>::quiet_NaN();  // Track previous close for ATR calculation
-    
-    // Price EMA state for incremental calculation
-    double m_emaPriceFast = std::numeric_limits<double>::quiet_NaN();
-    double m_emaPriceSlow = std::numeric_limits<double>::quiet_NaN();
     // Track the last minute processed to avoid double-counting candles
     int64_t m_lastProcessedMinute = std::numeric_limits<int64_t>::min();
+    
+    // ===== INCREMENTAL CANDLE ENGINE =====
+    int64_t m_workingMinute = -1;          // minuteIndex currently being built
+    TemporaryCandle m_workingCandle;       // mutable candle for that minute
+    
+    // Reference to calculator (will be set externally)
+    ring_buffer_trade_handler::RingBufferTradeHandler* m_calculator = nullptr;
     
     // Private methods
     int64_t getCurrentTimestamp();
     bool shouldUpdateCandles();
     void pruneOldTicks();
     void updateCandles();
-    TechnicalIndicators computeIndicatorsFromCandles();
-    // void updateChaikinForCandle(const Candle& candle, int64_t minuteIndex, bool isFirstTime);
-    void updateRSIForCandle(double close);
-    void updateATRForCandle(const Candle& candle);  // Fixed: matches implementation signature
-    double calculateALMA(
-        const std::vector<double>& prices,
-        int windowSize,
-        double sigma,
-        double offset
-    ) const;
-    
-    // Ring buffer and ALMA optimization methods
-    void initializeAlmaWeights();
     void addCandleToRing(const Candle& candle);
-    void updateAlmaIncremental(double newClose);
+    void updatePriceRing(double newClose);
+    
+    // ===== INCREMENTAL CANDLE ENGINE METHODS =====
+    void finaliseWorkingCandle();
+    void handleOutOfOrderTick(int64_t minuteIdx, const stock_data_tick::StockData& tick);
     
     // Thread safety
     mutable std::mutex m_mutex;

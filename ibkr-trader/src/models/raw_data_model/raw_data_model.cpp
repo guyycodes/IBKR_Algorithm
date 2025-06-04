@@ -156,7 +156,7 @@ stk_q::STK_Q_Data RawDataModel::convertToQueue(const stock_data_tick::StockData&
 {
     stk_q::STK_Q_Data q;
     q.symbol   = s.symbol;
-    q.time     = s.timestamp; // ns → ms
+    q.time     = s.timestamp; // requires ms
     q.bid      = s.bid;
     q.ask      = s.ask;
     q.last     = s.last;
@@ -187,7 +187,7 @@ stock_data_tick::StockData RawDataModel::convertToStockData(const stk_q::STK_Q_D
 {
     stock_data_tick::StockData s;
     s.symbol = q.symbol;
-    s.timestamp = static_cast<stock_data_tick::timestamp_t>(q.time) * 1'000'000; // ms→ns
+    s.timestamp = q.time;
     s.exchange = q.exchange;
     
     // Core market data

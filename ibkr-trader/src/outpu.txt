@@ -1,1036 +1,700 @@
-  Low: 141.4700
-  Close: 141.4700
-  BarRange: 0.0100
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.48
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994639318
-  Exchange: FINRA
-  Price Data: Last=141.4800 Bid=141.4500 Ask=141.4800
-  Size Data: BidSize=1500 AskSize=1800 Volume=7213
-  OHLC: Open=141.4700 High=141.4700 Low=141.4700 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0300
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=353
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994639321
-  Exchange: MEMX
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 1500
-  Ask: $141.4800 x 1800
-  MidPoint: 141.4650
-  Spread: 0.0300
-  SpreadPercent: 0.0212%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4700
-  High: 141.4700
-  Low: 141.4700
-  Close: 141.4700
-  BarRange: 0.0100
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994639321
-  Exchange: MEMX
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4800
-  Size Data: BidSize=1500 AskSize=1800 Volume=7566
-  OHLC: Open=141.4700 High=141.4700 Low=141.4700 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0300
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=10
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=106
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994639328
-  Exchange: ARCA
-MARKET DATA:
-  Last: $141.4500
-  Bid: $141.4500 x 1500
-  Ask: $141.4800 x 1800
-  MidPoint: 141.4650
-  Spread: 0.0300
-  SpreadPercent: 0.0212%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4700
-  High: 141.4700
-  Low: 141.4700
-  Close: 141.4700
-  BarRange: 0.0100
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.45
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994639328
-  Exchange: ARCA
-  Price Data: Last=141.4500 Bid=141.4500 Ask=141.4800
-  Size Data: BidSize=1500 AskSize=1800 Volume=7682
-  OHLC: Open=141.4700 High=141.4700 Low=141.4700 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0300
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=31
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994639331
-  Exchange: ARCA
-MARKET DATA:
-  Last: $141.4500
-  Bid: $141.4500 x 1000
-  Ask: $141.4800 x 1800
-  MidPoint: 141.4650
-  Spread: 0.0300
-  SpreadPercent: 0.0212%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4700
-  High: 141.4700
-  Low: 141.4700
-  Close: 141.4700
-  BarRange: 0.0100
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.45
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994639331
-  Exchange: ARCA
-  Price Data: Last=141.4500 Bid=141.4500 Ask=141.4800
-  Size Data: BidSize=1000 AskSize=1800 Volume=7713
-  OHLC: Open=141.4700 High=141.4700 Low=141.4700 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0300
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=219
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=11
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=2
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=268
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4800 vol=1
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994642721
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4800
-  Bid: $141.4500 x 1000
-  Ask: $141.4800 x 1800
-  MidPoint: 141.4650
-  Spread: 0.0300
-  SpreadPercent: 0.0212%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4600
-  Low: 141.4400
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 53 ticks to process
-[TimeOrderedTickBuffer] Aggregating 53 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 2 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.48
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994642721
-  Exchange: FINRA
-  Price Data: Last=141.4800 Bid=141.4500 Ask=141.4800
-  Size Data: BidSize=1000 AskSize=1800 Volume=8214
-  OHLC: Open=141.4500 High=141.4600 Low=141.4400 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0300
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4800 vol=2
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994643391
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4800
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 100
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4600
-  Low: 141.4400
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.48
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994643391
-  Exchange: FINRA
-  Price Data: Last=141.4800 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=100 Volume=8216
-  OHLC: Open=141.4500 High=141.4600 Low=141.4400 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994644356
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 100
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4600
-  Low: 141.4400
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 55 ticks to process
-[TimeOrderedTickBuffer] Aggregating 55 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 2 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994644356
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=100 Volume=8217
-  OHLC: Open=141.4500 High=141.4600 Low=141.4400 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994647388
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 56 ticks to process
-[TimeOrderedTickBuffer] Aggregating 56 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 2 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994647388
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=300 Volume=8217
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✓
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=1
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994647392
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4500
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.45
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994647392
-  Exchange: FINRA
-  Price Data: Last=141.4500 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=300 Volume=8218
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994649211
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 58 ticks to process
-[TimeOrderedTickBuffer] Aggregating 58 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 2 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994649211
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=300 Volume=8219
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994651522
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 200
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 59 ticks to process
-[TimeOrderedTickBuffer] Aggregating 59 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 2 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994651522
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=200 Volume=8219
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=1
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994651525
-  Exchange: DRCTEDGE
-MARKET DATA:
-  Last: $141.4700
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 200
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.47
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994651525
-  Exchange: DRCTEDGE
-  Price Data: Last=141.4700 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=200 Volume=8220
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✓
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=30
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=20
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=1
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=30
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=20
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994652255
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 200
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994652255
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=200 Volume=8322
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994652255
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 1000
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994652255
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=1000 AskSize=300 Volume=8322
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994654619
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 300
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 62 ticks to process
-[TimeOrderedTickBuffer] Aggregating 62 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 2 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994654619
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=300 AskSize=300 Volume=8322
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=100
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994654623
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4500
-  Bid: $141.4500 x 300
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.45
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994654623
-  Exchange: FINRA
-  Price Data: Last=141.4500 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=300 AskSize=300 Volume=8422
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=21
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994654626
-  Exchange: ARCA
-MARKET DATA:
-  Last: $141.4700
-  Bid: $141.4500 x 300
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.47
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994654626
-  Exchange: ARCA
-  Price Data: Last=141.4700 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=300 AskSize=300 Volume=8443
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=29
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=62
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994654632
-  Exchange: ARCA
-MARKET DATA:
-  Last: $141.4500
-  Bid: $141.4500 x 300
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.45
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994654632
-  Exchange: ARCA
-  Price Data: Last=141.4500 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=300 AskSize=300 Volume=8534
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=638
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=400
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994655133
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4700
-  Bid: $141.4500 x 300
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.47
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994655133
-  Exchange: FINRA
-  Price Data: Last=141.4700 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=300 AskSize=300 Volume=9572
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4700 vol=100
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994655751
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 300
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0000
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4500
-  Low: 141.4500
-  Close: 141.4500
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 67 ticks to process
-[TimeOrderedTickBuffer] Aggregating 67 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 2 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994655751
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=300 AskSize=300 Volume=9673
-  OHLC: Open=141.4500 High=141.4500 Low=141.4500 Previous_close=141.4500
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=5
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994658240
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4500
-  Bid: $141.4500 x 300
-  Ask: $141.4700 x 300
-  MidPoint: 141.4600
-  Spread: 0.0200
-  SpreadPercent: 0.0141%
-  PriceChange: 0.0200
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4700
-  Low: 141.4500
-  Close: 141.4700
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 68 ticks to process
-[TimeOrderedTickBuffer] Aggregating 68 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 2 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.45
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994658240
-  Exchange: FINRA
-  Price Data: Last=141.4500 Bid=141.4500 Ask=141.4700
-  Size Data: BidSize=300 AskSize=300 Volume=9679
-  OHLC: Open=141.4500 High=141.4700 Low=141.4500 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0200
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994658240
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4500
-  Bid: $141.4500 x 300
-  Ask: $141.4600 x 500
-  MidPoint: 141.4550
-  Spread: 0.0100
-  SpreadPercent: 0.0071%
-  PriceChange: 0.0200
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4700
-  Low: 141.4500
-  Close: 141.4700
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.45
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994658240
-  Exchange: FINRA
-  Price Data: Last=141.4500 Bid=141.4500 Ask=141.4600
-  Size Data: BidSize=300 AskSize=500 Volume=9679
-  OHLC: Open=141.4500 High=141.4700 Low=141.4500 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0100
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✓
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=250
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994659058
-  Exchange: ARCA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 300
-  Ask: $141.4600 x 500
-  MidPoint: 141.4550
-  Spread: 0.0100
-  SpreadPercent: 0.0071%
-  PriceChange: 0.0200
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4700
-  Low: 141.4500
-  Close: 141.4700
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994659058
-  Exchange: ARCA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4600
-  Size Data: BidSize=300 AskSize=500 Volume=9929
-  OHLC: Open=141.4500 High=141.4700 Low=141.4500 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0100
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=250
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994659062
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 400
-  Ask: $141.4600 x 500
-  MidPoint: 141.4550
-  Spread: 0.0100
-  SpreadPercent: 0.0071%
-  PriceChange: 0.0200
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4700
-  Low: 141.4500
-  Close: 141.4700
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994659062
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4600
-  Size Data: BidSize=400 AskSize=500 Volume=10179
-  OHLC: Open=141.4500 High=141.4700 Low=141.4500 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0100
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994659063
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 400
-  Ask: $141.4600 x 200
-  MidPoint: 141.4550
-  Spread: 0.0100
-  SpreadPercent: 0.0071%
-  PriceChange: 0.0200
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4500
-  High: 141.4700
-  Low: 141.4500
-  Close: 141.4700
-  BarRange: 0.0200
-=======================================================================
-[TimeOrderedTickBuffer] Computing technical indicators from 2 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4700, EMA26=141.4700, RSI=50.0, ATR=0.0000, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994659063
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4600
-  Size Data: BidSize=400 AskSize=200 Volume=10179
-  OHLC: Open=141.4500 High=141.4700 Low=141.4500 Previous_close=141.4700
-  Mid: 0.0000 Spread: 0.0100
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4700 EMA26=141.4700 ALMA=0.0000 ATR=0.0000
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994660977
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 400
-  Ask: $141.4600 x 100
-  MidPoint: 141.4550
-  Spread: 0.0100
-  SpreadPercent: 0.0071%
-  PriceChange: 0.0200
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4600
-  High: 141.4600
-  Low: 141.4500
-  Close: 141.4600
-  BarRange: 0.0100
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 72 ticks to process
-[TimeOrderedTickBuffer] Aggregating 72 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 3 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 3 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4680, EMA26=141.4693, RSI=50.0, ATR=0.0100, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994660977
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4600
-  Size Data: BidSize=400 AskSize=100 Volume=10179
-  OHLC: Open=141.4600 High=141.4600 Low=141.4500 Previous_close=141.4600
-  Mid: 0.0000 Spread: 0.0100
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4680 EMA26=141.4693 ALMA=0.0000 ATR=0.0100
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=100
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=9
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4500 vol=15
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994666246
-  Exchange: ARCA
-MARKET DATA:
-  Last: $141.4500
-  Bid: $141.4500 x 400
-  Ask: $141.4600 x 100
-  MidPoint: 141.4550
-  Spread: 0.0100
-  SpreadPercent: 0.0071%
-  PriceChange: 0.0200
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4600
-  High: 141.4600
-  Low: 141.4600
-  Close: 141.4600
-  BarRange: 0.0100
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 73 ticks to process
-[TimeOrderedTickBuffer] Aggregating 73 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 3 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 3 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4680, EMA26=141.4693, RSI=50.0, ATR=0.0100, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.45
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994666246
-  Exchange: ARCA
-  Price Data: Last=141.4500 Bid=141.4500 Ask=141.4600
-  Size Data: BidSize=400 AskSize=100 Volume=10307
-  OHLC: Open=141.4600 High=141.4600 Low=141.4600 Previous_close=141.4600
-  Mid: 0.0000 Spread: 0.0100
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4680 EMA26=141.4693 ALMA=0.0000 ATR=0.0100
-[ModelManager-Queue] New queue size after adding tick: 1 ✗
-[ModelManager] STUB: Adding trade tick for NVDA price=141.4600 vol=1
-==================== COMPLETE STOCKDATA VALIDATION ====================
-CORE DATA:
-  Symbol: NVDA
-  Timestamp: 1748994668343
-  Exchange: FINRA
-MARKET DATA:
-  Last: $141.4600
-  Bid: $141.4500 x 400
-  Ask: $141.4600 x 100
-  MidPoint: 141.4550
-  Spread: 0.0100
-  SpreadPercent: 0.0071%
-  PriceChange: 0.0200
-  VWAP: $140.8864
-OHLC DATA:
-  Open: 141.4600
-  High: 141.4600
-  Low: 141.4600
-  Close: 141.4600
-  BarRange: 0.0100
-=======================================================================
-[TimeOrderedTickBuffer] Triggering candle update - 74 ticks to process
-[TimeOrderedTickBuffer] Aggregating 74 ticks into 1-minute candles using ring buffers...
-[TimeOrderedTickBuffer] Ring buffer contains 3 candles, ALMA updated incrementally
-[TimeOrderedTickBuffer] Computing technical indicators from 3 ring buffer candles...
-[TimeOrderedTickBuffer] Calculated indicators: VWAP=140.8864, EMA9=141.4680, EMA26=141.4693, RSI=50.0, ATR=0.0100, ALMA=0.0000 (fixed incremental)
-[RawDataModel] Tick received for NVDA: last=141.46
-[ModelManager][VALIDATION][ThreadID: 140737445856832][Symbol: NVDA] 
-  Symbol: NVDA
-  Timestamp: 1748994668343
-  Exchange: FINRA
-  Price Data: Last=141.4600 Bid=141.4500 Ask=141.4600
-  Size Data: BidSize=400 AskSize=100 Volume=10308
-  OHLC: Open=141.4600 High=141.4600 Low=141.4600 Previous_close=141.4600
-  Mid: 0.0000 Spread: 0.0100
-  Derived Metrics: VWAP=140.8864
-  Technical Indicators: RSI=50.0000 EMA9=141.4680 EMA26=141.4693 ALMA=0.0000 ATR=0.0100
-[ModelManager-Queue] New queue size after adding tick: 1 ✓
+...
+[LocalAPI][INFO] HTTP listening on :8080
+[HTTP-WORKER:140737471034944] Processing first API request
+[InputManager][INFO] Received JSON: {"IONQ":{"lossThreshold":3,"lots":5,"margin":".10","maxHoldSeconds":3600,"maxTrades":10,"minWinRate":".50","stopLoss":".05","winThreshold":5}}
+[InputManager][INFO] Processing symbol: IONQ
+[ModelManagerFactory][THREAD-ID:140737471034944] Creating singleton instance
+[AppState][THREAD-ID:140737471034944] AppState singleton constructed
+[ModelManagerFactory][THREAD-ID:140737471034944] Getting ModelManager for symbol: IONQ (startThread=false)
+[ModelManagerFactory][THREAD-ID:140737471034944] Looking for existing ModelManager for symbol: IONQ
+[ModelManagerFactory][THREAD-ID:140737471034944] Creating ModelManager for symbol: IONQ
+[RawDataModel] IONQ created (using STK_Q default 500ms filter interval)
+[TimeOrderedTickBuffer] Initialized with 3600 second time window (60 minute ring buffers)
+[RingBufferCalculator] 🎯 ALMA weights ready (M=9, σ=0.85, offset=6)
+[TimeOrderedTickBuffer] Calculator set - technical indicators will be computed externally
+[RingBufferTradeHandler] Initialized with technical indicator calculations
+[ModelManager:140737471034944] Creating ModelManager for IONQ
+[InputManager -> ModelManager - IONQ:140737462642240] Starting thread
+
+[ModelManager:140737462642240] Connecting to IBKR for IONQ
+[IBKR][CTOR][sym:-][tid:140737462642240] IBKRTrader constructed
+[IBKR][connect][sym:IONQ][tid:140737462642240] eConnect → 2311
+[IBKR][connect][sym:IONQ][tid:140737462642240] connected & stabilised
+[ModelManager] Making main market data request for IONQ with requestId=98655
+
+========== ERROR ANALYSIS ==========[ModelManager] Waiting after market data request...
+
+Symbol: IONQ | Request ID: -1
+Thread ID: 140737445856832
+Error Code: 2158
+Error Message: Sec-def data farm connection is OK:secdefil
+Context: General error - see message for details
+=======================================
+[IBKR][startDataStream][sym:IONQ][tid:140737462642240] initialising supplementary feeds
+[IBKR][startDataStream][sym:IONQ][tid:140737462642240] feeds running
+[TimeOrderedTickBuffer] 🎯 TICK RECEIVED - Symbol: IONQ, Timestamp: 1749055571374, Last: $39.18, Volume: 25
+[TimeOrderedTickBuffer] 📦 Tick stored in map - Buffer size: 0 → 1 (growth: ✓)
+[TimeOrderedTickBuffer] 🕐 Tick minute: 29150926, Working minute: -1
+[TimeOrderedTickBuffer] 🚀 FIRST TICK - Initializing working minute: 29150926
+[TimeOrderedTickBuffer] ⚡ SAME MINUTE - Updating working candle (O(1))
+[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=39.18/39.18/39.18/39.18 Vol=25
+[RingBufferCalculator] No candles available - returning blank indicators
+[RingBufferTradeHandler] 🚀 Started ring buffer monitoring thread
+
+🚀 [ULTRA-LOW LATENCY] Starting 15-second ring buffer monitoring...
+📊 Reading 3 ring buffers in real-time:
+   1️⃣  Minute Ring (TemporaryCandle aggregation)
+   2️⃣  Candle Ring (Completed 1-min candles)
+   3️⃣  Price Ring (ALMA calculation buffer)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #1] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+[RawDataModel] Tick received for IONQ: last=39.18
+[TimeOrderedTickBuffer] 🎯 TICK RECEIVED - Symbol: IONQ, Timestamp: 1749055571377, Last: $39.1800, Volume: 25
+[TimeOrderedTickBuffer] 📦 Tick stored in map - Buffer size: 1 → 2 (growth: ✓)
+[TimeOrderedTickBuffer] 🕐 Tick minute: 29150926, Working minute: 29150926
+[TimeOrderedTickBuffer] ⚡ SAME MINUTE - Updating working candle (O(1))
+[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=39.1800/39.1800/39.1800/39.1800 Vol=50.0000
+[RingBufferCalculator] No candles available - returning blank indicators
+[RawDataModel] Tick received for IONQ: last=39.18
+[TimeOrderedTickBuffer] 🎯 TICK RECEIVED - Symbol: IONQ, Timestamp: 1749055571377, Last: $39.1800, Volume: 25
+[TimeOrderedTickBuffer] 📦 Tick stored in map - Buffer size: 2 → 2 (growth: ✗)
+[TimeOrderedTickBuffer] 🕐 Tick minute: 29150926, Working minute: 29150926
+[TimeOrderedTickBuffer] ⚡ SAME MINUTE - Updating working candle (O(1))
+[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=39.1800/39.1800/39.1800/39.1800 Vol=75.0000
+[RingBufferCalculator] No candles available - returning blank indicators
+[RawDataModel] Tick received for IONQ: last=39.18
+[TimeOrderedTickBuffer] 🎯 TICK RECEIVED - Symbol: IONQ, Timestamp: 1749055571377, Last: $39.1800, Volume: 25
+[TimeOrderedTickBuffer] 📦 Tick stored in map - Buffer size: 2 → 2 (growth: ✗)
+[TimeOrderedTickBuffer] 🕐 Tick minute: 29150926, Working minute: 29150926
+[TimeOrderedTickBuffer] ⚡ SAME MINUTE - Updating working candle (O(1))
+[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=39.1800/39.1800/39.1800/39.1800 Vol=100.0000
+[RingBufferCalculator] No candles available - returning blank indicators
+[RawDataModel] Tick received for IONQ: last=39.18
+[TimeOrderedTickBuffer] 🎯 TICK RECEIVED - Symbol: IONQ, Timestamp: 1749055571377, Last: $39.1800, Volume: 25
+[TimeOrderedTickBuffer] 📦 Tick stored in map - Buffer size: 2 → 2 (growth: ✗)
+[TimeOrderedTickBuffer] 🕐 Tick minute: 29150926, Working minute: 29150926
+[TimeOrderedTickBuffer] ⚡ SAME MINUTE - Updating working candle (O(1))
+[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=39.1800/39.1800/39.1800/39.1800 Vol=125.0000
+[RingBufferCalculator] No candles available - returning blank indicators
+[RawDataModel] Tick received for IONQ: last=39.18
+[TimeOrderedTickBuffer] 🎯 TICK RECEIVED - Symbol: IONQ, Timestamp: 1749055571377, Last: $39.1800, Volume: 25
+[TimeOrderedTickBuffer] 📦 Tick stored in map - Buffer size: 2 → 2 (growth: ✗)
+[TimeOrderedTickBuffer] 🕐 Tick minute: 29150926, Working minute: 29150926
+[TimeOrderedTickBuffer] ⚡ SAME MINUTE - Updating working candle (O(1))
+[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=39.1800/39.1800/39.1800/39.1800 Vol=150.0000
+[RingBufferCalculator] No candles available - returning blank indicators
+[RawDataModel] Tick received for IONQ: last=39.18
+[TimeOrderedTickBuffer] 🎯 TICK RECEIVED - Symbol: IONQ, Timestamp: 1749055571381, Last: $39.1900, Volume: 33
+[TimeOrderedTickBuffer] 📦 Tick stored in map - Buffer size: 2 → 3 (growth: ✓)
+[TimeOrderedTickBuffer] 🕐 Tick minute: 29150926, Working minute: 29150926
+[TimeOrderedTickBuffer] ⚡ SAME MINUTE - Updating working candle (O(1))
+[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=39.1800/39.1900/39.1800/39.1900 Vol=183.0000
+[RingBufferCalculator] No candles available - returning blank indicators
+[RawDataModel] Tick received for IONQ: last=39.19
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #2] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #3] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+^C
+[main] Caught signal 2, initiating shutdown…
+[AppState][THREAD:140737471039360][AppState] EMERGENCY-STOP - **EMERGENCY-STOP** (5000 ms) by signal (thread count: 2)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #4] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #5] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #6] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #7] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #8] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #9] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #10] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #11] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #12] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #13] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #14] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+[ModelManager:140737462642240] IBKR connected for IONQ
+[ModelManager:140737462642240] Disconnecting from IBKR for IONQ
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #15] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+[IBKR][disconnect][sym:IONQ][tid:140737462642240] disconnected
+[AppState][THREAD:140737462642240][AppState] THREAD-STOP-FAILED - No thread 'IBKR-READER-IONQ' (requested by ConnectionManager)
+[MODEL-WORKER - IONQ:140737462642240] Ending data processing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #16] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #17] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #18] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+^C
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #19] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #20] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #21] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #22] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #23] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #24] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 [SNAPSHOT #25] Ring Buffer Contents:
+
+1️⃣  MINUTE RING (Tick Aggregation Buffer):
+   Size: 60 slots | Window: 60 minutes
+   💤 No active minute aggregations
+
+2️⃣  CANDLE RING (Completed Candles Buffer):
+   Size: 60 slots | Head: 0 | Valid: 0
+   💤 No completed candles yet
+
+3️⃣  PRICE RING (ALMA Calculation Buffer):
+   Size: 9 slots | Head: 0 | Valid: 0
+   💤 No prices yet
+[RingBufferCalculator] No candles available - returning blank indicators
+
+📊 TECHNICAL INDICATORS (from RingBufferCalculator):
+   💎 VWAP: $0.0000
+   📈 EMA9: $0.0000 | EMA26: $0.0000
+   ⚡ RSI: 0.0%
+   📏 ATR: $0.0000
+   🎯 ALMA: $0.0000
+   🔧 Calc State: RSI warmup=0/14, ATR warmup=0/14, ALMA count=0/9

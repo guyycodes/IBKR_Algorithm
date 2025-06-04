@@ -1,6 +1,7 @@
 // time_ordered_tick_buffer.cpp
 
 #include "time_ordered_tick_buffer.hpp"
+#include "ring_buffer_trade_handler.hpp"
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
@@ -10,6 +11,7 @@
 #include <iterator>
 #include <chrono>
 #include <mutex>
+
 
 namespace time_ordered_tick_buffer {
 
@@ -32,29 +34,22 @@ static constexpr int64_t MS_PER_MINUTE     = 60 * 1000;                // Millis
 
 /**
  * ========================================================================
- * TimeOrderedTickBuffer - Advanced Technical Analysis Engine
+ * TimeOrderedTickBuffer - Ring Buffer Management and Candle Aggregation
  * ========================================================================
  * 
  * PURPOSE:
- * This class is the heart of our technical analysis system. It transforms
- * noisy, real-time tick data into clean, analyzable market data structures
- * and calculates sophisticated technical indicators for trading decisions.
+ * This class manages ring buffers and candle aggregation. Technical indicator
+ * calculations have been moved to RingBufferTradeHandler to separate concerns.
  * 
  * KEY RESPONSIBILITIES:
  * 1. CHRONOLOGICAL ORDERING: Maintains all incoming ticks in perfect time order
  * 2. CANDLE AGGREGATION: Converts chaotic tick data into smooth 1-minute candles
- * 3. TECHNICAL CALCULATIONS: Computes VWAP, EMA, RSI, ALMA, Chaikin indicators
+ * 3. RING BUFFER MANAGEMENT: Manages fixed-size buffers for efficient access
  * 4. MEMORY MANAGEMENT: Automatically prunes old data to prevent memory bloat
- * 5. REAL-TIME UPDATES: Provides fresh indicators as market data flows in
- * 
- * WHY THIS MATTERS:
- * - Raw tick data is too noisy for reliable trading signals
- * - Technical indicators need historical context to be meaningful
- * - Candles provide the standard format that traders worldwide understand
- * - Memory management prevents system crashes during long trading sessions
+ * 5. DATA PROVISION: Provides clean data to calculation engines
  * 
  * FLOW:
- * Tick Data → Time Ordering → Candle Aggregation → Technical Analysis → Trading Signals
+ * Tick Data → Time Ordering → Candle Aggregation → Ring Buffer Storage → Calculator Access
  */
 
 // Constructor - Initialize the buffer with a specific time window
@@ -63,43 +58,22 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
       m_windowMinutes(static_cast<size_t>(std::max<int64_t>(1, windowSizeMs / MS_PER_MINUTE))),
       m_lastCandleUpdateTime(0),
       m_candleUpdateFrequencyMs(1000),  // Default 1 second update frequency
-
-      m_almaDot(0.0),
-      // --- NEW -------------------------------------------------------------
       m_priceRingHead(0),
       m_priceRingCount(0),
       m_candleRingHead(0),
       m_candleRingCount(0),
-      m_lastProcessedMinute(-1),
-      m_prevClose(std::numeric_limits<double>::quiet_NaN()),
-      // m_emaADL_fast(std::numeric_limits<double>::quiet_NaN()),
-      // m_emaADL_slow(std::numeric_limits<double>::quiet_NaN()),
-      m_avgGain(0.0),
-      m_avgLoss(0.0),
-      m_rsiWarmupCount(0),
-      m_lastRSI(50.0),
-      m_atr(std::numeric_limits<double>::quiet_NaN()),
-      m_atrWarmupCount(0),
-      m_prevCloseForATR(std::numeric_limits<double>::quiet_NaN()),  // Initialize ATR previous close tracker
-      m_emaPriceFast(std::numeric_limits<double>::quiet_NaN()),
-      m_emaPriceSlow(std::numeric_limits<double>::quiet_NaN()),
-      m_almaSizeWindow(9),
-      m_almaSigma(0.85),
-      m_almaOffset(6.0)
-      // m_lastChaikin(0.0)  // Initialize Chaikin to neutral starting value (commented out)
-      // --------------------------------------------------------------------
+      m_lastProcessedMinute(-1)
 {
     // Initialize fixed-size ring buffers for O(1) operations
     m_candleRing.resize(m_windowMinutes);
     m_minuteRing.resize(m_windowMinutes);
     m_minuteIndices.resize(m_windowMinutes, -1);  // Initialize to invalid
     
-    m_priceRing.resize(m_almaSizeWindow);
+    // Initialize price ring for ALMA calculation (size will be set by calculator)
+    m_priceRing.resize(9);  // Default size, calculator may resize
     
     // Initialize all price ring slots to prevent NaN accumulation
     std::fill(m_priceRing.begin(), m_priceRing.end(), 0.0);
-    
-    initializeAlmaWeights();
     
     std::cout << "[TimeOrderedTickBuffer] Initialized with " << (windowSizeMs / 1000) 
               << " second time window (" << m_windowMinutes << " minute ring buffers)" << std::endl;
@@ -108,79 +82,112 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
 // Destructor - unique_ptr automatically cleans up
 TimeOrderedTickBuffer::~TimeOrderedTickBuffer() = default;
 
+// Set the calculator for technical indicators
+void TimeOrderedTickBuffer::setCalculator(ring_buffer_trade_handler::RingBufferTradeHandler* calculator) {
+    m_calculator = calculator;
+    std::cout << "[TimeOrderedTickBuffer] Calculator set - technical indicators will be computed externally" << std::endl;
+}
+
 /**
  * ========================================================================
  * addTick() - The Primary Data Ingestion Method
  * ========================================================================
  * 
- * This is where all market data enters our technical analysis pipeline.
+ * This is where all market data enters our ring buffer pipeline.
  * Each tick represents a real-time market event (price change, trade, etc.)
- * 
- * CRITICAL OPERATIONS:
- * 1. Insert tick at correct chronological position (handles out-of-order data)
- * 2. Remove old ticks that fall outside our analysis window
- * 3. Trigger candle updates when sufficient new data has arrived
- * 
- * WHY CHRONOLOGICAL ORDER MATTERS:
- * - Technical indicators depend on accurate time sequences
- * - Out-of-order data can create false signals
- * - Historical analysis requires precise timing
- * 
- * PERFORMANCE NOTE:
- * Using std::map ensures O(log n) insertion and automatic ordering
+Tick 1 arrives (minute 100) → Start building candle for minute 100
+Tick 2 arrives (minute 100) → Add to same candle (O(1))
+Tick 3 arrives (minute 100) → Add to same candle (O(1))
+...
+Tick 12,000 arrives (minute 100) → Add to same candle (O(1))
+
+Tick 12,001 arrives (minute 101) → 
+  ✅ FINISH candle for minute 100 (emit it)
+  🆕 START new candle for minute 101
  */
 void TimeOrderedTickBuffer::addTick(const stock_data_tick::StockData& tick) {
     std::lock_guard<std::mutex> lock(m_mutex);
     
-    // Insert tick at correct chronological position (handles out-of-order data)
+    std::cout << "[TimeOrderedTickBuffer] 🎯 TICK RECEIVED - Symbol: " << tick.symbol 
+              << ", Timestamp: " << tick.timestamp << ", Last: $" << tick.last 
+              << ", Volume: " << tick.volume << std::endl;
+
+    // -------- 1) O(1) store for map consumers (keep for compatibility) -------
+    size_t sizeBefore = m_orderedTicks.size();
     m_orderedTicks.emplace(tick.timestamp, tick);
+    size_t sizeAfter = m_orderedTicks.size();
     
-    // Log the addition for debugging (limit spam in production)
-    if (m_orderedTicks.size() % 100 == 0) {  // Log every 100th tick
-        std::cout << "[TimeOrderedTickBuffer] Buffer now contains " 
-                  << m_orderedTicks.size() << " chronologically ordered ticks" << std::endl;
+    std::cout << "[TimeOrderedTickBuffer] 📦 Tick stored in map - Buffer size: " << sizeBefore 
+              << " → " << sizeAfter << " (growth: " << (sizeAfter > sizeBefore ? "✓" : "✗") << ")" << std::endl;
+
+    // -------- 2) O(1) update of current minute candle ---------
+    const int64_t minuteIdx = tick.timestamp / MS_PER_MINUTE;
+    
+    std::cout << "[TimeOrderedTickBuffer] 🕐 Tick minute: " << minuteIdx 
+              << ", Working minute: " << m_workingMinute << std::endl;
+
+    if (m_workingMinute == -1) {                    // very first tick ever
+        std::cout << "[TimeOrderedTickBuffer] 🚀 FIRST TICK - Initializing working minute: " << minuteIdx << std::endl;
+        m_workingMinute = minuteIdx;
     }
-    
-    // Remove ticks that have aged out of our analysis window
-    // This prevents unlimited memory growth during long trading sessions
-    pruneOldTicks();
-    
-    // Check if we should update our candle aggregations
-    // We don't update on every tick (too expensive), only periodically
-    if (shouldUpdateCandles()) {
-        updateCandles();
+
+    if (minuteIdx == m_workingMinute) {
+        // Same minute - just update the working candle (O(1))
+        std::cout << "[TimeOrderedTickBuffer] ⚡ SAME MINUTE - Updating working candle (O(1))" << std::endl;
+        m_workingCandle.update(tick.last, tick.volume);
+        std::cout << "[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=" 
+                  << m_workingCandle.open << "/" << m_workingCandle.high << "/" 
+                  << m_workingCandle.low << "/" << m_workingCandle.close 
+                  << " Vol=" << m_workingCandle.volume << std::endl;
+        
+        // Prune old ticks periodically (not on every tick for performance)
+        static int tickCount = 0;
+        if (++tickCount % 100 == 0) {  // Every 100 ticks
+            pruneOldTicks();
+        }
+        return;                                     // <<<< FAST PATH EXIT
     }
+
+    if (minuteIdx < m_workingMinute) {
+        // Out-of-order tick for an older minute
+        std::cout << "[TimeOrderedTickBuffer] ⏪ OUT-OF-ORDER tick for minute " << minuteIdx 
+                  << " (working: " << m_workingMinute << ")" << std::endl;
+        handleOutOfOrderTick(minuteIdx, tick);
+        return;
+    }
+
+    // -------- 3) minute rolled over → finalise old candle -----
+    std::cout << "[TimeOrderedTickBuffer] 🔄 MINUTE ROLLOVER: " << m_workingMinute 
+              << " → " << minuteIdx << " - Finalising working candle" << std::endl;
+    
+    finaliseWorkingCandle();                        // Emit completed candle
+
+    // -------- 4) start new minute -----------------------------
+    std::cout << "[TimeOrderedTickBuffer] 🆕 STARTING NEW MINUTE: " << minuteIdx << std::endl;
+    m_workingMinute = minuteIdx;
+    m_workingCandle = TemporaryCandle{};            // Reset
+    m_workingCandle.update(tick.last, tick.volume);
+    
+    std::cout << "[TimeOrderedTickBuffer] 📊 New working candle initialized: OHLCV=" 
+              << m_workingCandle.open << "/" << m_workingCandle.high << "/" 
+              << m_workingCandle.low << "/" << m_workingCandle.close 
+              << " Vol=" << m_workingCandle.volume << std::endl;
 }
 
 /**
  * ========================================================================
- * calculateIndicators() - The Technical Analysis Engine
+ * calculateIndicators() - Delegates to External Calculator
  * ========================================================================
- * 
- * This method returns the latest calculated technical indicators.
- * These indicators are what your trading algorithms will use to make
- * buy/sell decisions.
- * 
- * INDICATORS PROVIDED:
- * - VWAP: Volume-Weighted Average Price (institutional benchmark)
- * - EMA9/26: Fast and slow exponential moving averages (trend detection)
- * - RSI: Relative Strength Index (momentum/overbought-oversold)
- * - ALMA: Arnaud Legoux Moving Average (advanced trend smoothing)
- * - Chaikin: Money flow indicator (buying vs selling pressure)
- * 
- * USAGE IN TRADING:
- * - Compare current price to VWAP for institutional edge
- * - EMA crossovers signal trend changes
- * - RSI above 70 = overbought, below 30 = oversold
- * - ALMA provides smooth trend direction
- * - Chaikin positive = money flowing in, negative = flowing out
  */
 TechnicalIndicators TimeOrderedTickBuffer::calculateIndicators() {
     std::lock_guard<std::mutex> lock(m_mutex);
     
-    // Use our pre-aggregated candles to calculate all indicators
-    // This is much more efficient than calculating from raw ticks
-    return computeIndicatorsFromCandles();
+    if (m_calculator) {
+        return m_calculator->computeIndicatorsFromCandles();
+    } else {
+        std::cout << "[TimeOrderedTickBuffer] ⚠️ No calculator set - returning blank indicators" << std::endl;
+        return TechnicalIndicators{};  // Return blank indicators
+    }
 }
 
 // ========================================================================
@@ -189,9 +196,6 @@ TechnicalIndicators TimeOrderedTickBuffer::calculateIndicators() {
 
 /**
  * getCurrentTimestamp() - System Time Reference
- * 
- * Provides consistent millisecond-precision timestamps across the system.
- * Used for window calculations and candle timing.
  */
 int64_t TimeOrderedTickBuffer::getCurrentTimestamp() {
     auto now = std::chrono::system_clock::now();
@@ -201,16 +205,11 @@ int64_t TimeOrderedTickBuffer::getCurrentTimestamp() {
 }
 
 bool TimeOrderedTickBuffer::shouldUpdateCandles() {
-    int64_t currentTime = getCurrentTimestamp();
-    
-    // Update candles if it's been long enough since the last update
-    // This prevents excessive computation while keeping data fresh
-    if (currentTime - m_lastCandleUpdateTime > m_candleUpdateFrequencyMs) {
-        m_lastCandleUpdateTime = currentTime;
-        std::cout << "[TimeOrderedTickBuffer] Triggering candle update - " 
-                  << m_orderedTicks.size() << " ticks to process" << std::endl;
-        return true;
-    }
+    // ===== LEGACY METHOD - NO LONGER USED =====
+    // Incremental candle engine now handles candle creation in O(1) time
+    // This method is kept for compatibility but always returns false
+    std::cout << "[TimeOrderedTickBuffer] ⚠️ Legacy shouldUpdateCandles() called - "
+              << "incremental engine now handles candles automatically" << std::endl;
     return false;
 }
 
@@ -250,66 +249,96 @@ void TimeOrderedTickBuffer::pruneOldTicks() {
 }
 
 void TimeOrderedTickBuffer::updateCandles() {
+    std::cout << "[TimeOrderedTickBuffer] 🕯️ ======= STARTING updateCandles() =======" << std::endl;
+    std::cout << "[TimeOrderedTickBuffer] 📊 Initial state:" << std::endl;
+    std::cout << "  - Ordered ticks: " << m_orderedTicks.size() << std::endl;
+    std::cout << "  - Window minutes: " << m_windowMinutes << std::endl;
+    std::cout << "  - Candle ring count: " << m_candleRingCount << std::endl;
+    std::cout << "  - Last processed minute: " << m_lastProcessedMinute << std::endl;
+    
     // Ring buffer approach: O(1) insertions, no pruning needed
     // Clear all slots to prevent stale data from being reprocessed
     std::fill(m_minuteIndices.begin(), m_minuteIndices.end(), -1);
     for (auto& tc : m_minuteRing) tc = TemporaryCandle{};
     
-    std::cout << "[TimeOrderedTickBuffer] Aggregating " << m_orderedTicks.size() 
+    std::cout << "[TimeOrderedTickBuffer] 🔄 Aggregating " << m_orderedTicks.size() 
               << " ticks into 1-minute candles using ring buffers..." << std::endl;
     
     // Group ticks by minute using ring buffer for O(1) access
+    size_t ticksProcessed = 0;
+    std::cout << "[TimeOrderedTickBuffer] 🔍 Processing ticks chronologically..." << std::endl;
+    
     for (const auto& [timestamp, tick] : m_orderedTicks) {
         int64_t minuteIndex = timestamp / MS_PER_MINUTE;
         
         // Map minute to ring buffer slot using modulo (safe since m_windowMinutes > 0)
         size_t slot = static_cast<size_t>(minuteIndex % static_cast<int64_t>(m_windowMinutes));
         
+        if (ticksProcessed < 5) {  // Log first 5 ticks for debugging
+            std::cout << "[TimeOrderedTickBuffer] 📊 Tick #" << ticksProcessed << ": " 
+                      << "timestamp=" << timestamp << ", minuteIndex=" << minuteIndex 
+                      << ", slot=" << slot << ", price=" << tick.last 
+                      << ", volume=" << tick.volume << std::endl;
+        }
+        
         // Check if this slot is for the current minute or needs reset
         if (m_minuteIndices[slot] != minuteIndex) {
             // New minute or stale slot - reset the temporary candle
+            if (ticksProcessed < 5) {
+                std::cout << "[TimeOrderedTickBuffer] 🆕 New minute detected for slot " << slot 
+                          << " (was: " << m_minuteIndices[slot] << ", now: " << minuteIndex << ")" << std::endl;
+            }
             m_minuteRing[slot] = TemporaryCandle{};
             m_minuteIndices[slot] = minuteIndex;
         }
         
         // Update the temporary candle for this minute
         m_minuteRing[slot].update(tick.last, tick.volume);
+        ticksProcessed++;
     }
+    
+    std::cout << "[TimeOrderedTickBuffer] ✅ Processed " << ticksProcessed << " ticks total" << std::endl;
     
     // Calculate window boundaries
     int64_t currentTime = getCurrentTimestamp();
     int64_t windowStart = (currentTime - m_windowSizeMs) / MS_PER_MINUTE;
     
-    // Maintain rolling ADL by removing old candles' MFV contributions
-    // auto mfvIt = m_candleMFV.begin();
-    // while (mfvIt != m_candleMFV.end()) {
-    //     if (mfvIt->first < windowStart) {
-    //         m_runningADL -= mfvIt->second;
-    //         mfvIt = m_candleMFV.erase(mfvIt);
-    //     } else {
-    //         break;
-    //     }
-    // }
-    
-    // Clamp ADL to prevent numerical drift
-    // if (!std::isfinite(m_runningADL)) {
-    //     m_runningADL = 0.0;
-    // }
-    
-    // bool isFirstTime = std::isnan(m_emaADL_fast);
-    bool isFirstTime = true;  // Simplified since Chaikin is disabled
+    std::cout << "[TimeOrderedTickBuffer] 🪟 Window boundaries:" << std::endl;
+    std::cout << "  - Current time: " << currentTime << std::endl;
+    std::cout << "  - Window start (minutes): " << windowStart << std::endl;
+    std::cout << "  - Last processed minute: " << m_lastProcessedMinute << std::endl;
     
     // Process NEW candles from ring buffer
     std::vector<std::pair<int64_t, TemporaryCandle*>> newCandles;
+    std::cout << "[TimeOrderedTickBuffer] 🔍 Scanning for new candles..." << std::endl;
+    
     for (size_t i = 0; i < m_windowMinutes; ++i) {
         int64_t minuteIndex = m_minuteIndices[i];
-        if (minuteIndex == -1) continue;  // Empty slot
-        if (minuteIndex <= m_lastProcessedMinute) continue;  // Already processed
-        if (minuteIndex < windowStart) continue;  // Outside window
-        if (m_minuteRing[i].isEmpty()) continue;  // No data
         
+        std::cout << "[TimeOrderedTickBuffer] 📍 Slot " << i << ": minuteIndex=" << minuteIndex;
+        
+        if (minuteIndex == -1) {
+            std::cout << " → SKIP (empty slot)" << std::endl;
+            continue;  // Empty slot
+        }
+        if (minuteIndex <= m_lastProcessedMinute) {
+            std::cout << " → SKIP (already processed, lastProcessed=" << m_lastProcessedMinute << ")" << std::endl;
+            continue;  // Already processed
+        }
+        if (minuteIndex < windowStart) {
+            std::cout << " → SKIP (outside window, windowStart=" << windowStart << ")" << std::endl;
+            continue;  // Outside window
+        }
+        if (m_minuteRing[i].isEmpty()) {
+            std::cout << " → SKIP (no data)" << std::endl;
+            continue;  // No data
+        }
+        
+        std::cout << " → ✅ NEW CANDLE FOUND!" << std::endl;
         newCandles.emplace_back(minuteIndex, &m_minuteRing[i]);
     }
+    
+    std::cout << "[TimeOrderedTickBuffer] 🎯 Found " << newCandles.size() << " new candles to process" << std::endl;
     
     // Sort by minute index for chronological processing
     std::sort(newCandles.begin(), newCandles.end());
@@ -333,242 +362,23 @@ void TimeOrderedTickBuffer::updateCandles() {
             continue;  // Skip this candle entirely
         }
         
-        // Update technical indicators
-        // updateChaikinForCandle(candle, minuteIndex, isFirstTime);
-        updateRSIForCandle(candle.close);
-        
-        // Update price EMAs incrementally
-        if (std::isnan(m_emaPriceFast)) {
-            m_emaPriceFast = m_emaPriceSlow = candle.close;
-        } else {
-            m_emaPriceFast += ALPHA_PRICE_FAST * (candle.close - m_emaPriceFast);
-            m_emaPriceSlow += ALPHA_PRICE_SLOW * (candle.close - m_emaPriceSlow);
-        }
-        
         // Add to ring buffer with O(1) insertion
         addCandleToRing(candle);
         
-        // Update ATR incrementally with access to previous candle
-        if (m_candleRingCount >= 2) {  // Need at least 2 candles for TR calculation
-            // Get previous candle from ring buffer
-            // size_t prevIdx = (m_candleRingHead + m_windowMinutes - 2) % m_windowMinutes;
-            // const Candle& prevCandle = m_candleRing[prevIdx];
-            updateATRForCandle(candle);
-        }
+        // Update price ring for ALMA calculation
+        updatePriceRing(candle.close);
         
-        // Update ALMA incrementally with O(1) operation
-        updateAlmaIncremental(candle.close);
+        // Delegate technical indicator calculations to external calculator
+        if (m_calculator) {
+            m_calculator->processNewCandle(candle);
+        }
         
         // Track processing progress
         m_lastProcessedMinute = minuteIndex;
-        isFirstTime = false;
     }
     
     std::cout << "[TimeOrderedTickBuffer] Ring buffer contains " << m_candleRingCount 
-              << " candles, ALMA updated incrementally" << std::endl;
-}
-
-/**
- * computeIndicatorsFromCandles() - Advanced Technical Analysis
- * 
- * This is the culmination of our data processing pipeline. We take clean,
- * aggregated candle data and compute sophisticated technical indicators
- * that professional traders rely on for market analysis.
- * 
- * INDICATOR CALCULATIONS:
- * 
- * 1. VWAP (Volume-Weighted Average Price):
- *    - Shows the average price weighted by volume
- *    - Institutional traders use this as a benchmark
- *    - Price above VWAP = bullish, below = bearish
- * 
- * 2. EMA 9/26 (Exponential Moving Averages):
- *    - Fast (9) and slow (26) trend indicators
- *    - When fast > slow = uptrend, fast < slow = downtrend
- *    - Crossovers generate buy/sell signals
- * 
- * 3. ALMA (Arnaud Legoux Moving Average):
- *    - Advanced trend indicator with reduced lag
- *    - More responsive than traditional moving averages
- *    - Better for fast-moving markets
- * 
- * 4. RSI (Relative Strength Index):
- *    - Momentum oscillator (0-100 scale)
- *    - Above 70 = overbought (potential sell)
- *    - Below 30 = oversold (potential buy)
- * 
- * 5. Chaikin Oscillator:
- *    - Money flow indicator
- *    - Positive = buying pressure, negative = selling pressure
- *    - Helps confirm price movements with volume analysis
- * 
- * DATA REQUIREMENTS:
- * We need at least 26 candles for the slowest indicator (EMA26).
- * Without sufficient data, indicators would be unreliable.
- */
-TechnicalIndicators TimeOrderedTickBuffer::computeIndicatorsFromCandles() {
-    TechnicalIndicators indicators;
-    
-    // Early exit if no candles available
-    if (m_candleRingCount == 0) {
-        std::cout << "[TimeOrderedTickBuffer] No candles available - returning blank indicators" << std::endl;
-        return indicators;  // All indicators default to 0.0
-    }
-    
-    std::cout << "[TimeOrderedTickBuffer] Computing technical indicators from " 
-              << m_candleRingCount << " ring buffer candles..." << std::endl;
-    
-    // Use VWAP from latest tick (already provided by IBKR)
-    if (!m_orderedTicks.empty()) {
-        indicators.vwap = m_orderedTicks.rbegin()->second.vwap;
-    } else {
-        indicators.vwap = 0.0;
-    }
-    
-    // Use incrementally maintained EMAs for O(1) performance
-    indicators.ema9 = std::isnan(m_emaPriceFast) ? 0.0 : m_emaPriceFast;
-    indicators.ema26 = std::isnan(m_emaPriceSlow) ? 0.0 : m_emaPriceSlow;
-    
-    // Use O(1) incremental ALMA calculation
-    if (m_priceRingCount >= m_almaSizeWindow) {
-        indicators.alma = std::isfinite(m_almaDot) ? m_almaDot : 0.0;
-    } else {
-        // Still warming up - fall back to traditional calculation temporarily
-        std::vector<double> closes;
-        
-        // Iterate through ring buffer in chronological order
-        if (m_candleRingCount > 0) {
-            size_t start = (m_candleRingHead + m_windowMinutes - m_candleRingCount) % m_windowMinutes;
-            for (size_t i = 0; i < m_candleRingCount; ++i) {
-                size_t idx = (start + i) % m_windowMinutes;
-                closes.push_back(m_candleRing[idx].close);
-            }
-        }
-        
-        if (closes.empty()) {
-            indicators.alma = 0.0;
-        } else {
-            indicators.alma = calculateALMA(
-                closes,
-                m_almaSizeWindow,
-                m_almaSigma,
-                m_almaOffset);
-        }
-    }
-    
-    // Use incremental RSI and ATR calculations
-    indicators.rsi = m_lastRSI;
-    indicators.atr = std::isnan(m_atr) ? 0.0 : m_atr;
-    // indicators.chaikin = m_lastChaikin;
-    
-    // Save stream state to prevent side effects
-    std::ios_base::fmtflags originalFlags = std::cout.flags();
-    std::streamsize originalPrecision = std::cout.precision();
-    
-    std::cout << "[TimeOrderedTickBuffer] Calculated indicators: "
-              << "VWAP=" << std::fixed << std::setprecision(4) << indicators.vwap
-              << ", EMA9=" << indicators.ema9 
-              << ", EMA26=" << indicators.ema26
-              << ", RSI=" << std::setprecision(1) << indicators.rsi
-              << ", ATR=" << std::setprecision(4) << indicators.atr
-              << ", ALMA=" << std::setprecision(4) << indicators.alma << " (fixed incremental)" << std::endl;
-              // << ", Chaikin=" << std::setprecision(6) << indicators.chaikin << std::endl;
-    
-    // Restore original stream state
-    std::cout.flags(originalFlags);
-    std::cout.precision(originalPrecision);
-    
-    return indicators;
-}
-
-/**
- * updateRSIForCandle() - Incremental RSI Calculation with Wilder's Smoothing
- * 
- * Maintains rolling RSI state without recalculating from scratch.
- * Uses Wilder's smoothing method for accurate RSI calculation.
- */
-void TimeOrderedTickBuffer::updateRSIForCandle(double close) {
-    // Skip bad data to prevent NaN poisoning
-    if (!std::isfinite(close)) {
-        return;  // skip bad data
-    }
-    
-    // First candle ever - initialize
-    if (std::isnan(m_prevClose)) {
-        m_prevClose = close;
-        return;
-    }
-
-    double change = close - m_prevClose;
-    m_prevClose = close;
-
-    // Warm-up phase: collect the first RSI_PERIOD changes to seed with SMA
-    if (m_rsiWarmupCount < RSI_PERIOD) {
-        if (change > 0) {
-            m_avgGain += change;
-        } else {
-            m_avgLoss += -change;
-        }
-        ++m_rsiWarmupCount;
-        
-        // Complete the seed when we have enough data
-        if (m_rsiWarmupCount == RSI_PERIOD) {
-            m_avgGain /= RSI_PERIOD;
-            m_avgLoss /= RSI_PERIOD;
-        }
-        
-        m_lastRSI = 50.0;  // Stay neutral until seed is complete
-        return;
-    }
-
-    // Apply Wilder's smoothing for ongoing RSI calculation
-    double gain = change > 0 ? change : 0.0;
-    double loss = change < 0 ? -change : 0.0;
-    
-    m_avgGain = (m_avgGain * (RSI_PERIOD - 1) + gain) / RSI_PERIOD;
-    m_avgLoss = (m_avgLoss * (RSI_PERIOD - 1) + loss) / RSI_PERIOD;
-    
-    // Calculate RSI with safety check for division by zero
-    if (m_avgLoss < 1e-8) {
-        m_lastRSI = 100.0;
-    } else {
-        double rs = m_avgGain / m_avgLoss;
-        m_lastRSI = 100.0 - (100.0 / (1.0 + rs));
-    }
-}
-
-/**
- * initializeAlmaWeights() - Pre-compute ALMA Weight Vector
- * 
- * Computes the Gaussian-like weight vector for ALMA once during initialization.
- * This enables O(1) incremental ALMA updates instead of O(M) recalculation.
- * 
- * FIXED: Matches the traditional ALMA algorithm
- */
-void TimeOrderedTickBuffer::initializeAlmaWeights()
-{
-    const size_t M      = m_almaSizeWindow;
-    const double sigma  = m_almaSigma;
-    const double offset = m_almaOffset; 
-
-    m_almaWeights.resize(M);
-
-    // Centre of the Gaussian on the window
-    const double m = offset * (static_cast<double>(M) - 1.0);
-
-    // Standard deviation of the Gaussian
-    const double s = static_cast<double>(M) / sigma;
-
-    double norm = 0.0;
-    for (size_t i = 0; i < M; ++i) {
-        const double x = static_cast<double>(i) - m;
-        m_almaWeights[i] = std::exp(-(x * x) / (2.0 * s * s));
-        norm += m_almaWeights[i];
-    }
-    for (double &w : m_almaWeights) w /= norm;
-
-    std::cout << "[TimeOrderedTickBuffer] ALMA weights ready (M=" << M << ", σ=" << sigma
-              << ", offset=" << offset << ")\n";
+              << " candles, " << newCandles.size() << " new candles processed" << std::endl;
 }
 
 /**
@@ -591,153 +401,107 @@ void TimeOrderedTickBuffer::addCandleToRing(const Candle& candle) {
 }
 
 /**
- * updateAlmaIncremental() - O(1) ALMA Update
- * 
- * Updates the ALMA dot product incrementally while maintaining correct
- * weight alignment. Uses O(M) recomputation after warmup to avoid
- * alignment issues that cause NaN propagation.
+ * updatePriceRing() - Updates price ring for ALMA calculation
  */
-void TimeOrderedTickBuffer::updateAlmaIncremental(double newClose)
-{
+void TimeOrderedTickBuffer::updatePriceRing(double newClose) {
     // Skip bad data to prevent NaN poisoning
     if (!std::isfinite(newClose)) {
-        return;  // skip bad data
+        return;
     }
     
-    const size_t M = m_almaWeights.size();
-
+    // Add price to ring buffer
     m_priceRing[m_priceRingHead] = newClose;
-
-    if (m_priceRingCount < M) {               // warm-up
-        m_almaDot += newClose * m_almaWeights[m_priceRingCount];
-        ++m_priceRingCount;
-        m_priceRingHead = (m_priceRingHead + 1) % M;
-    } else {
-        m_priceRingHead = (m_priceRingHead + 1) % M;  // head now oldest
-
-        double dot = 0.0;
-        size_t  idx = m_priceRingHead;
-        for (size_t w = 0; w < M; ++w) {
-            dot += m_priceRing[idx] * m_almaWeights[w];
-            idx = (idx + 1) % M;
-        }
-        m_almaDot = dot;
-    }
-
-    // ---- new: guarantee no NaN/Inf leaves this function ---------------
-    if (!std::isfinite(m_almaDot)) m_almaDot = 0.0;
-    m_almaDot = std::clamp(m_almaDot, -1e12, 1e12);  // Support high-value instruments like BRK-A
-}
-
-/**
- * updateATRForCandle() - Incremental ATR Calculation with Wilder's Method
- * 
- * Maintains rolling ATR state without recalculating from scratch.
- * Uses proper Wilder's method: SMA seed for first 14 TRs, then exponential smoothing.
- */
-void TimeOrderedTickBuffer::updateATRForCandle(const Candle& c)
-{
-    if (!std::isfinite(c.high) || !std::isfinite(c.low) || !std::isfinite(c.close))
-        return;                                                     // bad data guard
-
-    /* ---------- 1) compute True-Range ----------------------------------- */
-    double tr;
-    if (std::isnan(m_prevCloseForATR)) {                            // very first bar
-        tr = c.high - c.low;                                        // TR₀
-    } else {
-        tr = std::max({ c.high - c.low,
-                        std::fabs(c.high - m_prevCloseForATR),
-                        std::fabs(c.low  - m_prevCloseForATR) });
-    }
-    m_prevCloseForATR = c.close;                                    // stash for next call
-
-    /* ---------- 2) SMA seed then Wilder smoothing ---------------------- */
-    constexpr int N = ATR_PERIOD;                                   // 14 by default
-    if (m_atrWarmupCount < N) {                                     // SEED
-        if (std::isnan(m_atr)) m_atr = 0.0;
-        m_atr += tr;
-        if (++m_atrWarmupCount == N)                                // finished seed
-            m_atr /= N;                                             // convert sum → mean
-    } else {                                                        // SMOOTH
-        m_atr += (tr - m_atr) / N;                                  // Wilder
-    }
-}
-
-/**
- * calculateALMA() - ALMA Calculation
- * 
- * Computes the ALMA value for a given price series.
- * Uses optimized calculation to avoid unnecessary memory allocations.
- */
-double TimeOrderedTickBuffer::calculateALMA(
-    const std::vector<double>& prices,
-    int windowSize,
-    double sigma,
-    double offset
-) const
-{
-    // Need at least windowSize data points
-    if ((int)prices.size() < windowSize || windowSize <= 0) {
-        return 0.0;
-    }
-
-    // Constrain parameters to valid ranges
-    sigma = std::max(0.1, std::min(sigma, 1.0));
-    offset = std::max(0.0, std::min(offset, 10.0));
-
-    // Calculate distribution center point
-    double m = offset;
     
-    // Calculate standard deviation factor
-    double s = windowSize / (sigma * 10.0);
-
-    // Build weights - optimized to avoid unnecessary memory allocations
-    double sumW = 0.0;
-    double weightedSum = 0.0;
-    int startIdx = static_cast<int>(prices.size()) - windowSize;
-
-    // Calculate weighted sum in a single pass
-    for (int i = 0; i < windowSize; ++i) {
-        double x = (double)i - m;
-        double weight = std::exp(-(x * x) / (2.0 * s * s));
-        sumW += weight;
-        weightedSum += prices[startIdx + i] * weight;
+    // Advance head pointer with wraparound
+    m_priceRingHead = (m_priceRingHead + 1) % m_priceRing.size();
+    
+    // Track how many valid slots we have
+    if (m_priceRingCount < m_priceRing.size()) {
+        ++m_priceRingCount;
     }
-
-    // Normalize and return
-    return (sumW > 0.0) ? (weightedSum / sumW) : 0.0;
 }
 
-/*
+// ========================================================================
+// INCREMENTAL CANDLE ENGINE METHODS
+// ========================================================================
+
 /**
- * updateChaikinForCandle() - Consolidated Chaikin Oscillator Calculation
- * 
- * Single entry point for Chaikin calculation with rolling window support.
- * Computes MFM, MFV, updates ADL, EMAs, and stores MFV for rolling window.
+ * finaliseWorkingCandle() - Called once per minute to emit completed candle
  */
-// void TimeOrderedTickBuffer::updateChaikinForCandle(const Candle& candle,
-//                                                    int64_t minuteIndex,
-//                                                    bool    isFirstTime)
-// {
-//     const double range = candle.high - candle.low;
-//     const double mfm   = (range == 0.0) ? 0.0
-//                          : std::clamp((2.0 * candle.close - candle.high - candle.low) / range,
-//                                       -1.0, 1.0);
+void TimeOrderedTickBuffer::finaliseWorkingCandle() {
+    if (m_workingCandle.isEmpty()) {
+        std::cout << "[TimeOrderedTickBuffer] 💤 Working candle is empty - nothing to finalize for minute " 
+                  << m_workingMinute << std::endl;
+        return;
+    }
 
-//     const double mfv = mfm * candle.volume;
+    std::cout << "[TimeOrderedTickBuffer] 🕯️ FINALIZING candle for minute " << m_workingMinute 
+              << " - OHLCV: " << m_workingCandle.open << "/" << m_workingCandle.high << "/" 
+              << m_workingCandle.low << "/" << m_workingCandle.close 
+              << " Vol: " << m_workingCandle.volume << std::endl;
 
-//     // --- running ADL and EMA update ---------------------------------
-//     m_runningADL += mfv;
+    // Create completed candle
+    Candle candle(
+        m_workingCandle.open,
+        m_workingCandle.high,
+        m_workingCandle.low,
+        m_workingCandle.close,
+        m_workingCandle.volume,
+        m_workingMinute * MS_PER_MINUTE
+    );
 
-//     if (isFirstTime) {
-//         m_emaADL_fast = m_emaADL_slow = m_runningADL;
-//     } else {
-//         m_emaADL_fast += ALPHA_FAST * (m_runningADL - m_emaADL_fast);
-//         m_emaADL_slow += ALPHA_SLOW * (m_runningADL - m_emaADL_slow);
-//     }
+    // Skip candles with invalid OHLC data to prevent NaN poisoning
+    if (!std::isfinite(candle.open) || !std::isfinite(candle.high) || 
+        !std::isfinite(candle.low) || !std::isfinite(candle.close)) {
+        std::cout << "[TimeOrderedTickBuffer] ⚠️ Skipping candle with invalid OHLC data at minute " 
+                  << m_workingMinute << std::endl;
+        return;
+    }
 
-//     m_lastChaikin = m_emaADL_fast - m_emaADL_slow;
-//     m_candleMFV[minuteIndex] = mfv;
-// }
+    // Add to candle ring buffer (O(1))
+    addCandleToRing(candle);
+    
+    // Update price ring for ALMA calculation (O(1))
+    updatePriceRing(candle.close);
+    
+    // Delegate technical indicator calculations to external calculator
+    if (m_calculator) {
+        std::cout << "[TimeOrderedTickBuffer] 📊 Sending candle to calculator for processing..." << std::endl;
+        m_calculator->processNewCandle(candle);
+    }
+
+    // Also store in minute ring for compatibility with existing monitoring code
+    size_t slot = static_cast<size_t>(m_workingMinute % static_cast<int64_t>(m_windowMinutes));
+    m_minuteRing[slot] = m_workingCandle;
+    m_minuteIndices[slot] = m_workingMinute;
+    
+    // Track processing progress
+    m_lastProcessedMinute = m_workingMinute;
+    
+    std::cout << "[TimeOrderedTickBuffer] ✅ Candle finalized and added to rings - "
+              << "Candle ring count: " << m_candleRingCount << std::endl;
+}
+
+/**
+ * handleOutOfOrderTick() - Handle late/out-of-order ticks
+ */
+void TimeOrderedTickBuffer::handleOutOfOrderTick(int64_t minuteIdx, const stock_data_tick::StockData& tick) {
+    size_t slot = static_cast<size_t>(minuteIdx % static_cast<int64_t>(m_windowMinutes));
+    
+    // Check if this minute is still editable (not too old)
+    if (m_minuteIndices[slot] == minuteIdx) {
+        std::cout << "[TimeOrderedTickBuffer] 🔄 Updating out-of-order tick for minute " 
+                  << minuteIdx << " in slot " << slot << std::endl;
+        m_minuteRing[slot].update(tick.last, tick.volume);
+        
+        // If this was already finalized, we'd need to recalculate indicators
+        // For now, we just update the minute ring data
+        std::cout << "[TimeOrderedTickBuffer] ⚠️ Out-of-order tick processed - may need indicator recalculation" << std::endl;
+    } else {
+        std::cout << "[TimeOrderedTickBuffer] ❌ Out-of-order tick for minute " << minuteIdx 
+                  << " is too old (slot " << slot << " now contains minute " 
+                  << m_minuteIndices[slot] << ")" << std::endl;
+    }
+}
 
 } // namespace time_ordered_tick_buffer 

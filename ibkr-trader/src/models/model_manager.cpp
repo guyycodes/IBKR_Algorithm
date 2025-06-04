@@ -10,6 +10,8 @@
 #include <sstream>
 #include <numeric>
 #include <algorithm>
+#include <chrono>
+#include <ctime>
 
 using namespace std::chrono_literals;
 namespace model_manager {
@@ -35,9 +37,9 @@ ModelManager::ModelManager(std::string sym,
       m_windowUnit(unit),
       m_lastPrune(std::chrono::steady_clock::now())
 {
+    m_debug_logging = true;
     m_rawModel   = std::make_unique<raw_data_model::RawDataModel>(m_symbol);
     m_volProfile = std::make_unique<volume_profile_map::VolumeProfileMap>(0.05);
-
     m_toBuffer   = std::make_unique<time_ordered_tick_buffer::TimeOrderedTickBuffer>(windowToDuration().count());
     m_rbHandler  = std::make_unique<ring_buffer_trade_handler::RingBufferTradeHandler>(
                     *m_toBuffer, *m_volProfile, *m_rawModel);
@@ -154,26 +156,29 @@ std::chrono::milliseconds ModelManager::windowToDuration() const {
 }
 
 void ModelManager::pruneOldData(){
-    auto now = std::chrono::steady_clock::now();
+    
+    auto now = std::chrono::steady_clock::now();  // ① use steady_clock to match m_lastPrune
     if (now - m_lastPrune < 5s) return;        // prune at most every 5 s
     m_lastPrune = now;
     
     // Calculate cutoff time based on window duration
-    auto cutoff = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch())
-                - windowToDuration();
+    // cutoff = (system_clock_now − window) in **milliseconds since epoch**
+    auto system_now = std::chrono::system_clock::now();
+    const auto cutoffMs = std::chrono::duration_cast<std::chrono::milliseconds>(system_now.time_since_epoch())
+                        - windowToDuration();       // <- already returns milliseconds
     
     // Get current queue size for logging
     size_t sizeBefore = m_rawModel->queueSize();
     
     // Use STK_Q's efficient removeOlderThan method via RawDataModel interface
-    m_rawModel->removeOlderThan(static_cast<uint64_t>(cutoff.count()));
+    m_rawModel->removeOlderThan(static_cast<uint64_t>(cutoffMs.count()));
     
     if (m_debug_logging && sizeBefore > 0) {
         size_t sizeAfter = m_rawModel->queueSize();
         if (sizeBefore > sizeAfter) {
             std::cout << "[ModelManager] Pruned " << (sizeBefore - sizeAfter) 
                       << " old ticks for " << getSymbol() 
-                      << " (cutoff: " << cutoff.count() << "ms)" << std::endl;
+                      << " (cutoff: " << cutoffMs.count() << "ms)" << std::endl;
         }
     }
 }
@@ -237,46 +242,47 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
 
     // Calculate derived metrics in-place
     enrichedTick.calculateDerivedMetrics();
+    // time is in miliseconds
 
     // add a print out that will confirm the data that we are geting.
-    std::cout << "==================== COMPLETE STOCKDATA VALIDATION ====================" << std::endl;
-    // Core identification
-    std::cout << "CORE DATA:" << std::endl;
-    std::cout << "  Symbol: " << enrichedTick.symbol << std::endl;
-    std::cout << "  Timestamp: " << enrichedTick.timestamp << std::endl;
-    std::cout << "  Exchange: " << (enrichedTick.exchange.empty() ? "EMPTY" : enrichedTick.exchange) << std::endl;
+    // std::cout << "==================== COMPLETE STOCKDATA VALIDATION ====================" << std::endl;
+    // // Core identification
+    // std::cout << "CORE DATA:" << std::endl;
+    // std::cout << "  Symbol: " << enrichedTick.symbol << std::endl;
+    // std::cout << "  Timestamp: " << enrichedTick.timestamp << std::endl;
+    // std::cout << "  Exchange: " << (enrichedTick.exchange.empty() ? "EMPTY" : enrichedTick.exchange) << std::endl;
     
-    // Core market data
-    std::cout << "MARKET DATA:" << std::endl;
-    std::cout << "  Last: $" << std::fixed << std::setprecision(4) << enrichedTick.last << std::endl;
-    std::cout << "  Bid: $" << std::fixed << std::setprecision(4) << enrichedTick.bid 
-              << " x " << enrichedTick.bidSize << std::endl;
-    std::cout << "  Ask: $" << std::fixed << std::setprecision(4) << enrichedTick.ask 
-              << " x " << enrichedTick.askSize << std::endl;
-    // std::cout << "  LastSize: " << enrichedTick.lastSize << std::endl;
-    // std::cout << "  Volume (Total Market): " << std::fixed << std::setprecision(2) << t.volume << "M" << std::endl;
-    std::cout << "  MidPoint: " << enrichedTick.midPoint << std::endl;
-    std::cout << "  Spread: " << enrichedTick.spread << std::endl;
-    std::cout << "  SpreadPercent: " << enrichedTick.spreadPercent << "%" << std::endl;
-    std::cout << "  PriceChange: " << enrichedTick.priceChange << std::endl;
-    std::cout << "  VWAP: $" << std::fixed << std::setprecision(4) << enrichedTick.vwap << std::endl;
+    // // Core market data
+    // std::cout << "MARKET DATA:" << std::endl;
+    // std::cout << "  Last: $" << std::fixed << std::setprecision(4) << enrichedTick.last << std::endl;
+    // std::cout << "  Bid: $" << std::fixed << std::setprecision(4) << enrichedTick.bid 
+    //           << " x " << enrichedTick.bidSize << std::endl;
+    // std::cout << "  Ask: $" << std::fixed << std::setprecision(4) << enrichedTick.ask 
+    //           << " x " << enrichedTick.askSize << std::endl;
+    // // std::cout << "  LastSize: " << enrichedTick.lastSize << std::endl;
+    // // std::cout << "  Volume (Total Market): " << std::fixed << std::setprecision(2) << t.volume << "M" << std::endl;
+    // std::cout << "  MidPoint: " << enrichedTick.midPoint << std::endl;
+    // std::cout << "  Spread: " << enrichedTick.spread << std::endl;
+    // std::cout << "  SpreadPercent: " << enrichedTick.spreadPercent << "%" << std::endl;
+    // std::cout << "  PriceChange: " << enrichedTick.priceChange << std::endl;
+    // std::cout << "  VWAP: $" << std::fixed << std::setprecision(4) << enrichedTick.vwap << std::endl;
     
-    // OHLC data
-    std::cout << "OHLC DATA:" << std::endl;
-    std::cout << "  Open: " << enrichedTick.open << std::endl;
-    std::cout << "  High: " << enrichedTick.high << std::endl;
-    std::cout << "  Low: " << enrichedTick.low << std::endl;
-    std::cout << "  Close: " << enrichedTick.close << std::endl;
-    std::cout << "  BarRange: " << enrichedTick.barRange << std::endl;
+    // // OHLC data
+    // std::cout << "OHLC DATA:" << std::endl;
+    // std::cout << "  Open: " << enrichedTick.open << std::endl;
+    // std::cout << "  High: " << enrichedTick.high << std::endl;
+    // std::cout << "  Low: " << enrichedTick.low << std::endl;
+    // std::cout << "  Close: " << enrichedTick.close << std::endl;
+    // std::cout << "  BarRange: " << enrichedTick.barRange << std::endl;
     
-    std::cout << "=======================================================================" << std::endl;
+    // std::cout << "=======================================================================" << std::endl;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Efficient volume calculation - direct access instead of string parsing
     int totalVolume = m_volProfile->getTotalVolume();
     
     if (totalVolume > 0) {
-        std::cout << "Volume from profile: " << totalVolume << " shares" << std::endl;
+        // std::cout << "Volume from profile: " << totalVolume << " shares" << std::endl;
         enrichedTick.volume = totalVolume;
         if (m_debug_logging) {
             std::cout << "[ModelManager] Volume from profile: " << totalVolume << " shares" << std::endl;
@@ -301,8 +307,8 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
 
     // Trade opportunity detection
     if (m_rbHandler->evaluate(enrichedTick)) {
-        std::cout << "[TradeAlert] Opportunity detected for " << getSymbol() 
-                  << " at price: $" << enrichedTick.last << std::endl;
+        // std::cout << "[TradeAlert] Opportunity detected for " << getSymbol() 
+        //           << " at price: $" << enrichedTick.last << std::endl;
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Store in STK_Q and prune old data
@@ -312,20 +318,20 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
     // Print detailed tick information with thread ID
     std::ostringstream threadIdStr;
     threadIdStr << std::this_thread::get_id();
-    std::cout << "[ModelManager][VALIDATION][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-              << "\n  Symbol: " << enrichedTick.symbol
-              << "\n  Timestamp: " << enrichedTick.timestamp
-              << "\n  Exchange: " << (!enrichedTick.exchange.empty() ? enrichedTick.exchange : "-")
-              << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
-              << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
-              << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
-              << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
-              << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
-              << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
-              << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
-              << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
-              << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
-              << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;   
+    // std::cout << "[ModelManager][VALIDATION][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+    //           << "\n  Symbol: " << enrichedTick.symbol
+    //           << "\n  Timestamp: " << enrichedTick.timestamp
+    //           << "\n  Exchange: " << (!enrichedTick.exchange.empty() ? enrichedTick.exchange : "-")
+    //           << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
+    //           << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
+    //           << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
+    //           << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
+    //           << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
+    //           << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
+    //           << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
+    //           << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
+            //   << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
+            //   << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;   
                    
     pruneOldData();
 }
@@ -333,7 +339,7 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
 /// adds public tape tradetick to the volume profile map
 void ModelManager::addTradeTick(double p,int v){ 
     // this is used inside connection.cpp
-    std::cout << "[ModelManager] STUB: Adding trade tick for " << getSymbol() << " price=" << p << " vol=" << v << '\n';
+    // std::cout << "[ModelManager] STUB: Adding trade tick for " << getSymbol() << " price=" << p << " vol=" << v << '\n';
     if (v>0) m_volProfile->add_transaction(p,v); 
 }
 
