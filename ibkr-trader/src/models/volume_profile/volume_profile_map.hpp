@@ -80,7 +80,8 @@ public:
      * @return Sum of all volume entries across all buckets
      */
     int getTotalVolume() const;
-    
+
+
     /**
      * Get the volume profile data for analysis
      * @return Reference to the internal volume map (bucket_index -> volumes)

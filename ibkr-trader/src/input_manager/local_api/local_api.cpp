@@ -347,6 +347,59 @@ nlohmann::json LocalAPI::getSymbolQueueData(const std::string& sym) const{
         if (auto mm=f.getModelManager(sym)) {
             out["connected"]=mm->isConnected();
             out["tickCount"]=mm->getTickCount();
+            
+            // Get actual tick data from STK_Q within the time window
+            auto ticks = mm->getTicksInWindow();
+            nlohmann::json tickData = nlohmann::json::array();
+            
+            // Limit response size to prevent huge JSON (default: last 100 ticks)
+            constexpr size_t MAX_TICKS_IN_RESPONSE = 100;
+            size_t totalTicks = ticks.size();
+            
+            // Take only the most recent ticks if we have too many
+            auto startIt = (ticks.size() > MAX_TICKS_IN_RESPONSE) 
+                         ? ticks.end() - MAX_TICKS_IN_RESPONSE 
+                         : ticks.begin();
+            
+            for (auto it = startIt; it != ticks.end(); ++it) {
+                const auto& tick = *it;
+                nlohmann::json tickJson = {
+                    {"symbol", tick.symbol},
+                    {"timestamp", tick.timestamp},
+                    {"exchange", tick.exchange},
+                    {"last", tick.last},
+                    {"bid", tick.bid},
+                    {"ask", tick.ask},
+                    {"bidSize", tick.bidSize},
+                    {"askSize", tick.askSize},
+                    {"volume", tick.volume},
+                    {"open", tick.open},
+                    {"high", tick.high},
+                    {"low", tick.low},
+                    {"close", tick.close},
+                    {"mid", tick.mid},
+                    {"spread", tick.spread},
+                    {"spreadPercent", tick.spreadPercent},
+                    {"vwap", tick.vwap},
+                    {"imbalance", tick.imbalance},
+                    {"rsi", tick.rsi},
+                    {"ema9", tick.ema9},
+                    {"ema26", tick.ema26},
+                    {"alma", tick.alma},
+                    {"atr", tick.atr}
+                };
+                tickData.push_back(tickJson);
+            }
+            
+            out["ticks"] = tickData;
+            out["ticksInWindow"] = totalTicks;  // Total count
+            out["ticksReturned"] = tickData.size();  // Actual returned
+            if (totalTicks > MAX_TICKS_IN_RESPONSE) {
+                out["note"] = "Response limited to " + std::to_string(MAX_TICKS_IN_RESPONSE) + " most recent ticks";
+            }
+            
+            // Add volume profile summary
+            out["volumeProfileSummary"] = mm->getVolumeProfileSummary();
         } else out["error"]="no model";
     }catch(...){ out["error"]="factory unavailable"; }
     return out;

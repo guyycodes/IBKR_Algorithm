@@ -27,7 +27,16 @@ RingBufferTradeHandler::RingBufferTradeHandler(
     // Set this handler as the calculator for the buffer
     m_buf.setCalculator(this);
     
+    // Start monitoring immediately - no need to wait for first tick
+    startMonitoring();
+    
     std::cout << "[RingBufferTradeHandler] Initialized with technical indicator calculations" << std::endl;
+}
+
+// Destructor - ensures clean thread shutdown
+RingBufferTradeHandler::~RingBufferTradeHandler() {
+    std::cout << "[RingBufferTradeHandler] 🛑 Shutting down..." << std::endl;
+    stopMonitoring();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -416,8 +425,37 @@ void RingBufferTradeHandler::processNewCandle(const time_ordered_tick_buffer::Ca
 // RING BUFFER MONITORING SYSTEM
 // ═══════════════════════════════════════════════════════════════════════════════
 
+void RingBufferTradeHandler::startMonitoring() {
+    if (m_isMonitoring.load()) {
+        std::cout << "[RingBufferTradeHandler] ⚠️ Monitoring already started" << std::endl;
+        return;
+    }
+    
+    m_shouldStop = false;
+    m_monitorThread = std::thread(&RingBufferTradeHandler::monitorRingBuffersRealTime, this);
+    m_isMonitoring = true;
+    
+    std::cout << "[RingBufferTradeHandler] 🚀 Started ring buffer monitoring thread" << std::endl;
+}
+
+void RingBufferTradeHandler::stopMonitoring() {
+    if (!m_isMonitoring.load()) {
+        return;  // Already stopped
+    }
+    
+    std::cout << "[RingBufferTradeHandler] 🔄 Requesting thread shutdown..." << std::endl;
+    m_shouldStop = true;
+    
+    if (m_monitorThread.joinable()) {
+        m_monitorThread.join();  // Wait for clean exit
+        std::cout << "[RingBufferTradeHandler] ✅ Monitoring thread joined successfully" << std::endl;
+    }
+    
+    m_isMonitoring = false;
+}
+
 void RingBufferTradeHandler::monitorRingBuffersRealTime() {
-    std::cout << "\n🚀 [ULTRA-LOW LATENCY] Starting 15-second ring buffer monitoring...\n";
+    std::cout << "\n🚀 [ULTRA-LOW LATENCY] Starting ring buffer monitoring...\n";
     std::cout << "📊 Reading 3 ring buffers in real-time:\n";
     std::cout << "   1️⃣  Minute Ring (TemporaryCandle aggregation)\n";
     std::cout << "   2️⃣  Candle Ring (Completed 1-min candles)\n"; 
@@ -427,7 +465,7 @@ void RingBufferTradeHandler::monitorRingBuffersRealTime() {
     auto endTime = startTime + std::chrono::seconds(3600); // 60 minutes × 60 seconds
     
     int iteration = 0;
-    while (std::chrono::steady_clock::now() < endTime) {
+    while (!m_shouldStop.load() && std::chrono::steady_clock::now() < endTime) {
         std::cout << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
         std::cout << "📸 [SNAPSHOT #" << ++iteration << "] Ring Buffer Contents:\n";
         
@@ -441,7 +479,11 @@ void RingBufferTradeHandler::monitorRingBuffersRealTime() {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     
-    std::cout << "\n✅ [MONITORING COMPLETE] 15-second ring buffer monitoring finished!\n";
+    if (m_shouldStop.load()) {
+        std::cout << "\n🛑 [GRACEFUL SHUTDOWN] Monitoring stopped by request\n";
+    } else {
+        std::cout << "\n✅ [MONITORING COMPLETE] 1-hour monitoring finished!\n";
+    }
     std::cout << "📈 Total snapshots captured: " << iteration << "\n\n";
 }
 
@@ -453,7 +495,7 @@ void RingBufferTradeHandler::printMinuteRing() {
     std::cout << "   Size: " << minuteRing.size() << " slots | Window: " << m_buf.getWindowMinutes() << " minutes\n";
     
     int validSlots = 0;
-    for (size_t i = 0; i < minuteRing.size() && i < 5; ++i) {  // Show first 5 slots
+    for (size_t i = 0; i < minuteRing.size(); ++i) {            // scan all 60 slots
         if (minuteIndices[i] != -1 && !minuteRing[i].isEmpty()) {
             validSlots++;
             std::cout << "   📦 Slot[" << i << "] Minute:" << minuteIndices[i] 
@@ -489,7 +531,8 @@ void RingBufferTradeHandler::printCandleRing() {
         size_t idx = (head + candleRing.size() - count + i) % candleRing.size();
         const auto& candle = candleRing[idx];
         
-        std::cout << "   🕯️  Candle[" << idx << "] @ " << candle.timestamp/1000 
+        std::cout << "   🕯️  Candle[" << idx << "] @ " << candle.timestamp          // keep ms
+                  << " ms (" << (candle.timestamp/1000) << " s)"
                   << " | OHLCV: " << std::fixed << std::setprecision(2)
                   << candle.open << "/" << candle.high << "/"
                   << candle.low << "/" << candle.close 
@@ -547,16 +590,8 @@ void RingBufferTradeHandler::printTechnicalIndicators() {
 // ───────────────────────────────────────────────────────────────────────────────
 bool RingBufferTradeHandler::evaluate(const stock_data_tick::StockData& tick)
 {
-    // For now, just trigger monitoring on first call
-    static bool hasStartedMonitoring = false;
-    if (!hasStartedMonitoring) {
-        hasStartedMonitoring = true;
-        std::thread monitorThread(&RingBufferTradeHandler::monitorRingBuffersRealTime, this);
-        monitorThread.detach(); // Let it run independently
-        
-        std::cout << "[RingBufferTradeHandler] 🚀 Started ring buffer monitoring thread" << std::endl;
-    }
-    
+    // Monitoring already started in constructor - this method is now just a placeholder
+    // for future trade signal logic. Currently just monitoring ring buffers.
     return false; // Don't generate trade signals, just monitor and calculate
 }
 

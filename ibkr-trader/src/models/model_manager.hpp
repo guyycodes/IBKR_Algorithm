@@ -71,6 +71,9 @@ public:
     void addTick (const stock_data_tick::StockData& tick);          // level-1/5s bar
     void addTradeTick(double price, int volume);                    // time-&-sales
 
+    /* volume profile summary ----------------------------------------------- */
+    std::string getVolumeProfileSummary() const { return m_volProfile->get_summary(); }
+
     /* debug control -------------------------------------------------------- */
     void setDebugLogging(bool enabled) { m_debug_logging = enabled; }
     bool getDebugLogging() const { return m_debug_logging; }

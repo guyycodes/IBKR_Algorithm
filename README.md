@@ -472,9 +472,11 @@ All components listed under a thread box execute on that thread ID.
                         │         └─ ModelManager(QBTS) ←──────────────────────── time_ordered_tick_buffer, connection_manager, raw_data_model, volume_profile_map, ring_buffer_trade_handler
                         │                 │
                         │                 ├─ stock_data_tick ←────────────────────────  connection
-                        │                 ├─ time_ordered_tick_buffer ←──────────────────────── stock_data_tick  
-                        │                 ├─ time_ordered_tick_buffer (signal generation) ←────────── ring_buffer_trade_handler
+                        │                 ├─ time_ordered_tick_buffer ←──────────────────────── stock_data_tick, ring_buffer_trade_handler
+                        │                 │
                         │                 ├─ ring_buffer_trade_handler ←──────────────────────── stock_data_tick, time_ordered_tick_buffer
+                        │                 │       └─🧵 THREAD (ring buffer monitoring thread for time_ordered_tick_buffer)
+                        │                 │
                         │                 ├─ connection
                         │                 │     └──connection.cpp ←──────────────────────── connection_cache, frame_analyzer, decoder, account_summary
                         │                 ├─ connection_manager  
@@ -488,6 +490,7 @@ All components listed under a thread box execute on that thread ID.
                         │                 │     ├─ stock_data_tick
                         │                 │     ├─ volume_profile_map
                         │                 │     └─ raw_data_model ←──────────────────────── STK_Q, stock_data_tick
+                        │                 │             └─🧵 THREAD (for writing training data)
                         │                 ├─ STK_Q
                         │                 └─ position_handler (risk manager / P&L / Logs) ←──────────────────────── ring_buffer_trade_handler
                         │

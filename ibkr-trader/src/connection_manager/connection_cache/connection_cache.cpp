@@ -12,9 +12,20 @@ namespace connection {
 
 using namespace std::chrono;
 
-static uint64_t nowEpochMs()
+static uint64_t nowEpochMs() noexcept
 {
-    return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    thread_local uint64_t cachedTimeMs = 0;
+    thread_local uint64_t lastCheckedMs = 0;
+
+    const uint64_t nowMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    
+    // Update cache only if 75ms have passed (throttling to 10 ticks/second max)
+    if (nowMs - lastCheckedMs > 75 || cachedTimeMs == 0) {
+        cachedTimeMs = nowMs;
+        lastCheckedMs = nowMs;
+    }
+    
+    return cachedTimeMs;
 }
 
 bool ConnectionCache::isComplete(const stock_data_tick::StockData& d)
@@ -46,7 +57,7 @@ CacheResult ConnectionCache::merge(std::string_view  sym,
                                    double            spreadPercent,
                                    double            midPoint)
 {
-    /* ---------------------------------------------------------------------
+/* ---------------------------------------------------------------------
        1.  Lookup                 (zero allocations on hits)
        ------------------------------------------------------------------ */
     auto it = m_map.find(sym);                       // heterogeneous lookup (C++20)
@@ -63,6 +74,12 @@ CacheResult ConnectionCache::merge(std::string_view  sym,
 
     bool changed = false;
 
+    /* Timestamp correction - use provided timestamp if valid, otherwise use current time */
+    if (ts == 0) {
+        ts = nowEpochMs();        // Only use system time if no timestamp provided
+    }
+    // Otherwise preserve the original timestamp from market data feed
+
     /* tick-by-tick change tracker is folded into the update pass itself   */
     bool tickByTickChanged = false;
 
@@ -70,21 +87,25 @@ CacheResult ConnectionCache::merge(std::string_view  sym,
         if (v > 0 && v != field) { field = v; tickByTickChanged = true; }
     };
 
-    track_and_set(st.bid,     bid);
-    track_and_set(st.ask,     ask);
-    track_and_set(st.bidSize, bidSz);
-    track_and_set(st.askSize, askSz);
-    track_and_set(st.last,    last);          // mid-point or trade price
+    track_and_set(st.bid,               bid);
+    track_and_set(st.ask,               ask);
+    track_and_set(st.bidSize,           bidSz);
+    track_and_set(st.askSize,           askSz);
+    track_and_set(st.last,              last);          // mid-point or trade price
+    track_and_set(st.timestamp,         ts);            // Use corrected timestamp
+    track_and_set(st.spreadPercent,     spreadPercent);
+    track_and_set(st.midPoint,          midPoint);
+    track_and_set(st.spread,            spread);
 
     /* Bulk updates that do **not** participate in tick-change semantics  */
-    CONN_CHG(st.volume,   vol);
-    CONN_CHG(st.open,     o);  CONN_CHG(st.high,h); CONN_CHG(st.low,l); CONN_CHG(st.close,c);
-    CONN_CHG(st.vwap,     vwap);
-    CONN_CHG(st.priceChange,  priceChange);
-    CONN_CHG(st.barRange,     barRange);
-    CONN_CHG(st.spread,       spread);
-    CONN_CHG(st.spreadPercent,spreadPercent);
-    CONN_CHG(st.midPoint,     midPoint);
+    CONN_CHG(st.volume,         vol);
+    CONN_CHG(st.open,           o);  
+    CONN_CHG(st.high,           h); 
+    CONN_CHG(st.low,            l); 
+    CONN_CHG(st.close,          c);
+    CONN_CHG(st.vwap,           vwap);
+    CONN_CHG(st.priceChange,    priceChange);
+    CONN_CHG(st.barRange,       barRange); 
 
     /* ---------------------------------------------------------------------
        3.  Non-critical fields – executed only when necessary
@@ -93,10 +114,9 @@ CacheResult ConnectionCache::merge(std::string_view  sym,
     if (st.symbol.empty())     // symbol set only once
         st.symbol        = it->first;            // no copy on subsequent ticks
 
-    /* Timestamp – avoid the expensive syscall unless caller passed zero  */
-    
-    ts = nowEpochMs();
-    st.timestamp = ts;
+
+
+
 
     /* ---------------------------------------------------------------------
        4.  Completeness test – done **after** fast path so it never hurts

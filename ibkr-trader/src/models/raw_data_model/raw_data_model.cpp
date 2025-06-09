@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include "../util/stk_q/stk_q.hpp"
+#include "../global_config.hpp"
 
 namespace raw_data_model {
 
@@ -28,22 +29,61 @@ bool TradingParams::from_json(const nlohmann::json& js) noexcept
 /*───────────────────────────────────────────────────────────────────────────────
  * ctor                                                                         */
 RawDataModel::RawDataModel(std::string sym, int intervalMs)
-    : m_symbol(std::move(sym)),
-      m_queue(std::make_unique<stk_q::STK_Q>())
+    : m_symbol(std::move(sym))
 {
-    // STK_Q uses hardcoded 500ms filtering, intervalMs parameter is ignored
-    std::clog << "[RawDataModel] " << m_symbol << " created (using STK_Q default 500ms filter interval)" << '\n';
+    try {
+        m_queue = std::make_unique<stk_q::STK_Q>();
+        
+        // STK_Q uses hardcoded 500ms filtering, intervalMs parameter is ignored
+        std::clog << "[RawDataModel] " << m_symbol << " created (using STK_Q default 500ms filter interval)" << '\n';
+        
+        // warm up data collection if global flag is set
+        if (isDataCollectionEnabled()) {
+            initialize_training_collector();
+            std::clog << "[RawDataModel] Data collection auto-started for " << m_symbol << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[RawDataModel] Error creating RawDataModel for " << m_symbol 
+                  << ": " << e.what() << std::endl;
+        throw; // Re-throw to prevent incomplete object construction
+    }
+}
+
+/*───────────────────────────────────────────────────────────────────────────────
+ * dtor                                                                         */
+RawDataModel::~RawDataModel()
+{
+    // Ensure training thread is properly terminated
+    stop_write_to_file();
+    std::clog << "[RawDataModel] " << m_symbol << " destroyed" << '\n';
 }
 
 /*───────────────────────────────────────────────────────────────────────────────
  * addTick – single entry-point for new market ticks                            */
 void RawDataModel::addTick(const stock_data_tick::StockData& tick)
 {
-    std::lock_guard lg{m_mx};
-    stk_q::STK_Q_Data q = convertToQueue(tick);
+    try {
+        std::lock_guard lg{m_mx};
+        
+        // Always convert to STK_Q_Data format first
+        stk_q::STK_Q_Data q = convertToQueue(tick);
 
-    m_queue->push(q);
-    std::clog << "[RawDataModel] Tick received for " << m_symbol << ": last=" << tick.last << '\n';
+        if (shouldWriteToFile()) {
+            m_trainingCollector->processTick(q);
+            std::clog << "[RawDataModel] Tick written to file for " << m_symbol << ": last=" << tick.last << '\n';
+        } else {
+            // Route to STK_Q queue
+            m_queue->push(q);
+            std::clog << "[RawDataModel] Tick queued for " << m_symbol << ": last=" << tick.last << '\n';
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[RawDataModel] Error processing tick for " << m_symbol << ": " << e.what() << std::endl;
+    }
+}
+
+bool RawDataModel::shouldWriteToFile() const
+{
+    return isDataCollectionEnabled();
 }
 
 /*───────────────────────────────────────────────────────────────────────────────
@@ -79,7 +119,7 @@ bool RawDataModel::latestTick(stock_data_tick::StockData& out) const
     // spin-lock around trivial copy to avoid heavy mutex
     while (m_spinLock.test_and_set(std::memory_order_acquire));
     out.symbol    = m_symbol;
-    out.timestamp = static_cast<stock_data_tick::timestamp_t>(qd.time) * 1'000'000; // μs→ns
+    out.timestamp = static_cast<stock_data_tick::timestamp_t>(qd.time)
     out.exchange  = qd.exchange;
     
     out.bid       = qd.bid;
@@ -227,12 +267,160 @@ stock_data_tick::StockData RawDataModel::convertToStockData(const stk_q::STK_Q_D
 std::vector<stock_data_tick::StockData> RawDataModel::getTicksInTimeWindow(std::uint64_t cutoffTimeMs) const
 {
     std::vector<stock_data_tick::StockData> result;
-    std::lock_guard lg{m_mx};
     
-    // For now, return empty vector - this is a diagnostic method
-    // The STK_Q doesn't support non-destructive iteration
-    // TODO: Enhance STK_Q to support time-window queries if needed
+    // Get all data from STK_Q (non-destructive)
+    auto allQueueData = m_queue->getAllData();
+    
+    // Convert and filter by time if cutoffTimeMs is specified
+    for (const auto& qData : allQueueData) {
+        if (cutoffTimeMs == 0 || qData.time >= cutoffTimeMs) {
+            result.push_back(convertToStockData(qData));
+        }
+    }
+    
     return result;
+}
+
+/*───────────────────────────────────────────────────────────────────────────────
+ * initialize_training_collector – create and initialize training data collector */
+bool RawDataModel::initialize_training_collector()
+{
+    try {
+        // Create training data collector with optimized settings
+        m_trainingCollector = std::make_unique<TrainingDataCollector>(m_symbol);
+        std::clog << "[RawDataModel] Training data collector initialized for " << m_symbol << std::endl;
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "[RawDataModel] Failed to create training data collector for " << m_symbol 
+                  << ": " << e.what() << std::endl;
+        m_trainingCollector.reset();
+        return false;
+    }
+}
+
+/*───────────────────────────────────────────────────────────────────────────────
+ * write_to_file – start training data collection thread                        */
+bool RawDataModel::write_to_file()
+{
+    try {
+        std::lock_guard<std::mutex> lg{m_trainingMutex};
+        
+        // Check if already running
+        if (m_isTrainingActive.load()) {
+            std::clog << "[RawDataModel] Training data collection already active for " << m_symbol << std::endl;
+            return false;
+        }
+        
+        // Initialize collector if not already done
+        if (!m_trainingCollector && !initialize_training_collector()) {
+            return false;
+        }
+        
+        // Reset control flags and start thread
+        m_shouldStopTraining = false;
+        m_isTrainingActive = true;
+        
+        // Start the training data collection thread
+        m_trainingThread = std::make_unique<std::thread>(&RawDataModel::trainingDataThreadFunc, this);
+        
+        std::clog << "[RawDataModel] Training data collection started for " << m_symbol << std::endl;
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "[RawDataModel] Error starting training data collection for " << m_symbol 
+                  << ": " << e.what() << std::endl;
+        m_isTrainingActive = false;
+        return false;
+    } catch (...) {
+        std::cerr << "[RawDataModel] Unknown error starting training data collection for " << m_symbol << std::endl;
+        m_isTrainingActive = false;
+        return false;
+    }
+}
+
+/*───────────────────────────────────────────────────────────────────────────────
+ * stop_write_to_file – stop training data collection thread                    */
+void RawDataModel::stop_write_to_file()
+{
+    try {
+            {
+                std::unique_lock<std::mutex> lock{m_trainingMutex};
+                
+                if (!m_isTrainingActive.load()) {
+                    return; // Not running
+                }
+                
+                // Signal thread to stop
+                m_shouldStopTraining = true;
+                m_trainingCV.notify_all();
+            }  // Lock released here automatically
+        
+        // Wait for thread to finish (outside lock to avoid deadlock)
+        if (m_trainingThread && m_trainingThread->joinable()) {
+            m_trainingThread->join();
+            m_trainingThread.reset();
+        }
+        
+        // Clean up collector
+        if (m_trainingCollector) {
+            m_trainingCollector->stop();
+            m_trainingCollector.reset();
+        }
+        
+        m_isTrainingActive = false;
+        std::clog << "[RawDataModel] Training data collection stopped for " << m_symbol << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "[RawDataModel] Error stopping training data collection for " << m_symbol 
+                  << ": " << e.what() << std::endl;
+        m_isTrainingActive = false;
+    }
+}
+
+/*───────────────────────────────────────────────────────────────────────────────
+ * is_writing_to_file – check if training data collection is active             */
+bool RawDataModel::is_writing_to_file() const
+{
+    return m_isTrainingActive.load();
+}
+
+/*───────────────────────────────────────────────────────────────────────────────
+ * trainingDataThreadFunc – training data collection thread function            */
+void RawDataModel::trainingDataThreadFunc()
+{
+    try {
+        std::clog << "[RawDataModel] Training data thread started for " << m_symbol << std::endl;
+        
+        if (m_trainingCollector) {
+            m_trainingCollector->start();
+        }
+        
+        std::unique_lock<std::mutex> lock{m_trainingMutex};
+        
+        while (!m_shouldStopTraining.load()) {
+            // Check for new ticks periodically (every 100ms)
+            m_trainingCV.wait_for(lock, std::chrono::milliseconds(100));
+            
+            if (m_shouldStopTraining.load()) {
+                break;
+            }
+            
+            // Process available ticks
+            if (m_trainingCollector && m_trainingCollector->isRunning()) {
+                // Process tick data directly from STK_Q
+                stk_q::STK_Q_Data qData;
+                if (m_queue->peekLatest(qData)) {
+                    // Only process if we have valid data
+                    if (qData.last > 0.0) {
+                        m_trainingCollector->processTick(qData);
+                    }
+                }
+            }
+        }
+        
+        std::clog << "[RawDataModel] Training data thread finished for " << m_symbol << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "[RawDataModel] Error in training data thread for " << m_symbol 
+                  << ": " << e.what() << std::endl;
+    }
 }
 
 } // namespace raw_data_model

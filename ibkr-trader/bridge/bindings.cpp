@@ -1,18 +1,20 @@
-// #include "bindings.hpp"
+// ═══════════════════════════════════════════════════════════════════════════════
+// SIMPLIFIED BINDINGS: Candle Ring + STK_Q Only for now
+// bindings.cpp is used to bind the C++ code to Python
+// ═══════════════════════════════════════════════════════════════════════════════
 
-// PYBIND11_MODULE(pybridge, m) {
-//     m.doc() = "Ultra-Fast Bridge: C++ ➜ Python (Ring Buffer + ML Training Data)";
+#include "bindings.hpp"
+
+PYBIND11_MODULE(pybridge, m) {
+    m.doc() = "Simplified Bridge: Candle Ring + STK_Q Only";
     
-//     // Bind core data structures
-//     bind_stockdata(m);
-//     bind_stk_q_data(m);           // New: STK_Q data for training
-//     bind_temporary_candle(m);
-//     bind_candle(m);
-//     bind_technical_indicators(m);
+    // Bind only what we need
+    bind_stk_q_data(m);              // STK_Q data structure
+    bind_candle(m);                  // Candle data structure
     
-//     // Bind wrappers
-//     bind_ring_buffer_wrapper(m);     // Real-time analysis
-//     bind_training_data_wrapper(m);   // ML training data
+    // Bind simplified wrappers
+    bind_candle_ring_wrapper(m);     // Candle Ring access
+    bind_stk_q_wrapper(m);           // STK_Q access
     
-//     m.attr("__version__") = "2.0.0";
-// } 
+    m.attr("__version__") = "2.0.0-simplified";
+} 

@@ -314,7 +314,7 @@ void IBKRTrader::tickByTickBidAsk(int reqId, time_t t,
     routeViaCache(0, ana.bidPrice, ana.askPrice,
                  static_cast<int>(ana.bidSize),
                  static_cast<int>(ana.askSize),
-                 0, ana.epochTime,
+                 0, 0,
                  "", 0, 0, 0, 0, 0, 0, 0, ana.spread, ana.spreadPercent, ana.midPoint);
 }
 

@@ -7,7 +7,7 @@ namespace stk_q
 {
     // Data filtering interval - keeps only one tick per interval (in milliseconds)
     // 250ms = 4 ticks per second, 500ms = 2 ticks per second, 125ms = 8 ticks per second
-    static constexpr int64_t TICK_INTERVAL_MS = 250;
+    static constexpr int64_t TICK_INTERVAL_MS = 100;
 
     STK_Q::STK_Q() {
         // constructor
@@ -19,8 +19,8 @@ namespace stk_q
     
     void STK_Q::push(STK_Q_Data& data) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        int64_t originalTime = data.time;
-        int64_t roundedTime  = (originalTime / TICK_INTERVAL_MS) * TICK_INTERVAL_MS;
+        uint64_t originalTime = data.time;
+        uint64_t roundedTime  = (originalTime / TICK_INTERVAL_MS) * TICK_INTERVAL_MS;
 
         // Skip if we already have a tick for this interval
         if (m_orderedData.find(roundedTime) == m_orderedData.end()) {
@@ -40,8 +40,8 @@ namespace stk_q
     
     void STK_Q::push(STK_Q_Data&& data) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        int64_t originalTime = data.time;
-        int64_t roundedTime  = (originalTime / TICK_INTERVAL_MS) * TICK_INTERVAL_MS;
+        uint64_t originalTime = data.time;
+        uint64_t roundedTime  = (originalTime / TICK_INTERVAL_MS) * TICK_INTERVAL_MS;
 
         if (m_orderedData.find(roundedTime) == m_orderedData.end()) {
             data.time = roundedTime;
@@ -115,6 +115,19 @@ namespace stk_q
                       << ", Exchange: " << data.exchange 
                       << std::endl;
         }
+    }
+    
+    std::vector<STK_Q_Data> STK_Q::getAllData() const {
+        std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_mutex));
+        std::vector<STK_Q_Data> result;
+        result.reserve(m_orderedData.size());
+        
+        // Copy all data in chronological order (map is already sorted by timestamp)
+        for (const auto& [timestamp, data] : m_orderedData) {
+            result.push_back(data);
+        }
+        
+        return result;
     }
     
     void STK_Q::removeOlderThan(uint64_t cutoffTime) {

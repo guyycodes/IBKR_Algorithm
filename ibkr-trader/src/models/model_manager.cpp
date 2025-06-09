@@ -305,11 +305,9 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
 
     size_t queueSizeBefore = m_rawModel->queueSize();
 
-    // Trade opportunity detection
-    if (m_rbHandler->evaluate(enrichedTick)) {
-        // std::cout << "[TradeAlert] Opportunity detected for " << getSymbol() 
-        //           << " at price: $" << enrichedTick.last << std::endl;
-    }
+    // Trade opportunity detection dont call this here, would start thousands of threads (commented out - monitoring now starts in constructor)
+    // m_rbHandler->evaluate(enrichedTick)
+
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Store in STK_Q and prune old data
     m_rawModel->addTick(enrichedTick);
@@ -318,20 +316,20 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
     // Print detailed tick information with thread ID
     std::ostringstream threadIdStr;
     threadIdStr << std::this_thread::get_id();
-    // std::cout << "[ModelManager][VALIDATION][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-    //           << "\n  Symbol: " << enrichedTick.symbol
-    //           << "\n  Timestamp: " << enrichedTick.timestamp
-    //           << "\n  Exchange: " << (!enrichedTick.exchange.empty() ? enrichedTick.exchange : "-")
-    //           << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
-    //           << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
-    //           << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
-    //           << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
-    //           << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
-    //           << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
-    //           << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
-    //           << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
-            //   << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
-            //   << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;   
+    std::cout << "[ModelManager][VALIDATION][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+              << "\n  Symbol: " << enrichedTick.symbol
+              << "\n  Timestamp: " << enrichedTick.timestamp
+              << "\n  Exchange: " << (!enrichedTick.exchange.empty() ? enrichedTick.exchange : "-")
+              << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
+              << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
+              << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
+              << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
+              << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
+              << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
+              << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
+              << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
+              << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
+              << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;   
                    
     pruneOldData();
 }

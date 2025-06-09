@@ -26,7 +26,13 @@ namespace {
 /*Shared pointer is only written once, so relaxed ordering is fine.*/
 std::atomic<input_manager::InputManager*> g_inputManager{nullptr};
 std::atomic<bool>                         g_shutdownRequested{false};
+std::atomic<bool>                         g_collectData{false};
 } // namespace
+
+// Global accessor for collect data flag
+bool isDataCollectionEnabled() {
+    return g_collectData.load(std::memory_order_relaxed);
+}
 
 // --------------------------------------------------------------------------------
 //  Minimal, RAII-style registration / un-registration of signal handlers
@@ -73,6 +79,7 @@ void onSignal(int signo) {
 // --------------------------------------------------------------------------------
 struct Config {
     bool testApi = false;
+    bool collect = false;
     int apiPort = 9000;
     std::string configFile = "";
 };
@@ -88,7 +95,7 @@ void logThreadRole(const std::string& role, const std::string& action) {
 }
 
 void showUsage() {
-    std::cout << "Usage: ./bin/ibkr-trader [--test-api] [--port <n>] [-h|--help]\n";
+    std::cout << "Usage: ./bin/ibkr-trader [--test-api] [--collect] [--port <n>] [-h|--help]\n";
 }
 
 // --------------------------------------------------------------------------------
@@ -101,6 +108,9 @@ Config parseArguments(int argc, char* argv[]) {
         
         if (arg == "--test-api") {
             cfg.testApi = true;
+        }
+        else if (arg == "--collect") {
+            cfg.collect = true;
         }
         else if (arg == "--port" && i + 1 < argc) {
             cfg.apiPort = std::atoi(argv[++i]);
@@ -128,6 +138,7 @@ int run(std::span<char*> argv) {
 
     auto manager = std::make_shared<input_manager::InputManager>();
     g_inputManager.store(manager.get(), std::memory_order_relaxed);
+    g_collectData.store(cfg.collect, std::memory_order_relaxed);
 
     if (!manager->initialize(cfg.configFile)) {
         std::cerr << "[main] InputManager initialisation failed.\n";

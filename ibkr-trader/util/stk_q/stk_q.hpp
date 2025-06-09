@@ -8,6 +8,7 @@
 #include <memory>
 #include <mutex>
 #include <iostream>
+#include <vector>
 
 namespace stk_q
 {
@@ -15,7 +16,7 @@ namespace stk_q
     {
         // Core identification
         std::string symbol;
-        long time;
+        uint64_t time;
         std::string exchange;
 
         // Core market data (from stock_data_tick::StockData)
@@ -80,6 +81,9 @@ namespace stk_q
             // Utility operations
             void clear();
             void print() const;
+            
+            // Non-destructive data access
+            std::vector<STK_Q_Data> getAllData() const;
             
             // Time-based pruning
             void removeOlderThan(uint64_t cutoffTime);

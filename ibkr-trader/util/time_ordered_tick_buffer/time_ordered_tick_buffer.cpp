@@ -15,19 +15,20 @@
 
 namespace time_ordered_tick_buffer {
 
+// legacy code, now implemented in the ring_buffer_trade_handler.cpp file
 // Chaikin Oscillator Configuration
-static constexpr int    FAST_PERIOD        = 3;                        // Fast EMA period (3 candles)
-static constexpr int    SLOW_PERIOD        = 10;                       // Slow EMA period (10 candles)
-static constexpr int    FAST_PERIOD_MS     = FAST_PERIOD * 60 * 1000;  // 3 minutes in milliseconds
-static constexpr int    SLOW_PERIOD_MS     = SLOW_PERIOD * 60 * 1000;  // 10 minutes in milliseconds
-static constexpr double ALPHA_FAST         = 2.0 / (FAST_PERIOD + 1);  // Fast EMA smoothing factor
-static constexpr double ALPHA_SLOW         = 2.0 / (SLOW_PERIOD + 1);  // Slow EMA smoothing factor
+// static constexpr int    FAST_PERIOD        = 3;                        // Fast EMA period (3 candles)
+// static constexpr int    SLOW_PERIOD        = 10;                       // Slow EMA period (10 candles)
+// static constexpr int    FAST_PERIOD_MS     = FAST_PERIOD * 60 * 1000;  // 3 minutes in milliseconds
+// static constexpr int    SLOW_PERIOD_MS     = SLOW_PERIOD * 60 * 1000;  // 10 minutes in milliseconds
+// static constexpr double ALPHA_FAST         = 2.0 / (FAST_PERIOD + 1);  // Fast EMA smoothing factor
+// static constexpr double ALPHA_SLOW         = 2.0 / (SLOW_PERIOD + 1);  // Slow EMA smoothing factor
 
-// Price EMA Configuration
-static constexpr int    PRICE_EMA_FAST     = 9;                        // Fast price EMA period
-static constexpr int    PRICE_EMA_SLOW     = 26;                       // Slow price EMA period
-static constexpr double ALPHA_PRICE_FAST   = 2.0 / (PRICE_EMA_FAST + 1);  // Fast price EMA smoothing
-static constexpr double ALPHA_PRICE_SLOW   = 2.0 / (PRICE_EMA_SLOW + 1);  // Slow price EMA smoothing
+// // Price EMA Configuration
+// static constexpr int    PRICE_EMA_FAST     = 9;                        // Fast price EMA period
+// static constexpr int    PRICE_EMA_SLOW     = 26;                       // Slow price EMA period
+// static constexpr double ALPHA_PRICE_FAST   = 2.0 / (PRICE_EMA_FAST + 1);  // Fast price EMA smoothing
+// static constexpr double ALPHA_PRICE_SLOW   = 2.0 / (PRICE_EMA_SLOW + 1);  // Slow price EMA smoothing
 
 // Time Conversion Constants
 static constexpr int64_t MS_PER_MINUTE     = 60 * 1000;                // Milliseconds per minute
@@ -65,12 +66,12 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
       m_lastProcessedMinute(-1)
 {
     // Initialize fixed-size ring buffers for O(1) operations
-    m_candleRing.resize(m_windowMinutes);
-    m_minuteRing.resize(m_windowMinutes);
-    m_minuteIndices.resize(m_windowMinutes, -1);  // Initialize to invalid
-    
+    m_candleRing.resize(m_windowMinutes); // Purpose: Stores finalized candles for each minute slot
+    m_minuteRing.resize(m_windowMinutes); // Purpose: Stores temporary candles being built for each minute slot
     // Initialize price ring for ALMA calculation (size will be set by calculator)
-    m_priceRing.resize(9);  // Default size, calculator may resize
+    m_priceRing.resize(9);  // Default size, calculator may resize  // Purpose: Stores price data for ALMA calculation
+    
+    m_minuteIndices.resize(m_windowMinutes, -1);  // Initialize to invalid 
     
     // Initialize all price ring slots to prevent NaN accumulation
     std::fill(m_priceRing.begin(), m_priceRing.end(), 0.0);
@@ -471,6 +472,28 @@ void TimeOrderedTickBuffer::finaliseWorkingCandle() {
     }
 
     // Also store in minute ring for compatibility with existing monitoring code
+    // 
+    // NOTE: Ring buffer slot calculation using absolute minutes-since-epoch
+    // =====================================================================
+    // 
+    // This ring buffer uses absolute "minutes-since-epoch" as the key, which means
+    // the first slot used depends on WHEN the program started, not slot 0.
+    // 
+    // Example:
+    //   minuteIndex = 1,749,244,357,914 ms / 60,000 = 29,154,072 minutes-since-epoch
+    //   slot = 29,154,072 % 60 = 12
+    // 
+    // So the first minute gets stored in slot 12, not slot 0. This is CORRECT behavior!
+    // 
+    // Why this is proper:
+    // - Ring buffer has 60 slots (one per minute in 60-minute window)
+    // - Each minute maps to: minute % 60 = slot
+    // - Physical slot depends on when program starts (not a bug!)
+    // - After 48 more minutes (60-12), it wraps to slot 0, then 1, 2, etc.
+    // - Old slots get overwritten in true ring-buffer fashion
+    // 
+    // This ensures the 60-minute sliding window works correctly regardless of
+    // what wall-clock time the program started.
     size_t slot = static_cast<size_t>(m_workingMinute % static_cast<int64_t>(m_windowMinutes));
     m_minuteRing[slot] = m_workingCandle;
     m_minuteIndices[slot] = m_workingMinute;

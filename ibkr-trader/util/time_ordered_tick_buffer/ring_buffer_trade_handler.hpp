@@ -18,6 +18,8 @@
 #include <vector>
 #include <map>
 #include <limits>
+#include <thread>
+#include <atomic>
 #include "time_ordered_tick_buffer.hpp"
 #include "models/volume_profile/volume_profile_map.hpp"
 #include "models/raw_data_model/raw_data_model.hpp"
@@ -32,8 +34,15 @@ public:
         volume_profile_map::VolumeProfileMap& vol,
         raw_data_model::RawDataModel& model);
 
+    // Destructor for clean thread shutdown
+    ~RingBufferTradeHandler();
+
     // Main entry point - evaluates tick and triggers monitoring
     bool evaluate(const stock_data_tick::StockData& tick);
+
+    // Thread management methods
+    void startMonitoring();
+    void stopMonitoring();
 
     // Ultra-low latency ring buffer monitoring (15-second real-time monitoring)
     void monitorRingBuffersRealTime();
@@ -66,6 +75,11 @@ private:
     time_ordered_tick_buffer::TimeOrderedTickBuffer& m_buf;
     volume_profile_map::VolumeProfileMap& m_vol;
     raw_data_model::RawDataModel& m_model;
+    
+    // Thread management
+    std::thread m_monitorThread;
+    std::atomic<bool> m_shouldStop{false};
+    std::atomic<bool> m_isMonitoring{false};
     
     // Technical indicator state (moved from TimeOrderedTickBuffer)
     
