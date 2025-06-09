@@ -27,9 +27,6 @@ TrainingDataCollector::TrainingDataCollector(std::string symbol,
 TrainingDataCollector::~TrainingDataCollector()
 {
     stop();
-    std::lock_guard<std::mutex> g(m_mutex);
-    if (m_gzFile)
-        gzclose(m_gzFile);
 }
 
 void TrainingDataCollector::processTick(const stk_q::STK_Q_Data& tick)
@@ -42,7 +39,7 @@ void TrainingDataCollector::processTick(const stk_q::STK_Q_Data& tick)
     if (!m_gzFile)
         throw std::runtime_error("writer not initialized (file closed)");
     
-    if (m_currentRowCount >= m_rowsPerFile)
+    if (m_rowsPerFile && m_currentRowCount >= m_rowsPerFile)
         rotateFile();
     
     writeTickToFile(tick);
@@ -52,17 +49,26 @@ void TrainingDataCollector::processTick(const stk_q::STK_Q_Data& tick)
 void TrainingDataCollector::start()
 {
     std::lock_guard<std::mutex> g(m_mutex);
-    m_isRunning = true;
     
     if (!m_gzFile)
-        rotateFile();  // Open first file
+        rotateFile();  // Open first file - may throw
+    
+    m_isRunning = true;  // Only set this after rotateFile() succeeds
     
     std::clog << "[TrainingDataCollector] Started for symbol: " << m_symbol << std::endl;
 }
 
 void TrainingDataCollector::stop()
 {
+    std::lock_guard<std::mutex> g(m_mutex);
     m_isRunning = false;
+    
+    if (m_gzFile) {
+        gzflush(m_gzFile, Z_SYNC_FLUSH);
+        gzclose(m_gzFile);
+        m_gzFile = nullptr;
+    }
+    
     std::clog << "[TrainingDataCollector] Stopped" << std::endl;
 }
 
