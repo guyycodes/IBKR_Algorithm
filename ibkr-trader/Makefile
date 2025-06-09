@@ -12,7 +12,7 @@ LIBDIR = lib
 TESTDIR = $(SRCDIR)/tests
 
 # Link against protobuf library
-LIBS = -L$(LIBDIR) -lprotobuf -pthread -lbid
+LIBS = -L$(LIBDIR) -lprotobuf -pthread -lbid -lz
 
 # Add IBKR source files from include directory
 IBKR_SRCDIR = include/ibkr/cppclient/client
@@ -24,7 +24,8 @@ SOURCES = $(wildcard $(SRCDIR)/*.cpp) \
           util/app_state.cpp \
           util/stk_q/stk_q.cpp \
           util/time_ordered_tick_buffer/time_ordered_tick_buffer.cpp \
-          util/time_ordered_tick_buffer/ring_buffer_trade_handler.cpp
+          util/time_ordered_tick_buffer/ring_buffer_trade_handler.cpp \
+          util/training_data_collector/training_data_collector.cpp
 
 # Exclude official_example_connections directory
 SOURCES := $(filter-out $(SRCDIR)/connection_manager/official_example_connections/%.cpp, $(SOURCES))

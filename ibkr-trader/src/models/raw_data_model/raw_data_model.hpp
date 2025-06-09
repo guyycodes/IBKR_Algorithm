@@ -10,6 +10,7 @@
 #include <vector>
 #include <thread>
 #include <condition_variable>
+#include <queue>
 
 #include "../../util/stk_q/stk_q.hpp"
 #include "../stock_data_tick/stock_data_tick.hpp"
@@ -91,6 +92,7 @@ private:
     std::atomic<bool>                 m_isTrainingActive{false};
     mutable std::mutex                m_trainingMutex;
     std::condition_variable           m_trainingCV;
+    std::queue<stk_q::STK_Q_Data>     m_trainingQueue;  // Isolated queue for training thread
 };
 
 } // namespace raw_data_model
