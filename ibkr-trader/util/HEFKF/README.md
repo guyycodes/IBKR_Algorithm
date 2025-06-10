@@ -236,3 +236,18 @@ bool initialized = filter.is_initialized();
 1. Exponential Forgetting Kalman Filters for Time-Varying Parameter Estimation
 2. Hybrid Signal Processing for High-Frequency Trading
 3. Bucket-Based Directional Confidence in Financial Markets 
+
+
+
+MarketFeed ─▶ StockData ▸ ring‑buffer ▸ KalmanTick
+                                   │
+                                   ▼
+                             FrequencyAnalyser      (FFT/Welch, coherence)
+                                   │
+                                   ▼
+     BucketConfidence  ◀─ Dirichlet‑sharpen  ◀─ posterior_from_KF()
+                                   │
+        ( + quality_factor in FrequencyFeatures )
+                                   │
+                                   ▼
+         HybridExpForgettingKalmanFilter::process()

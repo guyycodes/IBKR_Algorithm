@@ -38,9 +38,11 @@ add_definitions(-DUSE_FFTW3)
 
 # Build library
 add_library(hefkf STATIC
-    
     1min_HEFKF.cpp
     5min_HEFKF.cpp
+    frequency_analyser.cpp
+    posterior.cpp
+    integration_loop.cpp
 )
 
 target_link_libraries(hefkf ${FFTW3_LIB} ${FFTW3_THREADS_LIB})
@@ -59,12 +61,21 @@ add_executable(standalone_example
 
 target_link_libraries(standalone_example hefkf)
 
+# Build unit tests for the pipeline
+add_executable(unit_tests
+    unit_tests.cpp
+)
+
+target_link_libraries(unit_tests hefkf)
+
 # Install targets
-install(TARGETS hefkf smoke_tests standalone_example DESTINATION bin)
+install(TARGETS hefkf smoke_tests standalone_example unit_tests DESTINATION bin)
 install(FILES 
-  
     1min_HEFKF.hpp 
     5min_HEFKF.hpp 
+    frequency_analyser.hpp
+    posterior.hpp
+    integration_loop.hpp
     DESTINATION include)
 
 # Optional: Build tests if we have them

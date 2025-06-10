@@ -87,31 +87,31 @@ private:
 
 // ─────────────────────── 1-Minute Specialized Configuration ───────────────────────────
 struct OneMinHKFConfig {
-    // 1-minute optimized parameters (hardcoded)
-    static constexpr double TIME_DOMAIN_WEIGHT = 0.7;
-    static constexpr double FREQUENCY_DOMAIN_WEIGHT = 0.3;
+    // 1-minute optimized parameters (REACTIVE FOCUS)
+    static constexpr double TIME_DOMAIN_WEIGHT = 0.75;     // Higher time domain focus for immediate response
+    static constexpr double FREQUENCY_DOMAIN_WEIGHT = 0.25; // Lower frequency weight for faster reactions
     static constexpr bool ADAPTIVE_NOISE = true;
-    static constexpr bool PRESERVE_BREAKOUTS = true;
-    static constexpr double BUCKET_WEIGHT = 0.5;
+    static constexpr bool PRESERVE_BREAKOUTS = true;        // Critical for 1min breakout detection
+    static constexpr double BUCKET_WEIGHT = 0.6;           // Higher bucket weight for directional bias
     
-    // Exponential forgetting parameters for 1min
-    static constexpr double LAMBDA_FIXED = 0.99;
+    // Exponential forgetting parameters for 1min (REACTIVE)
+    static constexpr double LAMBDA_FIXED = 0.98;       // Lower base forgetting for faster response
     static constexpr bool LAMBDA_ADAPTIVE = true;
-    static constexpr double LAMBDA_MIN = 0.95;
-    static constexpr double LAMBDA_MAX = 0.995;
-    static constexpr double VOL_THRESHOLD = 0.002;  // 0.2% 1-sec volatility threshold
+    static constexpr double LAMBDA_MIN = 0.92;         // Much lower min for high responsiveness
+    static constexpr double LAMBDA_MAX = 0.99;         // Lower max to avoid over-smoothing
+    static constexpr double VOL_THRESHOLD = 0.0015;    // 0.15% - tighter threshold for faster adaptation
     
-    // Noise matrix scaling parameters for 1min
-    static constexpr double INITIAL_P_SCALE = 1.0;
-    static constexpr double R_PRICE = 0.1;
-    static constexpr double R_VOLUME = 10000.0;
-    static constexpr double R_SPREAD = 0.01;
-    static constexpr double Q_BASE_SCALE = 1e-4;
+    // Noise matrix scaling parameters for 1min (LOW NOISE = MORE REACTIVE)
+    static constexpr double INITIAL_P_SCALE = 0.8;     // Lower initial uncertainty
+    static constexpr double R_PRICE = 0.05;            // MUCH lower measurement noise (trust measurements more)
+    static constexpr double R_VOLUME = 8000.0;         // Lower volume noise
+    static constexpr double R_SPREAD = 0.008;          // Lower spread noise
+    static constexpr double Q_BASE_SCALE = 5e-5;       // Lower process noise base
     
-    // Adaptive noise scaling for 1min
-    static constexpr double SCALE_MIN = 0.5;
-    static constexpr double SCALE_MAX = 5.0;
-    static constexpr double Q_MULTIPLIER = 0.1;
+    // Adaptive noise scaling for 1min (AGGRESSIVE SCALING)
+    static constexpr double SCALE_MIN = 0.3;           // Allow very low noise for strong signals
+    static constexpr double SCALE_MAX = 3.0;           // Cap scaling to prevent over-reactivity
+    static constexpr double Q_MULTIPLIER = 0.08;       // Lower process noise multiplier
 };
 
 // ─────────────────────── 1-Minute Specialized Filter Class ───────────────────────────

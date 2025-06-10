@@ -88,30 +88,50 @@ private:
 // ─────────────────────── 5-Minute Specialized Configuration ───────────────────────────
 struct FiveMinHKFConfig {
     // 5-minute optimized parameters (hardcoded)
-    static constexpr double TIME_DOMAIN_WEIGHT = 0.65;
-    static constexpr double FREQUENCY_DOMAIN_WEIGHT = 0.35;
+    // static constexpr double TIME_DOMAIN_WEIGHT = 0.65;
+    // static constexpr double FREQUENCY_DOMAIN_WEIGHT = 0.35;
+    // 5-minute optimized parameters (SMOOTH FOCUS)
+    static constexpr double TIME_DOMAIN_WEIGHT = 0.6;      // Lower time domain for smoother response
+    static constexpr double FREQUENCY_DOMAIN_WEIGHT = 0.4; // Higher frequency weight for trend analysis
     static constexpr bool ADAPTIVE_NOISE = true;
-    static constexpr bool PRESERVE_BREAKOUTS = true;
-    static constexpr double BUCKET_WEIGHT = 0.5;
+    // static constexpr bool PRESERVE_BREAKOUTS = true;
+    // static constexpr double BUCKET_WEIGHT = 0.5;
+    static constexpr bool PRESERVE_BREAKOUTS = false;      // Less aggressive breakout preservation
+    static constexpr double BUCKET_WEIGHT = 0.4;          // Lower bucket weight for smoother transitions
     
     // Exponential forgetting parameters for 5min
-    static constexpr double LAMBDA_FIXED = 0.99;
+    // static constexpr double LAMBDA_FIXED = 0.99;
+    // Exponential forgetting parameters for 5min (SMOOTH)
+    static constexpr double LAMBDA_FIXED = 0.995;      // Higher base forgetting for more smoothing
     static constexpr bool LAMBDA_ADAPTIVE = true;
-    static constexpr double LAMBDA_MIN = 0.94;    // Slightly lower for more smoothing
-    static constexpr double LAMBDA_MAX = 0.995;
-    static constexpr double VOL_THRESHOLD = 0.003;  // 0.3% 1-sec volatility threshold
+    // static constexpr double LAMBDA_MIN = 0.94;    // Slightly lower for more smoothing
+    // static constexpr double LAMBDA_MAX = 0.995;
+    // static constexpr double VOL_THRESHOLD = 0.003;  // 0.3% 1-sec volatility threshold
+    static constexpr double LAMBDA_MIN = 0.96;         // Much higher min for smoother response
+    static constexpr double LAMBDA_MAX = 0.998;        // Higher max for strong smoothing
+    static constexpr double VOL_THRESHOLD = 0.004;     // 0.4% - higher threshold for slower adaptation
     
     // Noise matrix scaling parameters for 5min
-    static constexpr double INITIAL_P_SCALE = 1.5;  // Larger initial covariance
-    static constexpr double R_PRICE = 0.15;         // Higher measurement noise
-    static constexpr double R_VOLUME = 12000.0;
-    static constexpr double R_SPREAD = 0.015;
-    static constexpr double Q_BASE_SCALE = 2e-4;    // Higher process noise
+    // static constexpr double INITIAL_P_SCALE = 1.5;  // Larger initial covariance
+    // static constexpr double R_PRICE = 0.15;         // Higher measurement noise
+    // static constexpr double R_VOLUME = 12000.0;
+    // static constexpr double R_SPREAD = 0.015;
+    // static constexpr double Q_BASE_SCALE = 2e-4;    // Higher process noise
+    // Noise matrix scaling parameters for 5min (HIGH NOISE = MORE SMOOTH)
+    static constexpr double INITIAL_P_SCALE = 2.0;     // Higher initial uncertainty
+    static constexpr double R_PRICE = 0.25;            // MUCH higher measurement noise (trust measurements less)
+    static constexpr double R_VOLUME = 15000.0;        // Higher volume noise
+    static constexpr double R_SPREAD = 0.025;          // Higher spread noise
+    static constexpr double Q_BASE_SCALE = 3e-4;       // Higher process noise base
     
     // Adaptive noise scaling for 5min
-    static constexpr double SCALE_MIN = 0.4;        // Wider scale range
-    static constexpr double SCALE_MAX = 6.0;
-    static constexpr double Q_MULTIPLIER = 0.15;    // Higher process noise scaling
+    // static constexpr double SCALE_MIN = 0.4;        // Wider scale range
+    // static constexpr double SCALE_MAX = 6.0;
+    // static constexpr double Q_MULTIPLIER = 0.15;    // Higher process noise scaling
+    // Adaptive noise scaling for 5min (CONSERVATIVE SCALING)
+    static constexpr double SCALE_MIN = 0.6;           // Higher min to maintain smoothness
+    static constexpr double SCALE_MAX = 8.0;           // Allow higher scaling for strong smoothing
+    static constexpr double Q_MULTIPLIER = 0.2;        // Higher process noise multiplier for smoothness
 };
 
 // ─────────────────────── 5-Minute Specialized Filter Class ───────────────────────────
