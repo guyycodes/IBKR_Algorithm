@@ -19,8 +19,8 @@ static uint64_t nowEpochMs() noexcept
 
     const uint64_t nowMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
     
-    // Update cache only if 75ms have passed (throttling to 10 ticks/second max)
-    if (nowMs - lastCheckedMs > 75 || cachedTimeMs == 0) {
+    // Update cache only if 10ms have passed (throttling to 10 ticks/second max)
+    if (nowMs - lastCheckedMs > 10 || cachedTimeMs == 0) {
         cachedTimeMs = nowMs;
         lastCheckedMs = nowMs;
     }

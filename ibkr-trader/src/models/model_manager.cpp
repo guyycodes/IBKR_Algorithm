@@ -40,7 +40,13 @@ ModelManager::ModelManager(std::string sym,
     m_debug_logging = true;
     m_rawModel   = std::make_unique<raw_data_model::RawDataModel>(m_symbol);
     m_volProfile = std::make_unique<volume_profile_map::VolumeProfileMap>(0.05);
+    
+    // CRITICAL: Convert user-friendly time units (5 MINUTES, 2 HOURS, etc.) to milliseconds
+    // This enables per-instance time window configuration instead of using a single default
+    // Example: ModelManager("AAPL", 5, MINUTES) → 300,000ms window
+    //          ModelManager("TSLA", 2, HOURS)   → 7,200,000ms window
     m_toBuffer   = std::make_unique<time_ordered_tick_buffer::TimeOrderedTickBuffer>(windowToDuration().count());
+    
     m_rbHandler  = std::make_unique<ring_buffer_trade_handler::RingBufferTradeHandler>(
                     *m_toBuffer, *m_volProfile, *m_rawModel);
     m_connMgr    = std::make_unique<connection_manager::ConnectionManager>();
@@ -145,6 +151,12 @@ std::string ModelManager::getConnectionStatus() const {
 // ────────────────────────────────────────────────────────────────────────────────
 //  time-window helpers
 // ────────────────────────────────────────────────────────────────────────────────
+// PURPOSE: Convert user-friendly time specifications to milliseconds for TimeOrderedTickBuffer
+// This allows flexible time window configuration per ModelManager instance:
+//   - 30 SECONDS for scalping strategies  
+//   - 5 MINUTES for short-term analysis
+//   - 2 HOURS for swing trading
+//   - etc.
 std::chrono::milliseconds ModelManager::windowToDuration() const {
     using namespace std::chrono;
     switch (m_windowUnit){
@@ -152,7 +164,7 @@ std::chrono::milliseconds ModelManager::windowToDuration() const {
         case TimeWindowUnit::MINUTES: return milliseconds(m_windowSize*60'000);
         case TimeWindowUnit::HOURS  : return milliseconds(m_windowSize*3'600'000);
     }
-    return milliseconds(0);
+    return milliseconds(0);  // Fallback (should never happen with valid enum)
 }
 
 void ModelManager::pruneOldData(){
@@ -289,9 +301,9 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
         }
     }
 
-    //Implement on another thread owned by model manager for speed and integration with the ML model & Python///
     // Technical analysis pipeline (time_ordered_tick_buffer)
     m_toBuffer->addTick(enrichedTick);
+    
     time_ordered_tick_buffer::TechnicalIndicators indicators = m_toBuffer->calculateIndicators();
 
     // Apply technical indicators in-place
@@ -313,23 +325,30 @@ void ModelManager::addTick(const stock_data_tick::StockData& t){
     m_rawModel->addTick(enrichedTick);
     
     size_t queueSizeAfter = m_rawModel->queueSize();
-    // Print detailed tick information with thread ID
-    std::ostringstream threadIdStr;
-    threadIdStr << std::this_thread::get_id();
-    std::cout << "[ModelManager][VALIDATION][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
-              << "\n  Symbol: " << enrichedTick.symbol
-              << "\n  Timestamp: " << enrichedTick.timestamp
-              << "\n  Exchange: " << (!enrichedTick.exchange.empty() ? enrichedTick.exchange : "-")
-              << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
-              << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
-              << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
-              << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
-              << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
-              << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
-              << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
-              << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
-              << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
-              << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << std::endl;   
+    
+    // Print detailed tick information with thread ID (throttled to every 5 seconds)
+    static auto lastPrintTime = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - lastPrintTime).count() >= 5) {
+        lastPrintTime = now;
+        
+        std::ostringstream threadIdStr;
+        threadIdStr << std::this_thread::get_id();
+        std::cout << "[ModelManager][VALIDATION][ThreadID: " << threadIdStr.str() << "][Symbol: " << getSymbol() << "] "
+                  << "\n  Symbol: " << enrichedTick.symbol
+                  << "\n  Timestamp: " << enrichedTick.timestamp
+                  << "\n  Exchange: " << (!enrichedTick.exchange.empty() ? enrichedTick.exchange : "-")
+                  << "\n  Price Data: Last=" << enrichedTick.last << " Bid=" << enrichedTick.bid << " Ask=" << enrichedTick.ask
+                  << "\n  Size Data: BidSize=" << enrichedTick.bidSize << " AskSize=" << enrichedTick.askSize << " Volume=" << enrichedTick.volume
+                  << "\n  OHLC: Open=" << enrichedTick.open << " High=" << enrichedTick.high << " Low=" << enrichedTick.low << " Previous_close=" << enrichedTick.close
+                  << "\n  Mid: " << enrichedTick.mid << " Spread: " << enrichedTick.spread 
+                  << "\n  Derived Metrics: VWAP=" << enrichedTick.vwap 
+                  << "\n  Technical Indicators: RSI=" << enrichedTick.rsi
+                  << " EMA9=" << enrichedTick.ema9 << " EMA26=" << enrichedTick.ema26
+                  << " ALMA=" << enrichedTick.alma << " ATR=" << enrichedTick.atr
+                  << "\n[ModelManager-Queue] New queue size after adding tick: " << queueSizeAfter 
+                  << (queueSizeAfter > queueSizeBefore ? " ✓" : " ✗") << "\n" << std::endl;
+    }   
                    
     pruneOldData();
 }

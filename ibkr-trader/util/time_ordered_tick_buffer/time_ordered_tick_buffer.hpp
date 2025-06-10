@@ -10,6 +10,7 @@
 #include <limits>
 #include <algorithm>
 #include <mutex>
+#include <atomic>
 #include "models/stock_data_tick/stock_data_tick.hpp"
 #include <cstdint>
 
@@ -20,8 +21,10 @@ namespace ring_buffer_trade_handler {
 
 namespace time_ordered_tick_buffer {
 
-// Configuration constants
-static constexpr int64_t DEFAULT_WINDOW_MS = 60'000;  // 1 minute default window , change this to 300'000; for 5 minutes
+// Configuration constants, the model_manager_factory creates a model_manager that sets this value, if none is set, we default to 600'000ms (10 minutes)
+// DEFAULT VALUE: Used only when TimeOrderedTickBuffer() constructor called without parameters
+// Most instances get their window size from ModelManager::windowToDuration() instead
+static constexpr int64_t DEFAULT_WINDOW_MS = 600'000;  // 10 minute default window , change this to 300'000; for 5 minutes
 
 // Helper struct for indicators
 struct TechnicalIndicators {
@@ -32,6 +35,11 @@ struct TechnicalIndicators {
     double alma = 0.0;
     double atr = 0.0;
     // double chaikin = 0.0;  // Commented out temporarily
+
+    // NEW: readiness flags for warm-up status
+    bool ema9Ready = false;
+    bool ema26Ready = false;
+    bool almaReady = false;
 
     bool isValid() const {
         // Check if we have valid indicator values
@@ -73,8 +81,24 @@ struct TemporaryCandle {
             low = std::min(low, price);
             close = price;
         }
-        volume += size;
+        volume = size;
     }
+};
+
+// ----------------------------------------------------------------------
+// Lightweight, read‑only copy of the three rings for the monitor thread
+// ----------------------------------------------------------------------
+struct MonitorSnapshot {
+    std::vector<TemporaryCandle> minuteRing;
+    std::vector<int64_t>         minuteIdx;
+
+    std::vector<Candle>          candleRing;
+    size_t                       candleHead = 0;
+    size_t                       candleCount = 0;
+
+    std::vector<double>          priceRing;
+    size_t                       priceHead = 0;
+    size_t                       priceCount = 0;
 };
 
 class TimeOrderedTickBuffer {
@@ -99,11 +123,12 @@ public:
     const std::vector<int64_t>& getMinuteIndices() const { return m_minuteIndices; }
     const std::vector<Candle>& getCandleRing() const { return m_candleRing; }
     const std::vector<double>& getPriceRing() const { return m_priceRing; }
-    const std::map<int64_t, stock_data_tick::StockData>& getOrderedTicks() const { return m_orderedTicks; }
+    /// All raw ticks in chronological order – **duplicates allowed**
+    const std::multimap<int64_t, stock_data_tick::StockData>& getOrderedTicks() const { return m_orderedTicks; }
     size_t getWindowMinutes() const { return m_windowMinutes; }
     int64_t getWindowSizeMs() const { return m_windowSizeMs; }
     
-    // Ring buffer state for ultra-low latency access
+    // Ring buffer state for ultra-low latency access // FOR FEED THREAD ONLY
     size_t getCandleRingHead() const { return m_candleRingHead; }
     size_t getCandleRingCount() const { return m_candleRingCount; }
     size_t getPriceRingHead() const { return m_priceRingHead; }
@@ -113,9 +138,18 @@ public:
     int64_t getLastProcessedMinute() const { return m_lastProcessedMinute; }
     void setLastProcessedMinute(int64_t minute) { m_lastProcessedMinute = minute; }
     
+    // ------------------------------------------
+    // Snapshot access for RingBufferMonitor
+    // ------------------------------------------
+    std::shared_ptr<const MonitorSnapshot> getSnapshot() const
+    {
+        std::lock_guard<std::mutex> lock(m_snapshotMutex);
+        return m_monitorSnapshot;
+    }
+    
 private:
-    // Map with timestamp as key ensures automatic chronological ordering
-    std::map<int64_t, stock_data_tick::StockData> m_orderedTicks;
+    /// Multimap keeps full market‑tape granularity (duplicates per ms)
+    std::multimap<int64_t, stock_data_tick::StockData> m_orderedTicks;
     
     // Window size in milliseconds (e.g., DEFAULT_WINDOW_MS = 1 minute)
     const int64_t m_windowSizeMs;
@@ -151,6 +185,10 @@ private:
     // Reference to calculator (will be set externally)
     ring_buffer_trade_handler::RingBufferTradeHandler* m_calculator = nullptr;
     
+    // ---- one‑writer (feed) / many‑reader (monitor) snapshot ----
+    std::shared_ptr<MonitorSnapshot> m_monitorSnapshot;
+    mutable std::mutex m_snapshotMutex;
+    
     // Private methods
     int64_t getCurrentTimestamp();
     bool shouldUpdateCandles();
@@ -162,6 +200,9 @@ private:
     // ===== INCREMENTAL CANDLE ENGINE METHODS =====
     void finaliseWorkingCandle();
     void handleOutOfOrderTick(int64_t minuteIdx, const stock_data_tick::StockData& tick);
+    
+    // ===== MONITOR SNAPSHOT METHODS =====
+    void publishMonitorSnapshotUnlocked();
     
     // Thread safety
     mutable std::mutex m_mutex;

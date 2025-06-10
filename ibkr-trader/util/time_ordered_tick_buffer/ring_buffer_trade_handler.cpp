@@ -1,9 +1,14 @@
 #include "ring_buffer_trade_handler.hpp"
-#include <iostream>
-#include <iomanip>
-#include <chrono>
-#include <thread>
+
+#include "ring_buffer_monitor.hpp"
+
 #include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+
+#include <thread>
 #include <cmath>
 #include <cstdint>
 
@@ -11,115 +16,103 @@ namespace ring_buffer_trade_handler {
 
 using TI = time_ordered_tick_buffer::TechnicalIndicators;
 
-constexpr double VWAP_MAX_DIST = 0.005;   // 0.5 %
-constexpr double SPREAD_MAX    = 0.04;    // $0.04
-constexpr int    VOL_LOOKBACK  = 20;
-
+// ╔═══════════════════════════════════════════════════════════════════════════╗
+// •  Ctor / Dtor                                                             •
+// ╚═══════════════════════════════════════════════════════════════════════════╝
 RingBufferTradeHandler::RingBufferTradeHandler(
         time_ordered_tick_buffer::TimeOrderedTickBuffer& b,
         volume_profile_map::VolumeProfileMap&            v,
         raw_data_model::RawDataModel&                    m)
-    : m_buf(b), m_vol(v), m_model(m) 
+    : m_buf(b)
+    , m_vol(v)
+    , m_model(m)
 {
-    // Initialize ALMA weights on construction
-    initializeAlmaWeights();
-    
-    // Set this handler as the calculator for the buffer
-    m_buf.setCalculator(this);
-    
-    // Start monitoring immediately - no need to wait for first tick
-    startMonitoring();
-    
-    std::cout << "[RingBufferTradeHandler] Initialized with technical indicator calculations" << std::endl;
+    initializeAlmaWeights();                // technical‑indicator bootstrap
+    m_buf.setCalculator(this);              // provide callbacks to the buffer
+    startMonitoring();                      // fire‑and‑forget logging thread
+    std::cout << "[RingBufferTradeHandler] ✅ Initialised\n";
 }
 
-// Destructor - ensures clean thread shutdown
-RingBufferTradeHandler::~RingBufferTradeHandler() {
-    std::cout << "[RingBufferTradeHandler] 🛑 Shutting down..." << std::endl;
-    stopMonitoring();
+RingBufferTradeHandler::~RingBufferTradeHandler()
+{
+    std::cout << "[RingBufferTradeHandler] 🛑 Shutting down…\n";
+    stopMonitoring();                       // RAII: ensure thread is joined
+}
+
+// ╔═══════════════════════════════════════════════════════════════════════════╗
+// •  Public API                                                               •
+// ╚═══════════════════════════════════════════════════════════════════════════╝
+bool RingBufferTradeHandler::evaluate(const stock_data_tick::StockData& /*tick*/)
+{
+    // Trading logic placeholder
+    return false;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TECHNICAL INDICATOR CALCULATIONS (moved from TimeOrderedTickBuffer)
+// RING BUFFER MONITORING SYSTEM
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * computeIndicatorsFromCandles() - Advanced Technical Analysis
- * 
- * This is the culmination of our data processing pipeline. We take clean,
- * aggregated candle data and compute sophisticated technical indicators
- * that professional traders rely on for market analysis.
- */
+/*----------------------------------------------------------------------*/
+
+void RingBufferTradeHandler::startMonitoring()
+{
+    std::scoped_lock lk(m_monitorMtx);
+    if (!m_monitor) {
+        m_monitor = std::make_unique<RingBufferMonitor>(m_buf, *this);
+        m_monitor->start(); // 1‑hour, 100 ms cadence (default)
+    }
+}
+
+/*----------------------------------------------------------------------*/
+
+void RingBufferTradeHandler::stopMonitoring()
+{
+    std::scoped_lock lk(m_monitorMtx);   // new small mutex
+    if (m_monitor) { m_monitor->stop(); }
+    m_monitor.reset();
+}
+
+// ╔═══════════════════════════════════════════════════════════════════════════╗
+// •  Candle processing & indicators                                           •
+// ╚═══════════════════════════════════════════════════════════════════════════╝
+void RingBufferTradeHandler::processNewCandle(const time_ordered_tick_buffer::Candle& c)
+{
+    std::cout << "[RingBufferCalculator] 🕯️  Processing new candle\n";
+
+    if (!std::isfinite(c.open) || !std::isfinite(c.high) ||
+        !std::isfinite(c.low)  || !std::isfinite(c.close))
+    {
+        std::cout << "[RingBufferCalculator] ⚠️  Bad candle – ignored\n";
+        return;
+    }
+
+    updateRSIForCandle(c.close);
+    updatePriceEMAs(c.close);
+    updateAlmaIncremental(c.close);
+
+    if (m_buf.getCandleRingCount() >= 2)
+        updateATRForCandle(c);
+
+    // Create atomic snapshot for race-free monitor access
+    TI tmp = computeIndicatorsInternal();
+    {
+        std::scoped_lock lk(m_snapshotMtx);
+        m_snapshot = std::make_shared<TI>(tmp);
+    }
+
+    // Wake the logger immediately – snapshot shows fresh data
+    {
+        std::scoped_lock lk(m_monitorMtx);
+        if (m_monitor) m_monitor->requestSnapshot();
+    }
+}
+
+/*----------------------------------------------------------------------*
+ *                          computeIndicators                           *
+ *----------------------------------------------------------------------*/
 TI RingBufferTradeHandler::computeIndicatorsFromCandles() {
-    TI indicators;
-    
-    // Early exit if no candles available
-    if (m_buf.getCandleRingCount() == 0) {
-        std::cout << "[RingBufferCalculator] No candles available - returning blank indicators" << std::endl;
-        return indicators;  // All indicators default to 0.0
-    }
-    
-    std::cout << "[RingBufferCalculator] Computing technical indicators from " 
-              << m_buf.getCandleRingCount() << " ring buffer candles..." << std::endl;
-    
-    // Use VWAP from latest tick (already provided by IBKR)
-    const auto& orderedTicks = m_buf.getOrderedTicks();
-    if (!orderedTicks.empty()) {
-        indicators.vwap = orderedTicks.rbegin()->second.vwap;
-    } else {
-        indicators.vwap = 0.0;
-    }
-    
-    // Use incrementally maintained EMAs for O(1) performance
-    indicators.ema9 = std::isnan(m_emaPriceFast) ? 0.0 : m_emaPriceFast;
-    indicators.ema26 = std::isnan(m_emaPriceSlow) ? 0.0 : m_emaPriceSlow;
-    
-    // Use O(1) incremental ALMA calculation
-    if (m_buf.getPriceRingCount() >= m_almaSizeWindow) {
-        indicators.alma = std::isfinite(m_almaDot) ? m_almaDot : 0.0;
-    } else {
-        // Still warming up - fall back to traditional calculation temporarily
-        std::vector<double> closes;
-        
-        // Iterate through ring buffer in chronological order
-        if (m_buf.getCandleRingCount() > 0) {
-            const auto& candleRing = m_buf.getCandleRing();
-            size_t head = m_buf.getCandleRingHead();
-            size_t count = m_buf.getCandleRingCount();
-            size_t windowMinutes = m_buf.getWindowMinutes();
-            
-            size_t start = (head + windowMinutes - count) % windowMinutes;
-            for (size_t i = 0; i < count; ++i) {
-                size_t idx = (start + i) % windowMinutes;
-                closes.push_back(candleRing[idx].close);
-            }
-        }
-        
-        if (closes.empty()) {
-            indicators.alma = 0.0;
-        } else {
-            indicators.alma = calculateALMA(
-                closes,
-                m_almaSizeWindow,
-                m_almaSigma,
-                m_almaOffset);
-        }
-    }
-    
-    // Use incremental RSI and ATR calculations
-    indicators.rsi = m_lastRSI;
-    indicators.atr = std::isnan(m_atr) ? 0.0 : m_atr;
-    
-    // Debug output for calculated indicators
-    std::cout << "[RingBufferCalculator] ✅ Calculated indicators: "
-              << "VWAP=$" << std::fixed << std::setprecision(4) << indicators.vwap
-              << ", EMA9=$" << indicators.ema9 
-              << ", EMA26=$" << indicators.ema26
-              << ", RSI=" << std::setprecision(1) << indicators.rsi << "%"
-              << ", ATR=$" << std::setprecision(4) << indicators.atr
-              << ", ALMA=$" << std::setprecision(4) << indicators.alma << std::endl;
-    
-    return indicators;
+    std::scoped_lock lk(m_snapshotMtx);
+    return m_snapshot ? *m_snapshot : TI{};
 }
 
 /**
@@ -352,12 +345,10 @@ void RingBufferTradeHandler::updateAlmaIncremental(double newClose)
  * Computes the ALMA value for a given price series.
  * Uses optimized calculation to avoid unnecessary memory allocations.
  */
-double RingBufferTradeHandler::calculateALMA(
-    const std::vector<double>& prices,
-    int windowSize,
-    double sigma,
-    double offset
-) const
+double RingBufferTradeHandler::calculateALMA(const std::vector<double>& prices,
+                                             int    windowSize,
+                                             double sigma,
+                                             double offset) const
 {
     // Need at least windowSize data points
     if ((int)prices.size() < windowSize || windowSize <= 0) {
@@ -392,207 +383,225 @@ double RingBufferTradeHandler::calculateALMA(
 }
 
 /**
- * processNewCandle() - Process new candle for all indicators
+ * computeIndicatorsInternal() - Internal Indicator Computation
  * 
- * This method is called when a new candle is created to update all indicators
+ * Computes indicators from current internal state for atomic snapshot.
+ * Called only by the trading thread, so no synchronization needed.
  */
-void RingBufferTradeHandler::processNewCandle(const time_ordered_tick_buffer::Candle& candle) {
-    std::cout << "[RingBufferCalculator] 🕯️ Processing new candle: OHLCV=" 
-              << std::fixed << std::setprecision(2) << candle.open << "/" << candle.high 
-              << "/" << candle.low << "/" << candle.close << " Vol=" << (int)candle.volume << std::endl;
+TI RingBufferTradeHandler::computeIndicatorsInternal() {
     
-    // Skip candles with invalid OHLC data to prevent NaN poisoning
-    if (!std::isfinite(candle.open) || !std::isfinite(candle.high) || 
-        !std::isfinite(candle.low) || !std::isfinite(candle.close)) {
-        std::cout << "[RingBufferCalculator] ⚠️ Skipping candle with invalid OHLC data" << std::endl;
-        return;
+    TI indicators;
+    size_t candleCount = m_buf.getCandleRingCount();
+    
+    // Early exit if no candles available
+    if (candleCount == 0) {
+        return indicators;  // All indicators default to 0.0
     }
     
-    // Update all technical indicators
-    updateRSIForCandle(candle.close);
-    updatePriceEMAs(candle.close);
-    updateAlmaIncremental(candle.close);
-    
-    // Update ATR if we have at least 2 candles for TR calculation
-    if (m_buf.getCandleRingCount() >= 2) {
-        updateATRForCandle(candle);
-    }
-    
-    std::cout << "[RingBufferCalculator] ✅ All indicators updated for new candle" << std::endl;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// RING BUFFER MONITORING SYSTEM
-// ═══════════════════════════════════════════════════════════════════════════════
-
-void RingBufferTradeHandler::startMonitoring() {
-    if (m_isMonitoring.load()) {
-        std::cout << "[RingBufferTradeHandler] ⚠️ Monitoring already started" << std::endl;
-        return;
-    }
-    
-    m_shouldStop = false;
-    m_monitorThread = std::thread(&RingBufferTradeHandler::monitorRingBuffersRealTime, this);
-    m_isMonitoring = true;
-    
-    std::cout << "[RingBufferTradeHandler] 🚀 Started ring buffer monitoring thread" << std::endl;
-}
-
-void RingBufferTradeHandler::stopMonitoring() {
-    if (!m_isMonitoring.load()) {
-        return;  // Already stopped
-    }
-    
-    std::cout << "[RingBufferTradeHandler] 🔄 Requesting thread shutdown..." << std::endl;
-    m_shouldStop = true;
-    
-    if (m_monitorThread.joinable()) {
-        m_monitorThread.join();  // Wait for clean exit
-        std::cout << "[RingBufferTradeHandler] ✅ Monitoring thread joined successfully" << std::endl;
-    }
-    
-    m_isMonitoring = false;
-}
-
-void RingBufferTradeHandler::monitorRingBuffersRealTime() {
-    std::cout << "\n🚀 [ULTRA-LOW LATENCY] Starting ring buffer monitoring...\n";
-    std::cout << "📊 Reading 3 ring buffers in real-time:\n";
-    std::cout << "   1️⃣  Minute Ring (TemporaryCandle aggregation)\n";
-    std::cout << "   2️⃣  Candle Ring (Completed 1-min candles)\n"; 
-    std::cout << "   3️⃣  Price Ring (ALMA calculation buffer)\n\n";
-    
-    auto startTime = std::chrono::steady_clock::now();
-    auto endTime = startTime + std::chrono::seconds(3600); // 60 minutes × 60 seconds
-    
-    int iteration = 0;
-    while (!m_shouldStop.load() && std::chrono::steady_clock::now() < endTime) {
-        std::cout << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-        std::cout << "📸 [SNAPSHOT #" << ++iteration << "] Ring Buffer Contents:\n";
-        
-        // Read all 3 ring buffers with ultra-low latency
-        printMinuteRing();
-        printCandleRing(); 
-        printPriceRing();
-        printTechnicalIndicators();
-        
-        // Ultra-fast 100ms polling for real-time updates
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-    
-    if (m_shouldStop.load()) {
-        std::cout << "\n🛑 [GRACEFUL SHUTDOWN] Monitoring stopped by request\n";
+    // Use VWAP from latest tick (already provided by IBKR)
+    const auto& orderedTicks = m_buf.getOrderedTicks();
+    if (!orderedTicks.empty()) {
+        indicators.vwap = orderedTicks.rbegin()->second.vwap;
     } else {
-        std::cout << "\n✅ [MONITORING COMPLETE] 1-hour monitoring finished!\n";
+        indicators.vwap = 0.0;
     }
-    std::cout << "📈 Total snapshots captured: " << iteration << "\n\n";
-}
-
-void RingBufferTradeHandler::printMinuteRing() {
-    const auto& minuteRing = m_buf.getMinuteRing();
-    const auto& minuteIndices = m_buf.getMinuteIndices();
     
-    std::cout << "\n1️⃣  MINUTE RING (Tick Aggregation Buffer):\n";
-    std::cout << "   Size: " << minuteRing.size() << " slots | Window: " << m_buf.getWindowMinutes() << " minutes\n";
+    // Use incrementally maintained EMAs for O(1) performance
+    // EMA9 - requires at least 9 candles for reliable calculation
+    if (candleCount >= 9) {
+        indicators.ema9 = std::isnan(m_emaPriceFast) ? 0.0 : m_emaPriceFast;
+        indicators.ema9Ready = true;
+    } else {
+        indicators.ema9 = 0.0;
+        indicators.ema9Ready = false;
+    }
     
-    int validSlots = 0;
-    for (size_t i = 0; i < minuteRing.size(); ++i) {            // scan all 60 slots
-        if (minuteIndices[i] != -1 && !minuteRing[i].isEmpty()) {
-            validSlots++;
-            std::cout << "   📦 Slot[" << i << "] Minute:" << minuteIndices[i] 
-                      << " | OHLCV: " << std::fixed << std::setprecision(2)
-                      << minuteRing[i].open << "/" << minuteRing[i].high << "/"
-                      << minuteRing[i].low << "/" << minuteRing[i].close 
-                      << " Vol:" << (int)minuteRing[i].volume << "\n";
+    // EMA26 - requires at least 26 candles for reliable calculation
+    if (candleCount >= 26) {
+        indicators.ema26 = std::isnan(m_emaPriceSlow) ? 0.0 : m_emaPriceSlow;
+        indicators.ema26Ready = true;
+    } else {
+        indicators.ema26 = 0.0;
+        indicators.ema26Ready = false;
+    }
+    
+    // Use O(1) incremental ALMA calculation
+    // ALMA - requires full window of prices
+    if (m_buf.getPriceRingCount() >= m_almaSizeWindow) {
+        indicators.alma = std::isfinite(m_almaDot) ? m_almaDot : 0.0;
+        indicators.almaReady = true;
+    } else {
+        indicators.almaReady = false;
+        // Still warming up - fall back to traditional calculation temporarily
+        std::vector<double> closes;
+        
+        // Iterate through ring buffer in chronological order
+        if (m_buf.getCandleRingCount() > 0) {
+            const auto& candleRing = m_buf.getCandleRing();
+            size_t head = m_buf.getCandleRingHead();
+            size_t count = m_buf.getCandleRingCount();
+            
+            for (size_t i = 0; i < count; ++i) 
+            {
+                size_t idx = (head + candleRing.size() - count + i) % candleRing.size();
+                closes.push_back(candleRing[idx].close);
+            }
+        }
+        
+        if (closes.empty()) {
+            indicators.alma = 0.0;
+        } else {
+            indicators.alma = calculateALMA(closes, static_cast<int>(m_almaSizeWindow),
+                                 m_almaSigma, m_almaOffset);
         }
     }
-    if (validSlots == 0) {
-        std::cout << "   💤 No active minute aggregations\n";
-    }
+    
+    // Use incremental RSI and ATR calculations
+    indicators.rsi = m_lastRSI;
+    indicators.atr = std::isnan(m_atr) ? 0.0 : m_atr;
+
+        // Debug output for calculated indicators
+    std::cout << "[RingBufferCalculator] ✅ Calculated indicators: "
+              << "VWAP=$" << std::fixed << std::setprecision(4) << indicators.vwap
+              << ", EMA9=$" << indicators.ema9 
+              << ", EMA26=$" << indicators.ema26
+              << ", RSI=" << std::setprecision(1) << indicators.rsi << "%"
+              << ", ATR=$" << std::setprecision(4) << indicators.atr
+              << ", ALMA=$" << std::setprecision(4) << indicators.alma << std::endl;
+    
+    return indicators;
 }
 
-void RingBufferTradeHandler::printCandleRing() {
-    const auto& candleRing = m_buf.getCandleRing();
-    size_t head = m_buf.getCandleRingHead();
-    size_t count = m_buf.getCandleRingCount();
+}
+
+
+
+// void RingBufferTradeHandler::monitorRingBuffersRealTime() {
+//     std::cout << "\n🚀 [ULTRA-LOW LATENCY] Starting ring buffer monitoring...\n";
+//     std::cout << "📊 Reading 3 ring buffers in real-time:\n";
+//     std::cout << "   1️⃣  Minute Ring (TemporaryCandle aggregation)\n";
+//     std::cout << "   2️⃣  Candle Ring (Completed 1-min candles)\n"; 
+//     std::cout << "   3️⃣  Price Ring (ALMA calculation buffer)\n\n";
     
-    std::cout << "\n2️⃣  CANDLE RING (Completed Candles Buffer):\n";
-    std::cout << "   Size: " << candleRing.size() << " slots | Head: " << head 
-              << " | Valid: " << count << "\n";
+//     auto startTime = std::chrono::steady_clock::now();
+//     auto endTime = startTime + std::chrono::seconds(3600); // 60 minutes × 60 seconds
     
-    if (count == 0) {
-        std::cout << "   💤 No completed candles yet\n";
-        return;
-    }
-    
-    // Show last 3 completed candles (chronological order)
-    size_t showCount = std::min<size_t>(3, count);
-    for (size_t i = 0; i < showCount; ++i) {
-        // Calculate index: start from head-count, then move forward
-        size_t idx = (head + candleRing.size() - count + i) % candleRing.size();
-        const auto& candle = candleRing[idx];
+//     int iteration = 0;
+//     while (!m_shouldStop.load() && std::chrono::steady_clock::now() < endTime) {
+//         std::cout << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+//         std::cout << "📸 [SNAPSHOT #" << ++iteration << "] Ring Buffer Contents:\n";
         
-        std::cout << "   🕯️  Candle[" << idx << "] @ " << candle.timestamp          // keep ms
-                  << " ms (" << (candle.timestamp/1000) << " s)"
-                  << " | OHLCV: " << std::fixed << std::setprecision(2)
-                  << candle.open << "/" << candle.high << "/"
-                  << candle.low << "/" << candle.close 
-                  << " Vol:" << (int)candle.volume << "\n";
-    }
-}
-
-void RingBufferTradeHandler::printPriceRing() {
-    const auto& priceRing = m_buf.getPriceRing();
-    size_t head = m_buf.getPriceRingHead();
-    size_t count = m_buf.getPriceRingCount();
+//         // Read all 3 ring buffers with ultra-low latency
+//         printMinuteRing();
+//         printCandleRing(); 
+//         printPriceRing();
+//         printTechnicalIndicators();
+        
+//         // Ultra-fast 100ms polling for real-time updates
+//         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//     }
     
-    std::cout << "\n3️⃣  PRICE RING (ALMA Calculation Buffer):\n";
-    std::cout << "   Size: " << priceRing.size() << " slots | Head: " << head 
-              << " | Valid: " << count << "\n";
-    
-    if (count == 0) {
-        std::cout << "   💤 No prices yet\n";
-        return;
-    }
-    
-    // Show last 5 prices (chronological order)
-    size_t showCount = std::min<size_t>(5, count);
-    std::cout << "   💰 Recent Prices: ";
-    for (size_t i = 0; i < showCount; ++i) {
-        // Calculate index: start from head-count, then move forward
-        size_t idx = (head + priceRing.size() - count + i) % priceRing.size();
-        std::cout << std::fixed << std::setprecision(2) << priceRing[idx];
-        if (i < showCount - 1) std::cout << " → ";
-    }
-    std::cout << "\n";
-}
+//     if (m_shouldStop.load()) {
+//         std::cout << "\n🛑 [GRACEFUL SHUTDOWN] Monitoring stopped by request\n";
+//     } else {
+//         std::cout << "\n✅ [MONITORING COMPLETE] 1-hour monitoring finished!\n";
+//     }
+//     std::cout << "📈 Total snapshots captured: " << iteration << "\n\n";
+// }
 
-void RingBufferTradeHandler::printTechnicalIndicators() {
-    auto indicators = computeIndicatorsFromCandles();
+// void RingBufferTradeHandler::printMinuteRing() {
+//     const auto& minuteRing = m_buf.getMinuteRing();
+//     const auto& minuteIndices = m_buf.getMinuteIndices();
     
-    std::cout << "\n📊 TECHNICAL INDICATORS (from RingBufferCalculator):\n";
-    std::cout << "   💎 VWAP: $" << std::fixed << std::setprecision(4) << indicators.vwap << "\n";
-    std::cout << "   📈 EMA9: $" << std::setprecision(4) << indicators.ema9 
-              << " | EMA26: $" << indicators.ema26 << "\n";
-    std::cout << "   ⚡ RSI: " << std::setprecision(1) << indicators.rsi << "%\n";
-    std::cout << "   📏 ATR: $" << std::setprecision(4) << indicators.atr << "\n";
-    std::cout << "   🎯 ALMA: $" << std::setprecision(4) << indicators.alma << "\n";
+//     std::cout << "\n1️⃣  MINUTE RING (Tick Aggregation Buffer):\n";
+//     std::cout << "   Size: " << minuteRing.size() << " slots | Window: " << m_buf.getWindowMinutes() << " minutes\n";
     
-    // Additional debugging info about calculation state
-    std::cout << "   🔧 Calc State: RSI warmup=" << m_rsiWarmupCount << "/" << RSI_PERIOD 
-              << ", ATR warmup=" << m_atrWarmupCount << "/" << ATR_PERIOD 
-              << ", ALMA count=" << m_buf.getPriceRingCount() << "/" << m_almaSizeWindow << "\n";
-}
+//     int validSlots = 0;
+//     for (size_t i = 0; i < minuteRing.size(); ++i) {            // scan all 60 slots
+//         if (minuteIndices[i] != -1 && !minuteRing[i].isEmpty()) {
+//             validSlots++;
+//             std::cout << "   📦 Slot[" << i << "] Minute:" << minuteIndices[i] 
+//                       << " | OHLCV: " << std::fixed << std::setprecision(2)
+//                       << minuteRing[i].open << "/" << minuteRing[i].high << "/"
+//                       << minuteRing[i].low << "/" << minuteRing[i].close 
+//                       << " Vol:" << (int)minuteRing[i].volume << "\n";
+//         }
+//     }
+//     if (validSlots == 0) {
+//         std::cout << "   💤 No active minute aggregations\n";
+//     }
+// }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// ORIGINAL TRADING LOGIC (COMMENTED OUT FOR RING BUFFER FOCUS)
-// ═══════════════════════════════════════════════════════════════════════════════
+// void RingBufferTradeHandler::printCandleRing() {
+//     const auto& candleRing = m_buf.getCandleRing();
+//     size_t head = m_buf.getCandleRingHead();
+//     size_t count = m_buf.getCandleRingCount();
+    
+//     std::cout << "\n2️⃣  CANDLE RING (Completed Candles Buffer):\n";
+//     std::cout << "   Size: " << candleRing.size() << " slots | Head: " << head 
+//               << " | Valid: " << count << "\n";
+    
+//     if (count == 0) {
+//         std::cout << "   💤 No completed candles yet\n";
+//         return;
+//     }
+    
+//     // Show last 3 completed candles (chronological order)
+//     size_t showCount = std::min<size_t>(3, count);
+//     for (size_t i = 0; i < showCount; ++i) {
+//         // Calculate index: start from head-count, then move forward
+//         size_t idx = (head + candleRing.size() - count + i) % candleRing.size();
+//         const auto& candle = candleRing[idx];
+        
+//         std::cout << "   🕯️  Candle[" << idx << "] @ " << candle.timestamp          // keep ms
+//                   << " ms (" << (candle.timestamp/1000) << " s)"
+//                   << " | OHLCV: " << std::fixed << std::setprecision(2)
+//                   << candle.open << "/" << candle.high << "/"
+//                   << candle.low << "/" << candle.close 
+//                   << " Vol:" << (int)candle.volume << "\n";
+//     }
+// }
 
-// ───────────────────────────────────────────────────────────────────────────────
-bool RingBufferTradeHandler::evaluate(const stock_data_tick::StockData& tick)
-{
-    // Monitoring already started in constructor - this method is now just a placeholder
-    // for future trade signal logic. Currently just monitoring ring buffers.
-    return false; // Don't generate trade signals, just monitor and calculate
-}
+// void RingBufferTradeHandler::printPriceRing() {
+//     const auto& priceRing = m_buf.getPriceRing();
+//     size_t head = m_buf.getPriceRingHead();
+//     size_t count = m_buf.getPriceRingCount();
+    
+//     std::cout << "\n3️⃣  PRICE RING (ALMA Calculation Buffer):\n";
+//     std::cout << "   Size: " << priceRing.size() << " slots | Head: " << head 
+//               << " | Valid: " << count << "\n";
+    
+//     if (count == 0) {
+//         std::cout << "   💤 No prices yet\n";
+//         return;
+//     }
+    
+//     // Show last 5 prices (chronological order)
+//     size_t showCount = std::min<size_t>(5, count);
+//     std::cout << "   💰 Recent Prices: ";
+//     for (size_t i = 0; i < showCount; ++i) {
+//         // Calculate index: start from head-count, then move forward
+//         size_t idx = (head + priceRing.size() - count + i) % priceRing.size();
+//         std::cout << std::fixed << std::setprecision(2) << priceRing[idx];
+//         if (i < showCount - 1) std::cout << " → ";
+//     }
+//     std::cout << "\n";
+// }
 
-} // namespace ring_buffer_trade_handler
+// void RingBufferTradeHandler::printTechnicalIndicators() {
+//     auto indicators = computeIndicatorsFromCandles();
+    
+//     std::cout << "\n📊 TECHNICAL INDICATORS (from RingBufferCalculator):\n";
+//     std::cout << "   💎 VWAP: $" << std::fixed << std::setprecision(4) << indicators.vwap << "\n";
+//     std::cout << "   📈 EMA9: $" << std::setprecision(4) << indicators.ema9 
+//               << " | EMA26: $" << indicators.ema26 << "\n";
+//     std::cout << "   ⚡ RSI: " << std::setprecision(1) << indicators.rsi << "%\n";
+//     std::cout << "   📏 ATR: $" << std::setprecision(4) << indicators.atr << "\n";
+//     std::cout << "   🎯 ALMA: $" << std::setprecision(4) << indicators.alma << "\n";
+    
+//     // Additional debugging info about calculation state
+//     std::cout << "   🔧 Calc State: RSI warmup=" << m_rsiWarmupCount << "/" << RSI_PERIOD 
+//               << ", ATR warmup=" << m_atrWarmupCount << "/" << ATR_PERIOD 
+//               << ", ALMA count=" << m_buf.getPriceRingCount() << "/" << m_almaSizeWindow << "\n";
+// }
+

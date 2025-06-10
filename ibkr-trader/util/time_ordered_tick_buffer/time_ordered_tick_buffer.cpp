@@ -15,20 +15,7 @@
 
 namespace time_ordered_tick_buffer {
 
-// legacy code, now implemented in the ring_buffer_trade_handler.cpp file
-// Chaikin Oscillator Configuration
-// static constexpr int    FAST_PERIOD        = 3;                        // Fast EMA period (3 candles)
-// static constexpr int    SLOW_PERIOD        = 10;                       // Slow EMA period (10 candles)
-// static constexpr int    FAST_PERIOD_MS     = FAST_PERIOD * 60 * 1000;  // 3 minutes in milliseconds
-// static constexpr int    SLOW_PERIOD_MS     = SLOW_PERIOD * 60 * 1000;  // 10 minutes in milliseconds
-// static constexpr double ALPHA_FAST         = 2.0 / (FAST_PERIOD + 1);  // Fast EMA smoothing factor
-// static constexpr double ALPHA_SLOW         = 2.0 / (SLOW_PERIOD + 1);  // Slow EMA smoothing factor
 
-// // Price EMA Configuration
-// static constexpr int    PRICE_EMA_FAST     = 9;                        // Fast price EMA period
-// static constexpr int    PRICE_EMA_SLOW     = 26;                       // Slow price EMA period
-// static constexpr double ALPHA_PRICE_FAST   = 2.0 / (PRICE_EMA_FAST + 1);  // Fast price EMA smoothing
-// static constexpr double ALPHA_PRICE_SLOW   = 2.0 / (PRICE_EMA_SLOW + 1);  // Slow price EMA smoothing
 
 // Time Conversion Constants
 static constexpr int64_t MS_PER_MINUTE     = 60 * 1000;                // Milliseconds per minute
@@ -54,6 +41,21 @@ static constexpr int64_t MS_PER_MINUTE     = 60 * 1000;                // Millis
  */
 
 // Constructor - Initialize the buffer with a specific time window
+// 
+// WINDOW SIZE SOURCE HIERARCHY:
+// 1. TYPICAL: windowSizeMs comes from ModelManager::windowToDuration() 
+//    - Factory uses DEFAULT_FACTORY_WINDOW_SIZE (60 MINUTES = 3,600,000 ms)
+//    - ModelManager converts via windowToDuration() based on TimeWindowUnit
+//    - Most production instances get 1-hour windows this way
+//
+// 2. FALLBACK: If constructor called without parameters, uses DEFAULT_WINDOW_MS
+//    - Defined in header as 600,000 ms (10 minutes)  
+//    - Only used when TimeOrderedTickBuffer() called directly without args
+//    - Rare in production; mainly for testing/standalone usage
+//
+// 3. DIRECT: windowSizeMs can be passed directly for custom configurations
+//
+// Current value will be: windowSizeMs parameter (usually 3,600,000 ms from factory)
 TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
     : m_windowSizeMs(windowSizeMs),
       m_windowMinutes(static_cast<size_t>(std::max<int64_t>(1, windowSizeMs / MS_PER_MINUTE))),
@@ -77,7 +79,8 @@ TimeOrderedTickBuffer::TimeOrderedTickBuffer(int64_t windowSizeMs)
     std::fill(m_priceRing.begin(), m_priceRing.end(), 0.0);
     
     std::cout << "[TimeOrderedTickBuffer] Initialized with " << (windowSizeMs / 1000) 
-              << " second time window (" << m_windowMinutes << " minute ring buffers)" << std::endl;
+              << " second time window (" << m_windowMinutes << " minute ring buffers)"
+              << " [Source: " << (windowSizeMs == 600000 ? "DEFAULT_WINDOW_MS" : "set from model_manager_factory") << "]" << std::endl;
 }
 
 // Destructor - unique_ptr automatically cleans up
@@ -139,13 +142,12 @@ void TimeOrderedTickBuffer::addTick(const stock_data_tick::StockData& tick) {
         std::cout << "[TimeOrderedTickBuffer] 📊 Working candle updated: OHLCV=" 
                   << m_workingCandle.open << "/" << m_workingCandle.high << "/" 
                   << m_workingCandle.low << "/" << m_workingCandle.close 
-                  << " Vol=" << m_workingCandle.volume << std::endl;
+                  << " Vol=" << m_workingCandle.volume << "\n" << std::endl;
         
         // Prune old ticks periodically (not on every tick for performance)
-        static int tickCount = 0;
-        if (++tickCount % 100 == 0) {  // Every 100 ticks
-            pruneOldTicks();
-        }
+
+        pruneOldTicks();
+        
         return;                                     // <<<< FAST PATH EXIT
     }
 
@@ -172,7 +174,7 @@ void TimeOrderedTickBuffer::addTick(const stock_data_tick::StockData& tick) {
     std::cout << "[TimeOrderedTickBuffer] 📊 New working candle initialized: OHLCV=" 
               << m_workingCandle.open << "/" << m_workingCandle.high << "/" 
               << m_workingCandle.low << "/" << m_workingCandle.close 
-              << " Vol=" << m_workingCandle.volume << std::endl;
+              << " Vol=" << m_workingCandle.volume << "\n" << std::endl;
 }
 
 /**
@@ -214,39 +216,37 @@ bool TimeOrderedTickBuffer::shouldUpdateCandles() {
     return false;
 }
 
-void TimeOrderedTickBuffer::pruneOldTicks() {
-    // Get current time for window calculation
-    int64_t currentTime = getCurrentTimestamp();
-    int64_t cutoffTime = currentTime - m_windowSizeMs;
-    
-    // Track how many ticks we remove for logging
-    size_t removedCount = 0;
-    size_t originalSize = m_orderedTicks.size();
-    
-    // Remove ticks older than our analysis window
-    auto it = m_orderedTicks.begin();
-    while (it != m_orderedTicks.end()) {
-        if (it->first < cutoffTime) {  // Timestamp is the key
-            it = m_orderedTicks.erase(it);
-            removedCount++;
-        } else {
-            break; // Map is ordered, so we can stop here
-        }
-    }
-    
-    // Remove future ticks (handles clock jumps backward from NTP corrections)
-    it = m_orderedTicks.upper_bound(currentTime);
-    while (it != m_orderedTicks.end()) {
-        it = m_orderedTicks.erase(it);
-        removedCount++;
-    }
-    
-    // Log pruning activity for monitoring
-    if (removedCount > 0) {
-        std::cout << "[TimeOrderedTickBuffer] Pruned " << removedCount 
-                  << " old/future ticks, buffer now has " << m_orderedTicks.size() 
-                  << " ticks spanning " << (m_windowSizeMs / 1000) << " seconds" << std::endl;
-    }
+// ----------------------------------------------------------------------------
+//  Improved, low‑overhead pruning
+// ----------------------------------------------------------------------------
+void TimeOrderedTickBuffer::pruneOldTicks()
+{
+    static int64_t  s_lastPruneWallMs = 0;              // coarse throttle
+    const int64_t   nowMs             = getCurrentTimestamp();
+
+    // Run at most once every 5 s  (adjust as you wish)
+    if (nowMs - s_lastPruneWallMs < 5'000)
+        return;
+    s_lastPruneWallMs = nowMs;
+
+    const int64_t cutoffTime = nowMs - m_windowSizeMs;   // Window-based horizon
+
+    // ------------------------------ front prune -----------------------------
+    auto oldEnd = m_orderedTicks.lower_bound(cutoffTime);        // first ≥ cutoff
+    std::size_t frontRemoved = std::distance(m_orderedTicks.begin(), oldEnd);
+    m_orderedTicks.erase(m_orderedTicks.begin(), oldEnd);
+
+    // ------------------------------ tail prune ------------------------------
+    auto futureBegin = m_orderedTicks.upper_bound(nowMs);        // first > now
+    std::size_t tailRemoved = std::distance(futureBegin, m_orderedTicks.end());
+    m_orderedTicks.erase(futureBegin, m_orderedTicks.end());
+
+    // ------------------------------ logging ---------------------------------
+    if (frontRemoved + tailRemoved)
+        std::cout << "[TimeOrderedTickBuffer] Pruned "
+                  << frontRemoved + tailRemoved << " ticks "
+                  << "(old:" << frontRemoved << ", future:" << tailRemoved
+                  << ") — buffer now " << m_orderedTicks.size() << '\n';
 }
 
 void TimeOrderedTickBuffer::updateCandles() {
@@ -279,7 +279,7 @@ void TimeOrderedTickBuffer::updateCandles() {
             std::cout << "[TimeOrderedTickBuffer] 📊 Tick #" << ticksProcessed << ": " 
                       << "timestamp=" << timestamp << ", minuteIndex=" << minuteIndex 
                       << ", slot=" << slot << ", price=" << tick.last 
-                      << ", volume=" << tick.volume << std::endl;
+                      << ", volume=" << tick.volume << "\n" << std::endl;
         }
         
         // Check if this slot is for the current minute or needs reset
@@ -339,7 +339,7 @@ void TimeOrderedTickBuffer::updateCandles() {
         newCandles.emplace_back(minuteIndex, &m_minuteRing[i]);
     }
     
-    std::cout << "[TimeOrderedTickBuffer] 🎯 Found " << newCandles.size() << " new candles to process" << std::endl;
+    std::cout << "[TimeOrderedTickBuffer] 🎯 Found " << newCandles.size() << " new candles to process" << "\n" << std::endl;
     
     // Sort by minute index for chronological processing
     std::sort(newCandles.begin(), newCandles.end());
@@ -379,7 +379,7 @@ void TimeOrderedTickBuffer::updateCandles() {
     }
     
     std::cout << "[TimeOrderedTickBuffer] Ring buffer contains " << m_candleRingCount 
-              << " candles, " << newCandles.size() << " new candles processed" << std::endl;
+              << " candles, " << newCandles.size() << " new candles processed" << "\n" << std::endl;
 }
 
 /**
@@ -439,7 +439,7 @@ void TimeOrderedTickBuffer::finaliseWorkingCandle() {
     std::cout << "[TimeOrderedTickBuffer] 🕯️ FINALIZING candle for minute " << m_workingMinute 
               << " - OHLCV: " << m_workingCandle.open << "/" << m_workingCandle.high << "/" 
               << m_workingCandle.low << "/" << m_workingCandle.close 
-              << " Vol: " << m_workingCandle.volume << std::endl;
+              << " Vol: " << m_workingCandle.volume << "\n" << std::endl;
 
     // Create completed candle
     Candle candle(
@@ -464,6 +464,11 @@ void TimeOrderedTickBuffer::finaliseWorkingCandle() {
     
     // Update price ring for ALMA calculation (O(1))
     updatePriceRing(candle.close);
+    
+    // Publish snapshot for monitor thread (while still holding m_mutex)
+    publishMonitorSnapshotUnlocked();   // <- copies rings for the monitor
+
+    m_mutex.unlock();  
     
     // Delegate technical indicator calculations to external calculator
     if (m_calculator) {
@@ -502,7 +507,7 @@ void TimeOrderedTickBuffer::finaliseWorkingCandle() {
     m_lastProcessedMinute = m_workingMinute;
     
     std::cout << "[TimeOrderedTickBuffer] ✅ Candle finalized and added to rings - "
-              << "Candle ring count: " << m_candleRingCount << std::endl;
+              << "Candle ring count: " << m_candleRingCount << "\n" << std::endl;
 }
 
 /**
@@ -524,6 +529,37 @@ void TimeOrderedTickBuffer::handleOutOfOrderTick(int64_t minuteIdx, const stock_
         std::cout << "[TimeOrderedTickBuffer] ❌ Out-of-order tick for minute " << minuteIdx 
                   << " is too old (slot " << slot << " now contains minute " 
                   << m_minuteIndices[slot] << ")" << std::endl;
+    }
+}
+
+// ========================================================================
+// MONITOR SNAPSHOT METHODS
+// ========================================================================
+
+/**
+ * publishMonitorSnapshotUnlocked() - Create and publish snapshot for monitor thread
+ * 
+ * This method copies the current state of all ring buffers into a MonitorSnapshot
+ * and publishes it atomically. Called while holding m_mutex to ensure consistency.
+ */
+void TimeOrderedTickBuffer::publishMonitorSnapshotUnlocked()
+{
+    MonitorSnapshot s;
+    s.minuteRing   = m_minuteRing;
+    s.minuteIdx    = m_minuteIndices;
+
+    s.candleRing   = m_candleRing;
+    s.candleHead   = m_candleRingHead;
+    s.candleCount  = m_candleRingCount;
+
+    s.priceRing    = m_priceRing;
+    s.priceHead    = m_priceRingHead;
+    s.priceCount   = m_priceRingCount;
+
+    // Store with mutex protection
+    {
+        std::lock_guard<std::mutex> lock(m_snapshotMutex);
+        m_monitorSnapshot = std::make_shared<MonitorSnapshot>(std::move(s));
     }
 }
 

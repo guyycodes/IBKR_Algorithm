@@ -25,6 +25,7 @@ SOURCES = $(wildcard $(SRCDIR)/*.cpp) \
           util/stk_q/stk_q.cpp \
           util/time_ordered_tick_buffer/time_ordered_tick_buffer.cpp \
           util/time_ordered_tick_buffer/ring_buffer_trade_handler.cpp \
+          util/time_ordered_tick_buffer/ring_buffer_monitor.cpp \
           util/training_data_collector/training_data_collector.cpp
 
 # Exclude official_example_connections directory
@@ -90,4 +91,9 @@ $(OBJDIR)/util/%.o: util/%.cpp
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
 
-.PHONY: all clean test-cli test-api run-cli run-api help
+# Thread Sanitizer build
+# tsan: CXXFLAGS = -std=c++20 -O2 -g -fsanitize=thread
+# tsan: LIBS += -fsanitize=thread
+# tsan: clean $(TARGET)
+
+.PHONY: all clean test-cli test-api run-cli run-api help #tsan

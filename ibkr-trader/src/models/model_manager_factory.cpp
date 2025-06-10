@@ -16,6 +16,14 @@ using namespace std::chrono_literals;  // Add this line to fix numeric literals
 namespace model_manager {
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Configuration Constants
+// ────────────────────────────────────────────────────────────────────────────────
+// DEFAULT WINDOW SIZE: Used when creating ModelManager instances through the factory
+// This controls how much historical data the TimeOrderedTickBuffer retains
+static constexpr size_t DEFAULT_FACTORY_WINDOW_SIZE = 60;           // 60 minutes = 1 hour
+static constexpr TimeWindowUnit DEFAULT_FACTORY_WINDOW_UNIT = TimeWindowUnit::MINUTES;
+
+// ────────────────────────────────────────────────────────────────────────────────
 // Utility for logging current thread
 // ────────────────────────────────────────────────────────────────────────────────
 void logCurrentThread(const std::string& component, const std::string& action) {
@@ -145,7 +153,8 @@ ModelManagerFactory::getModelManager(const std::string& symbol,
     
     auto mm = getModelManager(symbol);
     if (!mm) {
-        mm = createModelManager(symbol, /*window*/60, TimeWindowUnit::MINUTES);
+        // Use configurable constants instead of hardcoded values
+        mm = createModelManager(symbol, DEFAULT_FACTORY_WINDOW_SIZE, DEFAULT_FACTORY_WINDOW_UNIT);
     }
     if (!params.is_null()) {
         if (params.contains(symbol)) {

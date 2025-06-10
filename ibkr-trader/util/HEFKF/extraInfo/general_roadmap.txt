@@ -1,0 +1,136 @@
+Below is a step-by-step migration plan that folds an exponential-forgetting Kalman filter (λ–KF) into the existing Hybrid Kalman Filter (HKF) code-base you built earlier. The changes are surgical—only a few dozen lines—yet give you the full theoretical behaviour described in your note (finite memory, adaptive λ, bucket control still intact).
+
+1 New configuration knobs
+Add two parameters to every HKFConfig dataclass (hkf_filter_1min.py, hkf_filter_5min.py, …):
+
+python
+Copy
+@dataclass
+class HKFConfig:
+    ...
+    bucket_weight:   float = 0.5   # already there
+    lambda_fixed:    float = 0.99  # 100-tick memory ⇒ λ = 0.99
+    lambda_adaptive: bool  = True  # switch on/off adaptive λ
+2 Adaptive-λ helper
+Create hkf_lambda.py (shared by all filters):
+
+python
+Copy
+import numpy as np
+
+VOL_THRESHOLD = 0.002   # 0.2 % 1-sec volatility ≈ “elevated”
+
+def adaptive_lambda(volatility: float,
+                    base_lambda: float = 0.99,
+                    lam_min: float = 0.95,
+                    lam_max: float = 0.995) -> float:
+    """
+    Shrink λ when 1-second realised volatility spikes.
+    `volatility` is abs(dPrice)/Price.
+    """
+    vol_norm = min(volatility / VOL_THRESHOLD, 2.0)      # 0–2
+    return lam_max - (lam_max - lam_min) * (vol_norm / 2.0)
+3 Patch the Kalman prediction step
+Open hkf_filter_1min.py.
+
+3.1 Import the helper
+python
+Copy
+from hkf_lambda import adaptive_lambda
+3.2 Compute λ each tick
+Inside the per-row loop, right after you calculate price_vel and before _update_noise():
+
+python
+Copy
+# ---- λ selection ---------------------------------------------------------
+if hkf_cfg.lambda_adaptive:
+    lam = adaptive_lambda(abs(price_vel) / price if price else 0.0,
+                          base_lambda=hkf_cfg.lambda_fixed)
+else:
+    lam = hkf_cfg.lambda_fixed
+lam_inv = 1.0 / lam
+3.3 Prediction with forgetting
+Replace the two-line prediction block:
+
+python
+Copy
+# Predict step with control (λ-KF variant)
+# Covariance: P = (1/λ) F P Fᵀ + Q + optional q_extra
+P_pred = (lam_inv * (kf.F @ kf.P @ kf.F.T))            # pre-inflated
+P_pred[0,0] += q_extra                                 # add extra drift variance
+kf.P = P_pred + kf.Q                                   # add process noise
+kf.x = kf.F @ kf.x + kf.B * u_t
+Then remove the original kf.predict(...) call (since we just reproduced its math).
+Keep the kf.update(...) and everything that follows unchanged.
+
+(FilterPy’s built-in predict() cannot take a forgetting factor, so we roll it by hand.)
+
+4 Numerical safeguards
+Add after the covariance update (file end of loop, just after kf.update(...)):
+
+python
+Copy
+# Joseph stabilisation (optional but recommended)
+I = np.eye(kf.dim_x)
+kf.P = (I - kf.K @ kf.H) @ kf.P @ (I - kf.K @ kf.H).T + kf.K @ kf.R @ kf.K.T
+This keeps P positive-definite if λ is aggressive (e.g. 0.95).
+
+5 Expose λ in the JSON output
+In process_symbols_timeframe() add:
+
+python
+Copy
+output["quality_metrics"]["lambda_used"] = float(hkf_cfg.lambda_fixed)
+output["quality_metrics"]["adaptive_lambda"] = bool(hkf_cfg.lambda_adaptive)
+(Optional: if you want the per-tick λ values, log them into bucket_analysis the same way you already store control inputs.)
+
+6 Update the sanity test (sanity_test.py)
+python
+Copy
+hkf_cfg.lambda_fixed = 0.99
+hkf_cfg.lambda_adaptive = False
+...
+hkf_cfg.lambda_fixed = 0.97   # shorter memory for second run
+Assert that the two price_smoothed series now diverge even when bucket_weight is zero.
+
+7 What changed conceptually?
+Component	Before	After (λ-KF)
+Memory horizon	Infinite (all past equally)	Exponential: weight = λᵏ
+hkf_cfg knobs	bucket_weight only	bucket_weight, lambda_fixed, lambda_adaptive
+Prediction covariance	P ← F P Fᵀ + Q	P ← (1/λ) F P Fᵀ + Q
+Control vector	Same bucket-driven u_t	Unchanged (applied before covariance add)
+Numerical stabilisation	None	Optional Joseph form after update
+
+With λ = 0.99, the effective memory is ≈ 100 seconds; with λ = 0.97 only ≈ 33 seconds.
+
+8 Example: one-liner diff (core loop)
+diff
+Copy
+-        # Predict step with control --------------------------------------
+-        kf.Q[0,0] = kf.Q_base[0,0] + q_extra
+-        kf.predict(u=np.asarray([u_t], dtype=float))
++        # λ–KF prediction -------------------------------------------------
++        lam = adaptive_lambda(abs(price_vel)/price if price else 0.0,
++                              base_lambda=hkf_cfg.lambda_fixed) \
++              if hkf_cfg.lambda_adaptive else hkf_cfg.lambda_fixed
++        lam_inv = 1.0 / lam
++
++        P_pred = lam_inv * (kf.F @ kf.P @ kf.F.T)
++        P_pred[0,0] += q_extra        # bucket-variance boost
++        kf.P = P_pred + kf.Q
++        kf.x = kf.F @ kf.x + kf.B * u_t
+9 Roll-out checklist
+Unit tests pass (sanity_test + a new λ test).
+
+Back-fill lambda_fixed and lambda_adaptive into every timeframe filter.
+
+Grid-search (lambda_fixed, bucket_weight) on historical walk-forward.
+
+Monitor kf.P trace; if it explodes when λ small, tighten the Joseph step.
+
+You now have a single, coherent HKF implementation that supports:
+Bucket-driven control (directional edge)
+
+Frequency/coherence nudging (noise rejection)
+
+Exponential forgetting (finite memory, adaptive speed)
