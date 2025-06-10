@@ -5,8 +5,16 @@ project(HybridExpForgettingKalmanFilter)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find required packages
-find_package(Eigen3 REQUIRED)
+# Use local Eigen3 (header-only library)
+set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/eigen-3.4.0")
+
+# Verify Eigen3 exists
+if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/Core")
+    message(STATUS "Found local Eigen3 at: ${EIGEN3_INCLUDE_DIR}")
+    set(Eigen3_FOUND TRUE)
+else()
+    message(FATAL_ERROR "Eigen3 not found at ${EIGEN3_INCLUDE_DIR}. Please check the path!")
+endif()
 
 # Include directories
 include_directories(${EIGEN3_INCLUDE_DIR})
@@ -14,19 +22,28 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 # Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3")
 
+# Find FFTW3 for signal processing (Welch PSD & coherence)
+find_library(FFTW3_LIB fftw3)
+find_library(FFTW3_THREADS_LIB fftw3_threads)
+
+if(NOT FFTW3_LIB OR NOT FFTW3_THREADS_LIB)
+    message(FATAL_ERROR "FFTW3 libraries not found! Please install libfftw3-dev")
+endif()
+
+message(STATUS "Found FFTW3: ${FFTW3_LIB}")
+message(STATUS "Found FFTW3 threads: ${FFTW3_THREADS_LIB}")
+
+# Add FFTW3 definitions
+add_definitions(-DUSE_FFTW3)
+
 # Build library
 add_library(hefkf STATIC
-    hybrid_exp_forgetting_kalman_filter.cpp
+    
+    1min_HEFKF.cpp
+    5min_HEFKF.cpp
 )
 
-target_link_libraries(hefkf ${EIGEN3_LIBRARIES})
-
-# Build example
-add_executable(hefkf_example
-    hefkf_example.cpp
-)
-
-target_link_libraries(hefkf_example hefkf)
+target_link_libraries(hefkf ${FFTW3_LIB} ${FFTW3_THREADS_LIB})
 
 # Build smoke tests
 add_executable(smoke_tests
@@ -35,9 +52,20 @@ add_executable(smoke_tests
 
 target_link_libraries(smoke_tests hefkf)
 
+# Build standalone example
+add_executable(standalone_example
+    standalone_example.cpp
+)
+
+target_link_libraries(standalone_example hefkf)
+
 # Install targets
-install(TARGETS hefkf DESTINATION lib)
-install(FILES hybrid_exp_forgetting_kalman_filter.hpp DESTINATION include)
+install(TARGETS hefkf smoke_tests standalone_example DESTINATION bin)
+install(FILES 
+  
+    1min_HEFKF.hpp 
+    5min_HEFKF.hpp 
+    DESTINATION include)
 
 # Optional: Build tests if we have them
 if(BUILD_TESTS)
