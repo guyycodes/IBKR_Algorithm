@@ -353,8 +353,8 @@ hefkf_common::BucketConfidence AnalyticScorer::apply_enhancements(
 // ─────────────────────── Confidence Score Computation ───────────────────────
 double AnalyticScorer::compute_confidence_score(const NormalizedFeatures& norm_features,
                                                MarketRegime regime) const {
-    // Combine signal quality indicators
-    double coherence_avg = (norm_features.coher_pv + norm_features.coher_ps) / 2.0;
+    // Combine signal quality indicators - now using BOTH coherence signals
+    double coherence_avg = (norm_features.coher_pv * 0.7 + norm_features.coher_ps * 0.3);
     double entropy_avg = (norm_features.entropy_micro + norm_features.entropy_short + 
                          norm_features.entropy_medium + norm_features.entropy_trend) / 4.0;
     
@@ -432,16 +432,20 @@ hefkf_common::BucketConfidence AnalyticScorer::create_directional_bias(Regime re
 double AnalyticScorer::compute_enhanced_quality_signal(const NormalizedFeatures& norm_features) const {
     // Enhanced quality signal using ALL normalized spectral features
     
-    // Core signal quality (40% weight)
-    double core_quality = 0.4 * norm_features.coher_pv * (1.0 - norm_features.entropy_short);
+    // Core signal quality (40% weight) - now using BOTH coherence signals
+    double core_quality = 0.4 * (
+        norm_features.coher_pv * 0.7 +      // Price-volume coherence (primary)
+        norm_features.coher_ps * 0.3        // Price-spread coherence (secondary validation)
+    ) * (1.0 - norm_features.entropy_short);
     
     // Trend and momentum indicators (25% weight)  
     double trend_quality = 0.25 * (norm_features.trend * 0.7 + norm_features.d_trend * 0.3);
     
-    // Frequency domain characteristics (20% weight) - NOW USING CENTROID!
+    // Frequency domain characteristics (20% weight) - NOW USING BOTH CENTROIDS!
     double freq_quality = 0.2 * (
-        (1.0 - norm_features.flux) * 0.5 +  // Low flux = stable = good quality
-        norm_features.centroid_price * 0.3 + // Higher centroid = more high-freq content
+        (1.0 - norm_features.flux) * 0.4 +         // Low flux = stable = good quality
+        norm_features.centroid_price * 0.25 +      // Price frequency characteristics
+        norm_features.centroid_volume * 0.15 +     // Volume frequency characteristics  
         (1.0 - norm_features.centroid_velocity) * 0.2  // Low centroid velocity = stable spectrum
     );
     
@@ -464,10 +468,11 @@ double AnalyticScorer::compute_volatility_alert(const NormalizedFeatures& norm_f
     // Primary volatility indicators (50% weight)
     double flux_alert = 0.5 * norm_features.flux;  // High spectral flux = high volatility
     
-    // Frequency domain instability (30% weight)
+    // Frequency domain instability (30% weight) - NOW USING VOLUME CENTROID TOO!
     double freq_instability = 0.3 * (
-        norm_features.centroid_velocity * 0.6 +     // Rapid frequency shifts
-        norm_features.entropy_trend * 0.4           // High long-term complexity
+        norm_features.centroid_velocity * 0.5 +     // Rapid price frequency shifts
+        norm_features.centroid_volume * 0.2 +       // Volume frequency patterns
+        norm_features.entropy_trend * 0.3           // High long-term complexity
     );
     
     // Multi-timeframe entropy chaos (20% weight)
