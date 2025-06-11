@@ -416,7 +416,7 @@ void test_end_to_end_bucket_loop() {
     // Generate random walk data
     auto ticks = TestDataGenerator::generate_random_walk_ticks(300, 100.0, 0.01);
     
-    FilterPipeline pipeline(1.0);
+    FilterPipeline pipeline(1.0); // Create with 1Hz sampling frequency
     pipeline.initialize(ticks[0]);
     
     std::vector<FilterPipeline::PipelineOutput> outputs;

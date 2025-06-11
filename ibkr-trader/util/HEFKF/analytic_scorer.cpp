@@ -20,7 +20,8 @@ AnalyticScorer::AnalyticScorer() {
 // ─────────────────────── Main Scoring Interface ───────────────────────
 ScoringResult AnalyticScorer::score(const hefkf_common::FrequencyFeatures& freq_features,
                                    const hefkf_common::BucketConfidence& prior_buckets,
-                                   MarketRegime regime_hint) {
+                                   MarketRegime regime_hint,
+                                   bool is_1min_filter) {
     
     // Step 1: Normalize raw frequency features to [0,1] or [-1,1] ranges
     NormalizedFeatures norm_features = normalize_features(freq_features);
@@ -43,13 +44,22 @@ ScoringResult AnalyticScorer::score(const hefkf_common::FrequencyFeatures& freq_
     // Step 6: Compute overall confidence score
     double confidence_score = compute_confidence_score(norm_features, detected_regime);
     
+    // Compute enhanced signals using ALL spectral features
+    double enhanced_quality = compute_enhanced_quality_signal(norm_features);
+    double volatility_alert = compute_volatility_alert(norm_features);
+    
+    // Compute filter knob adjustments
+    FilterKnobAdjustments filter_adjustments = compute_filter_adjustments(
+        enhanced_quality, volatility_alert, is_1min_filter);
+    
     // Package results
     ScoringResult result;
     result.sharpening_factor = sharpening_factor;
     result.bias = bias;
     result.enhanced_buckets = enhanced_buckets;
     result.detected_regime = detected_regime;
-    result.confidence_score = confidence_score;
+    result.confidence_score = std::max(confidence_score, enhanced_quality);  // Use best of both
+    result.filter_adjustments = filter_adjustments;  // NEW: Filter knob adjustments
     
     last_result_ = result;
     return result;
@@ -58,7 +68,8 @@ ScoringResult AnalyticScorer::score(const hefkf_common::FrequencyFeatures& freq_
 // ─────────────────────── Simplified Scoring Interface ───────────────────────
 ScoringResult AnalyticScorer::score_simple(const hefkf_common::FrequencyFeatures& freq_features,
                                           const hefkf_common::BucketConfidence& prior_buckets,
-                                          double price_velocity) {
+                                          double price_velocity,
+                                          bool is_1min_filter) {
     
     // Step 1: Normalize features (same as complex version)
     NormalizedFeatures norm_features = normalize_features(freq_features);
@@ -417,6 +428,87 @@ hefkf_common::BucketConfidence AnalyticScorer::create_directional_bias(Regime re
     return bias;
 }
 
+// ─────────────────────── Enhanced Quality Signal (Uses ALL Features) ───────────────────────
+double AnalyticScorer::compute_enhanced_quality_signal(const NormalizedFeatures& norm_features) const {
+    // Enhanced quality signal using ALL normalized spectral features
+    
+    // Core signal quality (40% weight)
+    double core_quality = 0.4 * norm_features.coher_pv * (1.0 - norm_features.entropy_short);
+    
+    // Trend and momentum indicators (25% weight)  
+    double trend_quality = 0.25 * (norm_features.trend * 0.7 + norm_features.d_trend * 0.3);
+    
+    // Frequency domain characteristics (20% weight) - NOW USING CENTROID!
+    double freq_quality = 0.2 * (
+        (1.0 - norm_features.flux) * 0.5 +  // Low flux = stable = good quality
+        norm_features.centroid_price * 0.3 + // Higher centroid = more high-freq content
+        (1.0 - norm_features.centroid_velocity) * 0.2  // Low centroid velocity = stable spectrum
+    );
+    
+    // Multi-band entropy assessment (15% weight) - NOW USING TREND ENTROPY!
+    double entropy_quality = 0.15 * (
+        (1.0 - norm_features.entropy_micro) * 0.3 +
+        (1.0 - norm_features.entropy_short) * 0.3 +
+        (1.0 - norm_features.entropy_medium) * 0.2 +
+        (1.0 - norm_features.entropy_trend) * 0.2    // NOW INCLUDED!
+    );
+    
+    using namespace normalization;
+    return clamp01(core_quality + trend_quality + freq_quality + entropy_quality);
+}
+
+// ─────────────────────── Volatility Alert Signal ───────────────────────
+double AnalyticScorer::compute_volatility_alert(const NormalizedFeatures& norm_features) const {
+    // Volatility alert using spectral instability indicators
+    
+    // Primary volatility indicators (50% weight)
+    double flux_alert = 0.5 * norm_features.flux;  // High spectral flux = high volatility
+    
+    // Frequency domain instability (30% weight)
+    double freq_instability = 0.3 * (
+        norm_features.centroid_velocity * 0.6 +     // Rapid frequency shifts
+        norm_features.entropy_trend * 0.4           // High long-term complexity
+    );
+    
+    // Multi-timeframe entropy chaos (20% weight)
+    double entropy_chaos = 0.2 * (
+        norm_features.entropy_micro * 0.4 +   // Microstructure noise
+        norm_features.entropy_short * 0.3 +   // Short-term complexity
+        norm_features.entropy_medium * 0.3    // Medium-term complexity
+    );
+    
+    using namespace normalization;
+    return clamp01(flux_alert + freq_instability + entropy_chaos);
+}
+
+// ─────────────────────── Filter Knob Adjustments ───────────────────────
+FilterKnobAdjustments AnalyticScorer::compute_filter_adjustments(double quality_signal, 
+                                                                double volatility_alert,
+                                                                bool is_1min_filter) const {
+    FilterKnobAdjustments adjustments;
+    
+    // Store the underlying signals
+    adjustments.quality_signal = quality_signal;
+    adjustments.volatility_alert = volatility_alert;
+    
+    // Your exact specifications:
+    
+    // 1. bucket_weight (u-channel gain): Base 0.50 + 0.30×quality - 0.20×volatility_alert
+    adjustments.bucket_weight_adjustment = 0.30 * quality_signal - 0.20 * volatility_alert;
+    
+    // 2. frequency_domain_weight: Base 0.30 (1min)/0.35 (5min) + 0.15×quality
+    adjustments.frequency_domain_weight_adjustment = 0.15 * quality_signal;
+    
+    // 3. lambda adjustment: If volatility_alert > 0.6, drop lambda by 0.02×volatility_alert
+    if (volatility_alert > 0.6) {
+        adjustments.lambda_adjustment = -0.02 * volatility_alert;  // Negative = faster forgetting
+    } else {
+        adjustments.lambda_adjustment = 0.0;  // No adjustment for low volatility
+    }
+    
+    return adjustments;
+}
+
 ScoringResult AnalyticScorer::apply_simple_regime_scoring(const hefkf_common::FrequencyFeatures& freq_features,
                                                         const hefkf_common::BucketConfidence& prior_buckets,
                                                         Regime simple_regime) const {
@@ -464,13 +556,22 @@ ScoringResult AnalyticScorer::apply_simple_regime_scoring(const hefkf_common::Fr
     // Apply Dirichlet sharpening using existing function
     sharpen_dirichlet(enhanced_buckets, (alpha - 1.0) / 4.0);
     
+    // Compute enhanced signals using ALL spectral features
+    double enhanced_quality = compute_enhanced_quality_signal(norm_features);
+    double volatility_alert = compute_volatility_alert(norm_features);
+    
+    // Compute filter knob adjustments
+    FilterKnobAdjustments filter_adjustments = compute_filter_adjustments(
+        enhanced_quality, volatility_alert, is_1min_filter);
+    
     // Package results
     ScoringResult result;
     result.sharpening_factor = alpha;
     result.bias.reset(); // Not using DirectionalBias struct in simple approach
     result.enhanced_buckets = enhanced_buckets;
     result.detected_regime = MarketRegime::UNKNOWN; // Could map simple to complex if needed
-    result.confidence_score = quality;
+    result.confidence_score = enhanced_quality;  // Use enhanced quality instead of basic quality
+    result.filter_adjustments = filter_adjustments;  // NEW: Filter knob adjustments
     
     return result;
 }
@@ -512,4 +613,32 @@ MarketRegime classify_regime_from_price_action(double trend_strength,
     }
     
     return MarketRegime::UNKNOWN;
-} 
+}
+
+// ─────────────────────── Filter Parameter Utilities ───────────────────────
+void FilterParameters::apply_adjustments(const FilterKnobAdjustments& adjustments) {
+    // Apply adjustments while maintaining reasonable bounds
+    bucket_weight = std::clamp(bucket_weight + adjustments.bucket_weight_adjustment, 0.1, 0.9);
+    frequency_domain_weight = std::clamp(frequency_domain_weight + adjustments.frequency_domain_weight_adjustment, 0.1, 0.6);
+    lambda_fixed = std::clamp(lambda_fixed + adjustments.lambda_adjustment, 0.8, 0.99);
+}
+
+double FilterParameters::get_adjusted_bucket_weight() const {
+    return bucket_weight;
+}
+
+double FilterParameters::get_adjusted_frequency_weight() const {
+    return frequency_domain_weight;
+}
+
+double FilterParameters::get_adjusted_lambda() const {
+    return lambda_fixed;
+}
+
+FilterParameters create_base_filter_params(bool is_1min_filter) {
+    FilterParameters params;
+    params.bucket_weight = 0.50;  // Same for both
+    params.frequency_domain_weight = is_1min_filter ? 0.30 : 0.35;  // Your specification
+    params.lambda_fixed = 0.95;   // Default, can be adjusted per filter
+    return params;
+}

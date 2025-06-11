@@ -124,6 +124,17 @@ struct DirectionalBias {
     }
 };
 
+// ─────────────────────── Filter Knob Adjustments ───────────────────────
+struct FilterKnobAdjustments {
+    double bucket_weight_adjustment = 0.0;           // Adjustment to u-channel gain
+    double frequency_domain_weight_adjustment = 0.0; // Adjustment to frequency domain weight
+    double lambda_adjustment = 0.0;                  // Adjustment to forgetting factor (negative = faster forgetting)
+    
+    // Underlying signals driving the adjustments
+    double quality_signal = 0.0;                     // Enhanced quality signal [0,1]
+    double volatility_alert = 0.0;                   // Volatility alert signal [0,1]
+};
+
 // ─────────────────────── Scoring Result ───────────────────────
 struct ScoringResult {
     double sharpening_factor = 1.0;     // α for Dirichlet sharpening
@@ -131,6 +142,7 @@ struct ScoringResult {
     hefkf_common::BucketConfidence enhanced_buckets; // Final bucket probabilities
     MarketRegime detected_regime = MarketRegime::UNKNOWN; // Detected market regime
     double confidence_score = 0.0;     // Overall confidence in the prediction [0,1]
+    FilterKnobAdjustments filter_adjustments; // NEW: Filter knob adjustments
 };
 
 // ─────────────────────── AnalyticScorer Class ───────────────────────
@@ -142,12 +154,13 @@ public:
     // Main scoring interface (complex regime detection)
     ScoringResult score(const hefkf_common::FrequencyFeatures& freq_features,
                        const hefkf_common::BucketConfidence& prior_buckets,
-                       MarketRegime regime_hint = MarketRegime::UNKNOWN);
+                       MarketRegime regime_hint = MarketRegime::UNKNOWN,
+                       bool is_1min_filter = true);
     
     // Simplified scoring interface using 3-state regime detection  
     ScoringResult score_simple(const hefkf_common::FrequencyFeatures& freq_features,
                               const hefkf_common::BucketConfidence& prior_buckets,
-                              double price_velocity);
+                              double price_velocity, bool is_1min_filter = true);
     
     // Regime detection from frequency features (complex)
     MarketRegime detect_regime(const NormalizedFeatures& norm_features) const;
@@ -198,6 +211,15 @@ private:
     // Create directional bias vector for simple regime scoring
     hefkf_common::BucketConfidence create_directional_bias(Regime regime, double quality) const;
     
+    // Enhanced scoring signals using ALL spectral features
+    double compute_enhanced_quality_signal(const NormalizedFeatures& norm_features) const;
+    double compute_volatility_alert(const NormalizedFeatures& norm_features) const;
+    
+    // Filter knob adjustment computation
+    FilterKnobAdjustments compute_filter_adjustments(double quality_signal, 
+                                                   double volatility_alert,
+                                                   bool is_1min_filter = true) const;
+    
     ScoringResult apply_simple_regime_scoring(const hefkf_common::FrequencyFeatures& freq_features,
                                             const hefkf_common::BucketConfidence& prior_buckets,
                                             Regime simple_regime) const;
@@ -226,5 +248,24 @@ std::string regime_to_string(Regime regime);
 MarketRegime classify_regime_from_price_action(double trend_strength, 
                                              double volatility_proxy,
                                              double momentum_indicator);
+
+// ─────────────────────── Filter Knob Application Utilities ───────────────────────
+// Apply filter adjustments to base parameters
+struct FilterParameters {
+    double bucket_weight = 0.50;              // Base u-channel gain
+    double frequency_domain_weight = 0.30;    // Base frequency domain weight (1min: 0.30, 5min: 0.35)
+    double lambda_fixed = 0.95;               // Base forgetting factor
+    
+    // Apply adjustments from scoring result
+    void apply_adjustments(const FilterKnobAdjustments& adjustments);
+    
+    // Get adjusted values
+    double get_adjusted_bucket_weight() const;
+    double get_adjusted_frequency_weight() const; 
+    double get_adjusted_lambda() const;
+};
+
+// Helper function to create base parameters for filter type
+FilterParameters create_base_filter_params(bool is_1min_filter);
 
 #endif // ANALYTIC_SCORER_HPP 

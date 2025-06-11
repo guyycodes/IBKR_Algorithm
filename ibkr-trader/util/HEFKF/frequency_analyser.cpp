@@ -104,16 +104,19 @@ FrequencyAnalyser& FrequencyAnalyser::operator=(FrequencyAnalyser&& other) noexc
 
 // ─────────────────────── Main Interface ───────────────────────
 void FrequencyAnalyser::push(double price, double volume, double spread) {
-    price_[idx_] = price;
-    volume_[idx_] = volume;
-    spread_[idx_] = spread;
+    price_[idx_] = price;    // Store new price at current index
+    volume_[idx_] = volume;  // Store new volume at current index
+    spread_[idx_] = spread;  // Store new spread at current index
     
-    idx_ = (idx_ + 1) % WIN;
-    if (idx_ == 0) {
-        filled_ = true;
+    idx_ = (idx_ + 1) % WIN; // Move to next position, wrap around
+    if (idx_ == 0) {         // If we wrapped back to start
+        filled_ = true;      // Buffer is now full
     }
 }
-
+// ───────────────────────────────────────────────────────────────────────
+// The compute function is the main entrypoint for the frequency analysis, 
+// it takes the raw price, volume, and spread data and computes the frequency features
+// ───────────────────────────────────────────────────────────────────────
 bool FrequencyAnalyser::compute(hefkf_common::FrequencyFeatures& out) {
     if (!filled_) {
         return false;  // Need full window for reliable analysis
@@ -222,6 +225,11 @@ void FrequencyAnalyser::reset() {
 }
 
 // ─────────────────────── Welch PSD Implementation ───────────────────────
+// The Power Spectral Density (PSD) of a signal describes how the power of that signal is distributed across different frequencies. 
+// It's a way to analyze the frequency content of a signal and identify the dominant frequencies and their respective power contributions
+// Power Spectral Density (PSD) is the entrypoint for the frequency analysis, 
+// it tells you about the frequency components that make up the signal and how much "power" (or energy) each frequency component contributes.
+// ───────────────────────────────────────────────────────────────────────
 void FrequencyAnalyser::welch_psd(const double* x, std::vector<double>& out_psd, std::vector<double>& out_freq) {
     const int seg_len = WIN / 2;      // 128 samples per segment
     const int n_segs = 2;             // Two non-overlapping segments: [0..127] and [128..255]
