@@ -125,19 +125,19 @@ CMakeFiles/hefkf.dir/posterior.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/hefkf.dir/posterior.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/ibkr-trader/util/HEFKF/posterior.cpp -o CMakeFiles/hefkf.dir/posterior.cpp.s
 
-CMakeFiles/hefkf.dir/integration_loop.cpp.o: CMakeFiles/hefkf.dir/flags.make
-CMakeFiles/hefkf.dir/integration_loop.cpp.o: ../integration_loop.cpp
-CMakeFiles/hefkf.dir/integration_loop.cpp.o: CMakeFiles/hefkf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/hefkf.dir/integration_loop.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/hefkf.dir/integration_loop.cpp.o -MF CMakeFiles/hefkf.dir/integration_loop.cpp.o.d -o CMakeFiles/hefkf.dir/integration_loop.cpp.o -c /workspace/ibkr-trader/util/HEFKF/integration_loop.cpp
+CMakeFiles/hefkf.dir/analytic_scorer.cpp.o: CMakeFiles/hefkf.dir/flags.make
+CMakeFiles/hefkf.dir/analytic_scorer.cpp.o: ../analytic_scorer.cpp
+CMakeFiles/hefkf.dir/analytic_scorer.cpp.o: CMakeFiles/hefkf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/hefkf.dir/analytic_scorer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/hefkf.dir/analytic_scorer.cpp.o -MF CMakeFiles/hefkf.dir/analytic_scorer.cpp.o.d -o CMakeFiles/hefkf.dir/analytic_scorer.cpp.o -c /workspace/ibkr-trader/util/HEFKF/analytic_scorer.cpp
 
-CMakeFiles/hefkf.dir/integration_loop.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/hefkf.dir/integration_loop.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/ibkr-trader/util/HEFKF/integration_loop.cpp > CMakeFiles/hefkf.dir/integration_loop.cpp.i
+CMakeFiles/hefkf.dir/analytic_scorer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/hefkf.dir/analytic_scorer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/ibkr-trader/util/HEFKF/analytic_scorer.cpp > CMakeFiles/hefkf.dir/analytic_scorer.cpp.i
 
-CMakeFiles/hefkf.dir/integration_loop.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/hefkf.dir/integration_loop.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/ibkr-trader/util/HEFKF/integration_loop.cpp -o CMakeFiles/hefkf.dir/integration_loop.cpp.s
+CMakeFiles/hefkf.dir/analytic_scorer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/hefkf.dir/analytic_scorer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/ibkr-trader/util/HEFKF/analytic_scorer.cpp -o CMakeFiles/hefkf.dir/analytic_scorer.cpp.s
 
 # Object files for target hefkf
 hefkf_OBJECTS = \
@@ -145,7 +145,7 @@ hefkf_OBJECTS = \
 "CMakeFiles/hefkf.dir/5min_HEFKF.cpp.o" \
 "CMakeFiles/hefkf.dir/frequency_analyser.cpp.o" \
 "CMakeFiles/hefkf.dir/posterior.cpp.o" \
-"CMakeFiles/hefkf.dir/integration_loop.cpp.o"
+"CMakeFiles/hefkf.dir/analytic_scorer.cpp.o"
 
 # External object files for target hefkf
 hefkf_EXTERNAL_OBJECTS =
@@ -154,7 +154,7 @@ libhefkf.a: CMakeFiles/hefkf.dir/1min_HEFKF.cpp.o
 libhefkf.a: CMakeFiles/hefkf.dir/5min_HEFKF.cpp.o
 libhefkf.a: CMakeFiles/hefkf.dir/frequency_analyser.cpp.o
 libhefkf.a: CMakeFiles/hefkf.dir/posterior.cpp.o
-libhefkf.a: CMakeFiles/hefkf.dir/integration_loop.cpp.o
+libhefkf.a: CMakeFiles/hefkf.dir/analytic_scorer.cpp.o
 libhefkf.a: CMakeFiles/hefkf.dir/build.make
 libhefkf.a: CMakeFiles/hefkf.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library libhefkf.a"

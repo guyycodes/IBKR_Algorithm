@@ -175,43 +175,30 @@ hefkf/fast:
 .PHONY : hefkf/fast
 
 #=============================================================================
-# Target rules for targets named smoke_tests
+# Target rules for targets named test_20bucket_integration
 
 # Build rule for target.
-smoke_tests: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 smoke_tests
-.PHONY : smoke_tests
+test_20bucket_integration: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_20bucket_integration
+.PHONY : test_20bucket_integration
 
 # fast build rule for target.
-smoke_tests/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/smoke_tests.dir/build.make CMakeFiles/smoke_tests.dir/build
-.PHONY : smoke_tests/fast
+test_20bucket_integration/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_20bucket_integration.dir/build.make CMakeFiles/test_20bucket_integration.dir/build
+.PHONY : test_20bucket_integration/fast
 
 #=============================================================================
-# Target rules for targets named standalone_example
+# Target rules for targets named test_comprehensive
 
 # Build rule for target.
-standalone_example: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 standalone_example
-.PHONY : standalone_example
+test_comprehensive: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_comprehensive
+.PHONY : test_comprehensive
 
 # fast build rule for target.
-standalone_example/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/standalone_example.dir/build.make CMakeFiles/standalone_example.dir/build
-.PHONY : standalone_example/fast
-
-#=============================================================================
-# Target rules for targets named unit_tests
-
-# Build rule for target.
-unit_tests: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 unit_tests
-.PHONY : unit_tests
-
-# fast build rule for target.
-unit_tests/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/unit_tests.dir/build.make CMakeFiles/unit_tests.dir/build
-.PHONY : unit_tests/fast
+test_comprehensive/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_comprehensive.dir/build.make CMakeFiles/test_comprehensive.dir/build
+.PHONY : test_comprehensive/fast
 
 1min_HEFKF.o: 1min_HEFKF.cpp.o
 .PHONY : 1min_HEFKF.o
@@ -261,6 +248,30 @@ unit_tests/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/5min_HEFKF.cpp.s
 .PHONY : 5min_HEFKF.cpp.s
 
+analytic_scorer.o: analytic_scorer.cpp.o
+.PHONY : analytic_scorer.o
+
+# target to build an object file
+analytic_scorer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/analytic_scorer.cpp.o
+.PHONY : analytic_scorer.cpp.o
+
+analytic_scorer.i: analytic_scorer.cpp.i
+.PHONY : analytic_scorer.i
+
+# target to preprocess a source file
+analytic_scorer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/analytic_scorer.cpp.i
+.PHONY : analytic_scorer.cpp.i
+
+analytic_scorer.s: analytic_scorer.cpp.s
+.PHONY : analytic_scorer.s
+
+# target to generate assembly for a file
+analytic_scorer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/analytic_scorer.cpp.s
+.PHONY : analytic_scorer.cpp.s
+
 frequency_analyser.o: frequency_analyser.cpp.o
 .PHONY : frequency_analyser.o
 
@@ -284,30 +295,6 @@ frequency_analyser.s: frequency_analyser.cpp.s
 frequency_analyser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/frequency_analyser.cpp.s
 .PHONY : frequency_analyser.cpp.s
-
-integration_loop.o: integration_loop.cpp.o
-.PHONY : integration_loop.o
-
-# target to build an object file
-integration_loop.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop.cpp.o
-.PHONY : integration_loop.cpp.o
-
-integration_loop.i: integration_loop.cpp.i
-.PHONY : integration_loop.i
-
-# target to preprocess a source file
-integration_loop.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop.cpp.i
-.PHONY : integration_loop.cpp.i
-
-integration_loop.s: integration_loop.cpp.s
-.PHONY : integration_loop.s
-
-# target to generate assembly for a file
-integration_loop.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop.cpp.s
-.PHONY : integration_loop.cpp.s
 
 posterior.o: posterior.cpp.o
 .PHONY : posterior.o
@@ -333,77 +320,53 @@ posterior.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/posterior.cpp.s
 .PHONY : posterior.cpp.s
 
-smoke_tests.o: smoke_tests.cpp.o
-.PHONY : smoke_tests.o
+test_20bucket_integration.o: test_20bucket_integration.cpp.o
+.PHONY : test_20bucket_integration.o
 
 # target to build an object file
-smoke_tests.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/smoke_tests.dir/build.make CMakeFiles/smoke_tests.dir/smoke_tests.cpp.o
-.PHONY : smoke_tests.cpp.o
+test_20bucket_integration.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_20bucket_integration.dir/build.make CMakeFiles/test_20bucket_integration.dir/test_20bucket_integration.cpp.o
+.PHONY : test_20bucket_integration.cpp.o
 
-smoke_tests.i: smoke_tests.cpp.i
-.PHONY : smoke_tests.i
+test_20bucket_integration.i: test_20bucket_integration.cpp.i
+.PHONY : test_20bucket_integration.i
 
 # target to preprocess a source file
-smoke_tests.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/smoke_tests.dir/build.make CMakeFiles/smoke_tests.dir/smoke_tests.cpp.i
-.PHONY : smoke_tests.cpp.i
+test_20bucket_integration.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_20bucket_integration.dir/build.make CMakeFiles/test_20bucket_integration.dir/test_20bucket_integration.cpp.i
+.PHONY : test_20bucket_integration.cpp.i
 
-smoke_tests.s: smoke_tests.cpp.s
-.PHONY : smoke_tests.s
+test_20bucket_integration.s: test_20bucket_integration.cpp.s
+.PHONY : test_20bucket_integration.s
 
 # target to generate assembly for a file
-smoke_tests.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/smoke_tests.dir/build.make CMakeFiles/smoke_tests.dir/smoke_tests.cpp.s
-.PHONY : smoke_tests.cpp.s
+test_20bucket_integration.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_20bucket_integration.dir/build.make CMakeFiles/test_20bucket_integration.dir/test_20bucket_integration.cpp.s
+.PHONY : test_20bucket_integration.cpp.s
 
-standalone_example.o: standalone_example.cpp.o
-.PHONY : standalone_example.o
+test_comprehensive.o: test_comprehensive.cpp.o
+.PHONY : test_comprehensive.o
 
 # target to build an object file
-standalone_example.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/standalone_example.dir/build.make CMakeFiles/standalone_example.dir/standalone_example.cpp.o
-.PHONY : standalone_example.cpp.o
+test_comprehensive.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_comprehensive.dir/build.make CMakeFiles/test_comprehensive.dir/test_comprehensive.cpp.o
+.PHONY : test_comprehensive.cpp.o
 
-standalone_example.i: standalone_example.cpp.i
-.PHONY : standalone_example.i
-
-# target to preprocess a source file
-standalone_example.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/standalone_example.dir/build.make CMakeFiles/standalone_example.dir/standalone_example.cpp.i
-.PHONY : standalone_example.cpp.i
-
-standalone_example.s: standalone_example.cpp.s
-.PHONY : standalone_example.s
-
-# target to generate assembly for a file
-standalone_example.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/standalone_example.dir/build.make CMakeFiles/standalone_example.dir/standalone_example.cpp.s
-.PHONY : standalone_example.cpp.s
-
-unit_tests.o: unit_tests.cpp.o
-.PHONY : unit_tests.o
-
-# target to build an object file
-unit_tests.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/unit_tests.dir/build.make CMakeFiles/unit_tests.dir/unit_tests.cpp.o
-.PHONY : unit_tests.cpp.o
-
-unit_tests.i: unit_tests.cpp.i
-.PHONY : unit_tests.i
+test_comprehensive.i: test_comprehensive.cpp.i
+.PHONY : test_comprehensive.i
 
 # target to preprocess a source file
-unit_tests.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/unit_tests.dir/build.make CMakeFiles/unit_tests.dir/unit_tests.cpp.i
-.PHONY : unit_tests.cpp.i
+test_comprehensive.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_comprehensive.dir/build.make CMakeFiles/test_comprehensive.dir/test_comprehensive.cpp.i
+.PHONY : test_comprehensive.cpp.i
 
-unit_tests.s: unit_tests.cpp.s
-.PHONY : unit_tests.s
+test_comprehensive.s: test_comprehensive.cpp.s
+.PHONY : test_comprehensive.s
 
 # target to generate assembly for a file
-unit_tests.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/unit_tests.dir/build.make CMakeFiles/unit_tests.dir/unit_tests.cpp.s
-.PHONY : unit_tests.cpp.s
+test_comprehensive.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_comprehensive.dir/build.make CMakeFiles/test_comprehensive.dir/test_comprehensive.cpp.s
+.PHONY : test_comprehensive.cpp.s
 
 # Help Target
 help:
@@ -418,33 +381,29 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... hefkf"
-	@echo "... smoke_tests"
-	@echo "... standalone_example"
-	@echo "... unit_tests"
+	@echo "... test_20bucket_integration"
+	@echo "... test_comprehensive"
 	@echo "... 1min_HEFKF.o"
 	@echo "... 1min_HEFKF.i"
 	@echo "... 1min_HEFKF.s"
 	@echo "... 5min_HEFKF.o"
 	@echo "... 5min_HEFKF.i"
 	@echo "... 5min_HEFKF.s"
+	@echo "... analytic_scorer.o"
+	@echo "... analytic_scorer.i"
+	@echo "... analytic_scorer.s"
 	@echo "... frequency_analyser.o"
 	@echo "... frequency_analyser.i"
 	@echo "... frequency_analyser.s"
-	@echo "... integration_loop.o"
-	@echo "... integration_loop.i"
-	@echo "... integration_loop.s"
 	@echo "... posterior.o"
 	@echo "... posterior.i"
 	@echo "... posterior.s"
-	@echo "... smoke_tests.o"
-	@echo "... smoke_tests.i"
-	@echo "... smoke_tests.s"
-	@echo "... standalone_example.o"
-	@echo "... standalone_example.i"
-	@echo "... standalone_example.s"
-	@echo "... unit_tests.o"
-	@echo "... unit_tests.i"
-	@echo "... unit_tests.s"
+	@echo "... test_20bucket_integration.o"
+	@echo "... test_20bucket_integration.i"
+	@echo "... test_20bucket_integration.s"
+	@echo "... test_comprehensive.o"
+	@echo "... test_comprehensive.i"
+	@echo "... test_comprehensive.s"
 .PHONY : help
 
 

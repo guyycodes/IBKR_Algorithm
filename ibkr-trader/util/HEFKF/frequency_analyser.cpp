@@ -7,6 +7,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <cstring>
+#include <iostream>  // For std::cerr debug logging
 
 // ─────────────────────── Shared FrequencyFeatures Implementation ───────────────────────
 namespace hefkf_common {
@@ -43,22 +44,25 @@ const std::vector<FrequencyAnalyser::FreqBand> FrequencyAnalyser::FREQ_BANDS = {
 };
 
 // ─────────────────────── Constructor & Destructor ───────────────────────
-FrequencyAnalyser::FrequencyAnalyser(double fs) : fs_(fs) {
+FrequencyAnalyser::FrequencyAnalyser(double fs) : m_fs(fs), m_total_ticks_pushed(-1) {
     // Initialize buffers
-    window_.resize(WIN);
-    fft_input_.resize(WIN);
-    fft_input_y_.resize(WIN);
-    fft_output_.resize(WIN/2 + 1);  // Real-to-complex FFT output size
-    fft_output_y_.resize(WIN/2 + 1);
+    m_window.resize(WIN);
+    m_fft_input.resize(WIN);
+    m_fft_input_y.resize(WIN);
+    m_fft_output.resize(WIN/2 + 1);  // Real-to-complex FFT output size
+    m_fft_output_y.resize(WIN/2 + 1);
     
     // Initialize FFTW plan
     init_fftw_plans();
     init_hanning_window();
     
     // Initialize data arrays to zero
-    price_.fill(0.0);
-    volume_.fill(0.0);
-    spread_.fill(0.0);
+    m_price.fill(0.0);
+    m_volume.fill(0.0);
+    m_spread.fill(0.0);
+    
+    // Note: m_total_ticks_pushed starts at -1 so that after the initialization
+    // push (from FilterPipeline::initialize), it will be 0, matching FilterPipeline's counting
 }
 
 FrequencyAnalyser::~FrequencyAnalyser() {
@@ -67,14 +71,16 @@ FrequencyAnalyser::~FrequencyAnalyser() {
 
 // Move constructor
 FrequencyAnalyser::FrequencyAnalyser(FrequencyAnalyser&& other) noexcept
-    : idx_(other.idx_), filled_(other.filled_), fs_(other.fs_),
-      price_(std::move(other.price_)), volume_(std::move(other.volume_)), spread_(std::move(other.spread_)),
-      plan_forward_(other.plan_forward_), plan_forward_y_(other.plan_forward_y_), window_(std::move(other.window_)),
-      fft_input_(std::move(other.fft_input_)), fft_input_y_(std::move(other.fft_input_y_)),
-      fft_output_(std::move(other.fft_output_)), fft_output_y_(std::move(other.fft_output_y_)) {
+    : m_idx(other.m_idx), m_filled(other.m_filled), m_fs(other.m_fs),
+      m_price(std::move(other.m_price)), m_volume(std::move(other.m_volume)), m_spread(std::move(other.m_spread)),
+      m_plan_forward(other.m_plan_forward), m_plan_forward_y(other.m_plan_forward_y), m_window(std::move(other.m_window)),
+      m_fft_input(std::move(other.m_fft_input)), m_fft_input_y(std::move(other.m_fft_input_y)),
+      m_fft_output(std::move(other.m_fft_output)), m_fft_output_y(std::move(other.m_fft_output_y)),
+      m_total_ticks_pushed(other.m_total_ticks_pushed) {
     
-    other.plan_forward_ = nullptr;  // Prevent double cleanup
-    other.plan_forward_y_ = nullptr;
+    other.m_plan_forward = nullptr;  // Prevent double cleanup
+    other.m_plan_forward_y = nullptr;
+    other.m_total_ticks_pushed = 0;
 }
 
 // Move assignment
@@ -82,35 +88,47 @@ FrequencyAnalyser& FrequencyAnalyser::operator=(FrequencyAnalyser&& other) noexc
     if (this != &other) {
         cleanup_fftw();
         
-        idx_ = other.idx_;
-        filled_ = other.filled_;
-        fs_ = other.fs_;
-        price_ = std::move(other.price_);
-        volume_ = std::move(other.volume_);
-        spread_ = std::move(other.spread_);
-        plan_forward_ = other.plan_forward_;
-        plan_forward_y_ = other.plan_forward_y_;
-        window_ = std::move(other.window_);
-        fft_input_ = std::move(other.fft_input_);
-        fft_input_y_ = std::move(other.fft_input_y_);
-        fft_output_ = std::move(other.fft_output_);
-        fft_output_y_ = std::move(other.fft_output_y_);
+        m_idx = other.m_idx;
+        m_filled = other.m_filled;
+        m_fs = other.m_fs;
+        m_price = std::move(other.m_price);
+        m_volume = std::move(other.m_volume);
+        m_spread = std::move(other.m_spread);
+        m_plan_forward = other.m_plan_forward;
+        m_plan_forward_y = other.m_plan_forward_y;
+        m_window = std::move(other.m_window);
+        m_fft_input = std::move(other.m_fft_input);
+        m_fft_input_y = std::move(other.m_fft_input_y);
+        m_fft_output = std::move(other.m_fft_output);
+        m_fft_output_y = std::move(other.m_fft_output_y);
+        m_total_ticks_pushed = other.m_total_ticks_pushed;
         
-        other.plan_forward_ = nullptr;
-        other.plan_forward_y_ = nullptr;
+        other.m_plan_forward = nullptr;
+        other.m_plan_forward_y = nullptr;
+        other.m_total_ticks_pushed = 0;
     }
     return *this;
 }
 
 // ─────────────────────── Main Interface ───────────────────────
 void FrequencyAnalyser::push(double price, double volume, double spread) {
-    price_[idx_] = price;    // Store new price at current index
-    volume_[idx_] = volume;  // Store new volume at current index
-    spread_[idx_] = spread;  // Store new spread at current index
+    m_price[m_idx] = price;    // Store new price at current index
+    m_volume[m_idx] = volume;  // Store new volume at current index
+    m_spread[m_idx] = spread;  // Store new spread at current index
     
-    idx_ = (idx_ + 1) % WIN; // Move to next position, wrap around
-    if (idx_ == 0) {         // If we wrapped back to start
-        filled_ = true;      // Buffer is now full
+    m_idx = (m_idx + 1) % WIN; // Move to next position, wrap around
+    if (m_idx == 0) {         // If we wrapped back to start
+        m_filled = true;      // Buffer is now full
+    }
+    
+    // Increment tick counter for debugging
+    m_total_ticks_pushed++;
+    
+    // Debug logging around tick 1000
+    if (m_total_ticks_pushed >= 995 && m_total_ticks_pushed <= 1005) {
+        std::cerr << "FrequencyAnalyser::push - tick " << m_total_ticks_pushed 
+                  << ", idx=" << m_idx << ", filled=" << m_filled 
+                  << ", price=" << price << std::endl;
     }
 }
 // ───────────────────────────────────────────────────────────────────────
@@ -118,7 +136,7 @@ void FrequencyAnalyser::push(double price, double volume, double spread) {
 // it takes the raw price, volume, and spread data and computes the frequency features
 // ───────────────────────────────────────────────────────────────────────
 bool FrequencyAnalyser::compute(hefkf_common::FrequencyFeatures& out) {
-    if (!filled_) {
+    if (!m_filled) {
         return false;  // Need full window for reliable analysis
     }
     
@@ -128,20 +146,40 @@ bool FrequencyAnalyser::compute(hefkf_common::FrequencyFeatures& out) {
     
     // Linearize circular buffers
     for (int i = 0; i < WIN; ++i) {
-        int circular_idx = (idx_ + i) % WIN;
-        price_linear[i] = price_[circular_idx];
-        volume_linear[i] = volume_[circular_idx];
-        spread_linear[i] = spread_[circular_idx];
+        int circular_idx = (m_idx + i) % WIN;
+        price_linear[i] = m_price[circular_idx];
+        volume_linear[i] = m_volume[circular_idx];
+        spread_linear[i] = m_spread[circular_idx];
+    }
+    
+    // Convert prices to returns for spectral analysis
+    // This makes the data stationary and eliminates DC bias
+    // IMPORTANT: This alters all spectral metrics:
+    // - Spectral flux: (e.g., 0.00001 instead of 0.01)
+    // - Trend strength: Now measures consistency of returns, not price trends
+    // - All downstream normalization constants must be calibrated accordingly
+    std::vector<double> price_returns(WIN);
+    price_returns[0] = 0.0;  // First return is undefined, set to 0
+    
+    for (int i = 1; i < WIN; ++i) {
+        if (price_linear[i-1] > EPSILON && price_linear[i] > EPSILON) {
+            // Simple returns: (P[i] - P[i-1]) / P[i-1]
+            price_returns[i] = (price_linear[i] - price_linear[i-1]) / price_linear[i-1];
+        } else {
+            price_returns[i] = 0.0;  // Handle edge case of zero/negative prices
+        }
     }
     
     // ═══ CORE SPECTRAL ANALYSIS ═══
     // Compute PSDs using Welch method
     std::vector<double> psd_price, psd_volume, psd_spread;
-    welch_psd(price_linear.data(), psd_price, freq_vec);
+    welch_psd(price_returns.data(), psd_price, freq_vec);  // Use returns instead of raw prices
     welch_psd(volume_linear.data(), psd_volume, freq_vec);
     welch_psd(spread_linear.data(), psd_spread, freq_vec);
     
     // Compute trend strength (low frequency power ratio)
+    // Note: Now using returns PSD, so this measures the fraction of price CHANGES in low frequencies
+    // rather than absolute price level, which is more meaningful for trend detection
     double total_power = std::accumulate(psd_price.begin(), psd_price.end(), 0.0);
     double current_trend_strength = band_power(freq_vec, psd_price, 0.0, 1.0/(120*60.0)) / 
                                    std::max(total_power, EPSILON);
@@ -153,8 +191,8 @@ bool FrequencyAnalyser::compute(hefkf_common::FrequencyFeatures& out) {
     out.spectral_centroid_volume = compute_spectral_centroid(freq_vec, psd_volume);
     
     // Compute spectral flux (rate of change in spectral shape)
-    if (!prev_psd_price_.empty() && has_previous_compute_) {
-        out.spectral_flux = compute_spectral_flux(psd_price, prev_psd_price_);
+    if (!m_prev_psd_price.empty() && m_has_previous_compute) {
+        out.spectral_flux = compute_spectral_flux(psd_price, m_prev_psd_price);
     } else {
         out.spectral_flux = 0.0;  // No previous data for comparison
     }
@@ -166,11 +204,33 @@ bool FrequencyAnalyser::compute(hefkf_common::FrequencyFeatures& out) {
     }
     
     // ═══ COHERENCE ANALYSIS ═══
+    // Convert volume and spread to returns for consistent comparison
+    std::vector<double> volume_returns(WIN);
+    std::vector<double> spread_returns(WIN);
+    volume_returns[0] = 0.0;
+    spread_returns[0] = 0.0;
+    
+    for (int i = 1; i < WIN; ++i) {
+        // Volume returns (handle zero volume)
+        if (volume_linear[i-1] > EPSILON && volume_linear[i] > EPSILON) {
+            volume_returns[i] = (volume_linear[i] - volume_linear[i-1]) / volume_linear[i-1];
+        } else {
+            volume_returns[i] = 0.0;
+        }
+        
+        // Spread returns (handle zero/negative spread)
+        if (std::abs(spread_linear[i-1]) > EPSILON && std::abs(spread_linear[i]) > EPSILON) {
+            spread_returns[i] = (spread_linear[i] - spread_linear[i-1]) / std::abs(spread_linear[i-1]);
+        } else {
+            spread_returns[i] = 0.0;
+        }
+    }
+    
     std::vector<double> coherence_pv, coherence_ps;
-    double current_coherence_pv = coherence_estimate(price_linear.data(), volume_linear.data(), 
+    double current_coherence_pv = coherence_estimate(price_returns.data(), volume_returns.data(), 
                                                     coherence_pv, freq_vec);
     out.coherence_price_volume_peak = current_coherence_pv;
-    out.coherence_price_spread_peak = coherence_estimate(price_linear.data(), spread_linear.data(), 
+    out.coherence_price_spread_peak = coherence_estimate(price_returns.data(), spread_returns.data(), 
                                                         coherence_ps, freq_vec);
     
     // Compute band-wise coherence
@@ -180,17 +240,17 @@ bool FrequencyAnalyser::compute(hefkf_common::FrequencyFeatures& out) {
     // ═══ DERIVATIVE FEATURES (MOMENTUM DETECTION) ═══
     double current_spectral_centroid = out.spectral_centroid_price;
     
-    if (has_previous_compute_) {
+    if (m_has_previous_compute) {
         // Time delta for derivatives (assuming constant sampling rate)
-        double time_delta = 1.0 / fs_;
+        double time_delta = 1.0 / m_fs;
         
         // Compute derivatives using historical values
         out.trend_strength_derivative = compute_derivative(current_trend_strength, 
-                                                          prev_trend_strength_, time_delta);
+                                                          m_prev_trend_strength, time_delta);
         out.coherence_pv_derivative = compute_derivative(current_coherence_pv, 
-                                                        prev_coherence_pv_peak_, time_delta);
+                                                        m_prev_coherence_pv_peak, time_delta);
         out.centroid_velocity = compute_derivative(current_spectral_centroid, 
-                                                  prev_spectral_centroid_, time_delta);
+                                                  m_prev_spectral_centroid, time_delta);
     } else {
         // First computation - no derivatives available
         out.trend_strength_derivative = 0.0;
@@ -200,28 +260,31 @@ bool FrequencyAnalyser::compute(hefkf_common::FrequencyFeatures& out) {
     
     // ═══ UPDATE HISTORICAL TRACKING ═══
     // Store current values for next iteration's derivative calculations
-    prev_trend_strength_ = current_trend_strength;
-    prev_coherence_pv_peak_ = current_coherence_pv;
-    prev_spectral_centroid_ = current_spectral_centroid;
-    prev_psd_price_ = psd_price;  // Store for spectral flux calculation
-    has_previous_compute_ = true;
+    m_prev_trend_strength = current_trend_strength;
+    m_prev_coherence_pv_peak = current_coherence_pv;
+    m_prev_spectral_centroid = current_spectral_centroid;
+    m_prev_psd_price = psd_price;  // Store for spectral flux calculation
+    m_has_previous_compute = true;
     
     return true;
 }
 
 void FrequencyAnalyser::reset() {
-    idx_ = 0;
-    filled_ = false;
-    price_.fill(0.0);
-    volume_.fill(0.0);
-    spread_.fill(0.0);
+    m_idx = 0;
+    m_filled = false;
+    m_price.fill(0.0);
+    m_volume.fill(0.0);
+    m_spread.fill(0.0);
     
     // Reset derivative tracking
-    prev_trend_strength_ = 0.0;
-    prev_coherence_pv_peak_ = 0.0;
-    prev_spectral_centroid_ = 0.0;
-    prev_psd_price_.clear();
-    has_previous_compute_ = false;
+    m_prev_trend_strength = 0.0;
+    m_prev_coherence_pv_peak = 0.0;
+    m_prev_spectral_centroid = 0.0;
+    m_prev_psd_price.clear();
+    m_has_previous_compute = false;
+    
+    // Reset tick counter to -1 (will become 0 after initialization push)
+    m_total_ticks_pushed = -1;
 }
 
 // ─────────────────────── Welch PSD Implementation ───────────────────────
@@ -231,8 +294,8 @@ void FrequencyAnalyser::reset() {
 // it tells you about the frequency components that make up the signal and how much "power" (or energy) each frequency component contributes.
 // ───────────────────────────────────────────────────────────────────────
 void FrequencyAnalyser::welch_psd(const double* x, std::vector<double>& out_psd, std::vector<double>& out_freq) {
-    const int seg_len = WIN / 2;      // 128 samples per segment
-    const int n_segs = 2;             // Two non-overlapping segments: [0..127] and [128..255]
+    const int seg_len = WIN / 4;      // 64 samples per segment (was WIN/2 = 128)
+    const int n_segs = 4;             // Four non-overlapping segments: [0..63], [64..127], [128..191], [192..255]
     
     out_psd.clear();
     out_psd.resize(seg_len/2 + 1, 0.0);
@@ -241,7 +304,7 @@ void FrequencyAnalyser::welch_psd(const double* x, std::vector<double>& out_psd,
     if (out_freq.empty()) {
         out_freq.resize(seg_len/2 + 1);
         for (int i = 0; i < seg_len/2 + 1; ++i) {
-            out_freq[i] = (i * fs_) / seg_len;
+            out_freq[i] = (i * m_fs) / seg_len;
         }
     }
     
@@ -258,7 +321,7 @@ void FrequencyAnalyser::welch_psd(const double* x, std::vector<double>& out_psd,
     
     // Process each segment - now using all 256 samples efficiently
     for (int seg = 0; seg < n_segs; ++seg) {
-        int start_idx = seg * seg_len;  // Segment 1: 0-127, Segment 2: 128-255
+        int start_idx = seg * seg_len;  // Segments: 0-63, 64-127, 128-191, 192-255
         
         // Apply Hanning window to segment
         for (int i = 0; i < seg_len; ++i) {
@@ -267,10 +330,10 @@ void FrequencyAnalyser::welch_psd(const double* x, std::vector<double>& out_psd,
         }
         
         // Setup FFTW input
-        std::copy(windowed_seg.begin(), windowed_seg.end(), fft_input_.begin());
+        std::copy(windowed_seg.begin(), windowed_seg.end(), m_fft_input.begin());
         
         // Execute FFT
-        fftw_execute_dft_r2c(plan_forward_, fft_input_.data(),
+        fftw_execute_dft_r2c(m_plan_forward, m_fft_input.data(),
                              reinterpret_cast<fftw_complex*>(seg_fft.data()));
         
         // Accumulate magnitude squared
@@ -281,7 +344,7 @@ void FrequencyAnalyser::welch_psd(const double* x, std::vector<double>& out_psd,
     }
     
     // Average and normalize
-    double norm_factor = 1.0 / (n_segs * fs_ * window_norm);
+    double norm_factor = 1.0 / (n_segs * m_fs * window_norm);
     for (auto& p : out_psd) {
         p *= norm_factor;
     }
@@ -296,9 +359,19 @@ void FrequencyAnalyser::welch_psd(const double* x, std::vector<double>& out_psd,
 double FrequencyAnalyser::coherence_estimate(const double* x, const double* y, 
                                             std::vector<double>& out_coherence, 
                                             std::vector<double>& out_freq) {
+
+        std::cerr << "DEBUG: coherence_estimate called with signals at addresses " 
+              << static_cast<const void*>(x) << " and " << static_cast<const void*>(y) << std::endl;
+    
+    // Clear buffers to prevent spillover between calls
+    std::fill(m_fft_input.begin(), m_fft_input.end(), 0.0);
+    std::fill(m_fft_input_y.begin(), m_fft_input_y.end(), 0.0);
+    std::fill(m_fft_output.begin(), m_fft_output.end(), std::complex<double>(0.0, 0.0));
+    std::fill(m_fft_output_y.begin(), m_fft_output_y.end(), std::complex<double>(0.0, 0.0));
+    
     // True coherence using cross-PSD: |Pxy|² / (Pxx * Pyy)
-    const int seg_len = WIN / 2;      // 128 samples per segment
-    const int n_segs = 2;             // Two non-overlapping segments: [0..127] and [128..255]
+    const int seg_len = WIN / 4;      // 64 samples per segment (was WIN/2 = 128)
+    const int n_segs = 4;             // Four non-overlapping segments: [0..63], [64..127], [128..191], [192..255]
     
     out_coherence.clear();
     out_coherence.resize(seg_len/2 + 1, 0.0);
@@ -307,7 +380,7 @@ double FrequencyAnalyser::coherence_estimate(const double* x, const double* y,
     if (out_freq.empty()) {
         out_freq.resize(seg_len/2 + 1);
         for (int i = 0; i < seg_len/2 + 1; ++i) {
-            out_freq[i] = (i * fs_) / seg_len;
+            out_freq[i] = (i * m_fs) / seg_len;
         }
     }
     
@@ -328,7 +401,7 @@ double FrequencyAnalyser::coherence_estimate(const double* x, const double* y,
     
     // Process each segment
     for (int seg = 0; seg < n_segs; ++seg) {
-        int start_idx = seg * seg_len;  // Segment 1: 0-127, Segment 2: 128-255
+        int start_idx = seg * seg_len;  // Segments: 0-63, 64-127, 128-191, 192-255
         
         // Apply Hanning window to both signals
         for (int i = 0; i < seg_len; ++i) {
@@ -337,14 +410,29 @@ double FrequencyAnalyser::coherence_estimate(const double* x, const double* y,
             windowed_y[i] = y[start_idx + i] * w;
         }
         
+        // Pre-whiten: Linear detrending to remove residual drift
+        // This reduces spectral leakage into low frequencies
+        double a_x = 0.0, a_y = 0.0;           // slope estimates
+        for (int i = 0; i < seg_len; ++i) {    // simple un-normalized LR
+            a_x += i * windowed_x[i];
+            a_y += i * windowed_y[i];
+        }
+        a_x = (12.0 / (seg_len * (seg_len*seg_len - 1))) * a_x;
+        a_y = (12.0 / (seg_len * (seg_len*seg_len - 1))) * a_y;
+        
+        for (int i = 0; i < seg_len; ++i) {
+            windowed_x[i] -= a_x * (i - (seg_len-1)/2.0);
+            windowed_y[i] -= a_y * (i - (seg_len-1)/2.0);
+        }
+        
         // Setup FFTW inputs
-        std::copy(windowed_x.begin(), windowed_x.end(), fft_input_.begin());
-        std::copy(windowed_y.begin(), windowed_y.end(), fft_input_y_.begin());
+        std::copy(windowed_x.begin(), windowed_x.end(), m_fft_input.begin());
+        std::copy(windowed_y.begin(), windowed_y.end(), m_fft_input_y.begin());
         
         // Execute FFTs
-        fftw_execute_dft_r2c(plan_forward_, fft_input_.data(),
+        fftw_execute_dft_r2c(m_plan_forward, m_fft_input.data(),
                              reinterpret_cast<fftw_complex*>(fft_x.data()));
-        fftw_execute_dft_r2c(plan_forward_y_, fft_input_y_.data(),
+        fftw_execute_dft_r2c(m_plan_forward_y, m_fft_input_y.data(),
                              reinterpret_cast<fftw_complex*>(fft_y.data()));
         
         // Accumulate PSDs and cross-PSD
@@ -356,7 +444,12 @@ double FrequencyAnalyser::coherence_estimate(const double* x, const double* y,
     }
     
     // Compute coherence: |Pxy|² / (Pxx * Pyy)
-    double norm_factor = 1.0 / (n_segs * fs_ * window_norm);
+    double norm_factor = 1.0 / (n_segs * m_fs * window_norm);
+    
+    // Find max PSD values for threshold calculation
+    double max_psd_x = 0.0;
+    double max_psd_y = 0.0;
+    
     for (size_t i = 0; i < out_coherence.size(); ++i) {
         psd_x[i] *= norm_factor;
         psd_y[i] *= norm_factor;
@@ -369,6 +462,16 @@ double FrequencyAnalyser::coherence_estimate(const double* x, const double* y,
             psd_xy[i] *= 2.0;
         }
         
+        // Track max values
+        max_psd_x = std::max(max_psd_x, psd_x[i]);
+        max_psd_y = std::max(max_psd_y, psd_y[i]);
+        
+        if (i < 5) {  // Debug first few frequencies
+            std::cerr << "DEBUG: i=" << i << ", psd_x=" << psd_x[i] 
+                    << ", psd_y=" << psd_y[i] 
+                    << ", |psd_xy|²=" << std::norm(psd_xy[i]) << std::endl;
+        }
+        
         double denom = psd_x[i] * psd_y[i];
         if (denom > EPSILON) {
             out_coherence[i] = std::norm(psd_xy[i]) / denom;  // |Pxy|² / (Pxx * Pyy)
@@ -378,12 +481,92 @@ double FrequencyAnalyser::coherence_estimate(const double* x, const double* y,
         }
     }
     
-    return find_peak_coherence(out_coherence);
-}
+    // Apply power threshold filtering
+    double power_threshold = 0.001 * std::min(max_psd_x, max_psd_y);  // 0.1% of peak power (was 1%)
+    
+    // Filter coherence values where either PSD is below threshold
+    for (size_t i = 0; i < out_coherence.size(); ++i) {
+        if (psd_x[i] < power_threshold || psd_y[i] < power_threshold) {
+            out_coherence[i] = 0.0;  // Zero out coherence for low-power bins
+        }
+    }
+    std::cerr << "DEBUG: Coherence spectrum:" << std::endl;
+    std::cerr << "  First 10: ";
+    for (size_t i = 0; i < std::min(size_t(10), out_coherence.size()); ++i) {
+        std::cerr << out_coherence[i] << " ";
+    }
+    std::cerr << std::endl;
 
-double FrequencyAnalyser::find_peak_coherence(const std::vector<double>& coherence) const {
-    if (coherence.empty()) return 0.0;
-    return *std::max_element(coherence.begin(), coherence.end());
+    // Print around the expected peaks
+    if (out_coherence.size() > 20) {
+        std::cerr << "  Around 0.15 Hz (bins 17-22): ";
+        for (size_t i = 17; i < std::min(size_t(23), out_coherence.size()); ++i) {
+            std::cerr << out_coherence[i] << " ";
+        }
+        std::cerr << std::endl;
+    }
+
+    if (out_coherence.size() > 45) {
+        std::cerr << "  Around peak (bins 38-43): ";
+        for (size_t i = 38; i < std::min(size_t(44), out_coherence.size()); ++i) {
+            std::cerr << i << ":" << out_coherence[i] << " ";
+        }
+        std::cerr << std::endl;
+    }
+
+    // Print the tail to see if there's spurious coherence
+    if (out_coherence.size() > 60) {
+        std::cerr << "  Tail (last 5): ";
+        for (size_t i = out_coherence.size() - 5; i < out_coherence.size(); ++i) {
+            std::cerr << out_coherence[i] << " ";
+        }
+        std::cerr << std::endl;
+    }
+    
+    // Use band-weighted coherence instead of peak
+    // Focus on low-to-medium frequency band (0.01-0.1 Hz) 
+    // This captures price-volume correlations at trading-relevant timescales
+    // while avoiding high-frequency noise and single-bin artifacts
+    double band_coherence = band_coherence_weighted(out_coherence, out_freq, 0.01, 0.1);
+
+    std::cerr << "DEBUG: Returning band-weighted coherence = " << band_coherence << std::endl;
+    return band_coherence;
+    }
+
+// ─────────────────────── Band Coherence Weighted ───────────────────────
+// This function calculates the weighted coherence of a signal over a given frequency band.
+// It uses a weighted average of the coherence values in the band, with the weights being the coherence values themselves.
+// The function also applies a power threshold to the coherence values, so that only bins with a coherence value greater than the threshold are included in the weighted average.
+// The function also applies a coverage threshold to the coherence values, so that only bins with a coherence value greater than the threshold are included in the weighted average.
+// The function also applies a smoothness exponent to the coherence values, so that the weighted average is more sensitive to changes in the coherence values.
+// ───────────────────────────────────────────────────────────────────────
+double FrequencyAnalyser::band_coherence_weighted(const std::vector<double>& coherence,
+                                                 const std::vector<double>& freq,
+                                                 double f_low, double f_high) const {
+    constexpr double ACTIVE_TH  = 0.05;   // ignore bins that carry no info
+    constexpr double COHERENT_TH = 0.45;  // "high‑quality" bin threshold
+    constexpr double ALPHA       = 1.25;  // coverage penalty exponent (0.5-1.5, higher = stricter separation)
+
+    double sumC = 0.0;
+    std::size_t activeBins = 0, coherentBins = 0;
+
+    for (std::size_t i = 0; i < coherence.size() && i < freq.size(); ++i) {
+        if (freq[i] <  f_low || freq[i] > f_high)   continue;
+        if (coherence[i] < ACTIVE_TH)               continue;   // skip dead bins
+
+        sumC += coherence[i];
+        ++activeBins;
+        if (coherence[i] >= COHERENT_TH) ++coherentBins;
+    }
+
+    if (activeBins == 0)      return 0.0;            // nothing usable
+
+    const double meanC    = sumC / static_cast<double>(activeBins);
+    const double coverage = static_cast<double>(coherentBins) /
+                            static_cast<double>(activeBins);
+
+    // final score
+    return meanC * std::pow(coverage, ALPHA);
 }
 
 // ─────────────────────── Frequency Band Analysis ───────────────────────
@@ -418,39 +601,40 @@ void FrequencyAnalyser::compute_band_coherence(const std::vector<double>& freq,
 
 // ─────────────────────── Helper Functions ───────────────────────
 void FrequencyAnalyser::init_fftw_plans() {
-    plan_forward_ = fftw_plan_dft_r2c_1d(WIN/2, fft_input_.data(),
-                                         reinterpret_cast<fftw_complex*>(fft_output_.data()),
+    // Create plans for 64-sample FFTs (WIN/4) instead of 128-sample (WIN/2)
+    m_plan_forward = fftw_plan_dft_r2c_1d(WIN/4, m_fft_input.data(),
+                                         reinterpret_cast<fftw_complex*>(m_fft_output.data()),
                                          FFTW_MEASURE);
     
-    plan_forward_y_ = fftw_plan_dft_r2c_1d(WIN/2, fft_input_y_.data(),
-                                           reinterpret_cast<fftw_complex*>(fft_output_y_.data()),
+    m_plan_forward_y = fftw_plan_dft_r2c_1d(WIN/4, m_fft_input_y.data(),
+                                           reinterpret_cast<fftw_complex*>(m_fft_output_y.data()),
                                            FFTW_MEASURE);
     
-    if (!plan_forward_ || !plan_forward_y_) {
+    if (!m_plan_forward || !m_plan_forward_y) {
         throw std::runtime_error("Failed to create FFTW plans");
     }
 }
 
 void FrequencyAnalyser::cleanup_fftw() {
-    if (plan_forward_) {
-        fftw_destroy_plan(plan_forward_);
-        plan_forward_ = nullptr;
+    if (m_plan_forward) {
+        fftw_destroy_plan(m_plan_forward);
+        m_plan_forward = nullptr;
     }
-    if (plan_forward_y_) {
-        fftw_destroy_plan(plan_forward_y_);
-        plan_forward_y_ = nullptr;
+    if (m_plan_forward_y) {
+        fftw_destroy_plan(m_plan_forward_y);
+        m_plan_forward_y = nullptr;
     }
 }
 
 void FrequencyAnalyser::init_hanning_window() {
     for (int i = 0; i < WIN; ++i) {
-        window_[i] = 0.5 * (1.0 - std::cos(2.0 * M_PI * i / (WIN - 1)));
+        m_window[i] = 0.5 * (1.0 - std::cos(2.0 * M_PI * i / (WIN - 1)));
     }
 }
 
 void FrequencyAnalyser::apply_window(const double* input, double* windowed) const {
     for (int i = 0; i < WIN; ++i) {
-        windowed[i] = input[i] * window_[i];
+        windowed[i] = input[i] * m_window[i];
     }
 }
 
@@ -493,7 +677,22 @@ double FrequencyAnalyser::compute_spectral_flux(
         }
     }
     
-    return std::sqrt(flux) / current_psd.size();
+    double raw_flux = std::sqrt(flux) / current_psd.size();
+    
+    // Cap spectral flux to reasonable bounds (0.0 to 1.0)
+    // Normal range is 0.001-0.05, so 1.0 is already very high
+    const double MAX_SPECTRAL_FLUX = 1.0;
+    
+    // Debug logging for extreme values
+    if (raw_flux > 0.1) {  // 2x the normal maximum
+        std::cerr << "WARNING: Extreme spectral flux detected: " << raw_flux 
+                  << " (normal range: 0.001-0.05)" << std::endl;
+        std::cerr << "  PSD vector size: " << current_psd.size() 
+                  << ", Sum of squared diffs: " << flux << std::endl;
+        std::cerr << "  Total ticks pushed: " << m_total_ticks_pushed << std::endl;
+    }
+    
+    return std::min(raw_flux, MAX_SPECTRAL_FLUX);
 }
 
 double FrequencyAnalyser::compute_band_entropy(

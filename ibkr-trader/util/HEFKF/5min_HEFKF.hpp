@@ -14,16 +14,31 @@
 
 namespace hefkf_5min {
 
-// ─────────────────────── Bucket Confidence Structure ───────────────────────
-struct BucketConfidence {
-    double up_001_002 = 0.0;
-    double up_002_005 = 0.0;
-    double up_005_010 = 0.0;
-    double up_010_plus = 0.0;
-    double dn_001_002 = 0.0;
-    double dn_002_005 = 0.0;
-    double dn_005_010 = 0.0;
-    double dn_010_plus = 0.0;
+// ─────────────────────── 20-Bucket Confidence Structure ───────────────────────
+struct BucketConfidence20 {
+    // UP buckets (10 buckets)
+    double up_000 = 0.0;  // 0.00% ± 0.125%
+    double up_010 = 0.0;  // 0.25% ± 0.125%
+    double up_020 = 0.0;  // 0.50% ± 0.125%
+    double up_030 = 0.0;  // 0.75% ± 0.125%
+    double up_040 = 0.0;  // 1.00% ± 0.125%
+    double up_050 = 0.0;  // 1.25% ± 0.125%
+    double up_060 = 0.0;  // 1.50% ± 0.125%
+    double up_070 = 0.0;  // 1.75% ± 0.125%
+    double up_080 = 0.0;  // 2.00% ± 0.125%
+    double up_090 = 0.0;  // 2.25%+ (all ≥ 2.125%)
+    
+    // DOWN buckets (10 buckets)
+    double dn_000 = 0.0;  // -0.00% ± 0.125%
+    double dn_010 = 0.0;  // -0.25% ± 0.125%
+    double dn_020 = 0.0;  // -0.50% ± 0.125%
+    double dn_030 = 0.0;  // -0.75% ± 0.125%
+    double dn_040 = 0.0;  // -1.00% ± 0.125%
+    double dn_050 = 0.0;  // -1.25% ± 0.125%
+    double dn_060 = 0.0;  // -1.50% ± 0.125%
+    double dn_070 = 0.0;  // -1.75% ± 0.125%
+    double dn_080 = 0.0;  // -2.00% ± 0.125%
+    double dn_090 = 0.0;  // -2.25%- (all ≤ -2.125%)
     
     // Normalize probabilities to sum to 1.0
     void normalize();
@@ -54,7 +69,7 @@ struct MarketData {
     std::chrono::system_clock::time_point timestamp;
     
     // Optional bucket confidence data
-    std::unique_ptr<BucketConfidence> bucket_conf;
+    std::unique_ptr<BucketConfidence20> bucket_conf;
     
     // Optional frequency features
     std::unique_ptr<FrequencyFeatures> freq_features;
@@ -70,69 +85,57 @@ struct FilterOutput {
     std::chrono::system_clock::time_point timestamp;
 };
 
-// ─────────────────────── Bucket Expectation Helper ───────────────────────────
-class BucketExpectation {
+// ─────────────────────── 20-Bucket Expectation Helper ───────────────────────────
+class BucketExpectation20 {
 public:
     struct ReturnStats {
         double mean_return = 0.0;
         double variance = 0.0;
     };
     
-    static ReturnStats compute_expectation(const BucketConfidence& conf);
+    static ReturnStats compute_expectation(const BucketConfidence20& conf);
     
 private:
-    // Bucket specifications: (mean_return, variance)
-    static const std::unordered_map<std::string, std::pair<double, double>> bucket_specs_;
+    // 20-Bucket specifications with 2.5bp increments
+    // Each bucket represents expected return at center ± variance
+    static const std::unordered_map<int, std::pair<double, double>> m_bucket_specs_up;
+    static const std::unordered_map<int, std::pair<double, double>> m_bucket_specs_dn;
 };
 
-// ─────────────────────── 5-Minute Specialized Configuration ───────────────────────────
-struct FiveMinHKFConfig {
-    // 5-minute optimized parameters (hardcoded)
-    // static constexpr double TIME_DOMAIN_WEIGHT = 0.65;
-    // static constexpr double FREQUENCY_DOMAIN_WEIGHT = 0.35;
-    // 5-minute optimized parameters (SMOOTH FOCUS)
-    static constexpr double TIME_DOMAIN_WEIGHT = 0.6;      // Lower time domain for smoother response
-    static constexpr double FREQUENCY_DOMAIN_WEIGHT = 0.4; // Higher frequency weight for trend analysis
-    static constexpr bool ADAPTIVE_NOISE = true;
-    // static constexpr bool PRESERVE_BREAKOUTS = true;
-    // static constexpr double BUCKET_WEIGHT = 0.5;
-    static constexpr bool PRESERVE_BREAKOUTS = false;      // Less aggressive breakout preservation
-    static constexpr double BUCKET_WEIGHT = 0.4;          // Lower bucket weight for smoother transitions
-    
-    // Exponential forgetting parameters for 5min
-    // static constexpr double LAMBDA_FIXED = 0.99;
-    // Exponential forgetting parameters for 5min (SMOOTH)
-    static constexpr double LAMBDA_FIXED = 0.995;      // Higher base forgetting for more smoothing
-    static constexpr bool LAMBDA_ADAPTIVE = true;
-    // static constexpr double LAMBDA_MIN = 0.94;    // Slightly lower for more smoothing
-    // static constexpr double LAMBDA_MAX = 0.995;
-    // static constexpr double VOL_THRESHOLD = 0.003;  // 0.3% 1-sec volatility threshold
-    static constexpr double LAMBDA_MIN = 0.96;         // Much higher min for smoother response
-    static constexpr double LAMBDA_MAX = 0.998;        // Higher max for strong smoothing
-    static constexpr double VOL_THRESHOLD = 0.004;     // 0.4% - higher threshold for slower adaptation
-    
-    // Noise matrix scaling parameters for 5min
-    // static constexpr double INITIAL_P_SCALE = 1.5;  // Larger initial covariance
-    // static constexpr double R_PRICE = 0.15;         // Higher measurement noise
-    // static constexpr double R_VOLUME = 12000.0;
-    // static constexpr double R_SPREAD = 0.015;
-    // static constexpr double Q_BASE_SCALE = 2e-4;    // Higher process noise
-    // Noise matrix scaling parameters for 5min (HIGH NOISE = MORE SMOOTH)
-    static constexpr double INITIAL_P_SCALE = 2.0;     // Higher initial uncertainty
-    static constexpr double R_PRICE = 0.25;            // MUCH higher measurement noise (trust measurements less)
-    static constexpr double R_VOLUME = 15000.0;        // Higher volume noise
-    static constexpr double R_SPREAD = 0.025;          // Higher spread noise
-    static constexpr double Q_BASE_SCALE = 3e-4;       // Higher process noise base
-    
-    // Adaptive noise scaling for 5min
-    // static constexpr double SCALE_MIN = 0.4;        // Wider scale range
-    // static constexpr double SCALE_MAX = 6.0;
-    // static constexpr double Q_MULTIPLIER = 0.15;    // Higher process noise scaling
-    // Adaptive noise scaling for 5min (CONSERVATIVE SCALING)
-    static constexpr double SCALE_MIN = 0.6;           // Higher min to maintain smoothness
-    static constexpr double SCALE_MAX = 8.0;           // Allow higher scaling for strong smoothing
-    static constexpr double Q_MULTIPLIER = 0.2;        // Higher process noise multiplier for smoothness
-};
+// ─────────────────────── Configuration Namespace ───────────────────────
+namespace FiveMinHKFConfig {
+
+// Noise Configuration - UPDATED FOR BETTER VELOCITY TRACKING
+// 5-minute filter maintains more smoothing than 1-minute but still tracks velocity
+
+// Buckets and Confidence  
+static constexpr double BUCKET_WEIGHT = 0.15;      // Lower than 1min for smoothing
+static constexpr double FREQUENCY_DOMAIN_WEIGHT = 0.08;
+static constexpr double CONFIDENCE_ALPHA = 1.5;    // Less sharpening than 1min
+static constexpr double MIN_COHERENCE = 0.1;
+
+// Process and Measurement Noise - UPDATED FOR VELOCITY TRACKING
+static constexpr double Q_BASE_SCALE = 1e-4;       // INCREASED 2x (but less than 1min)
+static constexpr double Q_MULTIPLIER = 1.2;        // More smoothing than 1min
+static constexpr double R_PRICE = 0.001;           // Higher than 1min for smoothing
+static constexpr double R_VELOCITY = 0.001;        // REDUCED 10x from original
+static constexpr double R_VOLUME = 1.0;
+static constexpr double R_SPREAD = 0.01;
+static constexpr double INITIAL_P_SCALE = 0.5;
+
+// Lambda (Forgetting Factor) - UPDATED BUT KEPT SMOOTHER THAN 1MIN
+static constexpr bool LAMBDA_ADAPTIVE = true;
+static constexpr double LAMBDA_MIN = 0.85;         // REDUCED from 0.96 - 15% weight on new data
+static constexpr double LAMBDA_MAX = 0.95;         // REDUCED from 0.998 - 5% weight on new data minimum
+static constexpr double LAMBDA_FIXED = 0.90;       // REDUCED from 0.995 - if adaptive is false
+
+// Adaptive Parameters
+static constexpr bool ADAPTIVE_NOISE = true;
+static constexpr double SCALE_MIN = 0.5;
+static constexpr double SCALE_MAX = 2.5;
+static constexpr double VOL_THRESHOLD = 0.003;     // Higher threshold for 5min
+
+} // namespace FiveMinHKFConfig
 
 // ─────────────────────── 5-Minute Specialized Filter Class ───────────────────────────
 class FiveMinuteHEFKF {
@@ -153,33 +156,34 @@ public:
     void reset();
     
     // Get current state for debugging
-    const Eigen::VectorXd& get_state() const { return x_; }
-    const Eigen::MatrixXd& get_covariance() const { return P_; }
+    const Eigen::VectorXd& get_state() const { return m_x; }
+    const Eigen::MatrixXd& get_covariance() const { return m_P; }
     
     // Check if filter is initialized
-    bool is_initialized() const { return initialized_; }
-    
-    // Get configuration info
-    static FiveMinHKFConfig get_config_info() { return FiveMinHKFConfig{}; }
+    bool is_initialized() const { return m_initialized; }
 
 private:
     // Filter state
-    Eigen::VectorXd x_;           // State vector [price, velocity, volume, spread]
-    Eigen::MatrixXd P_;           // Covariance matrix
-    Eigen::MatrixXd F_;           // Transition matrix
-    Eigen::MatrixXd H_;           // Observation matrix
-    Eigen::MatrixXd B_;           // Control matrix
-    Eigen::MatrixXd Q_;           // Process noise covariance
-    Eigen::MatrixXd R_;           // Measurement noise covariance
-    Eigen::MatrixXd Q_base_;      // Base process noise (for scaling)
-    Eigen::MatrixXd R_base_;      // Base measurement noise (for scaling)
-    Eigen::MatrixXd K_;           // Kalman gain (stored for Joseph form)
+    Eigen::VectorXd m_x;           // State vector [price, velocity, volume, spread]
+    Eigen::MatrixXd m_P;           // Covariance matrix
+    Eigen::MatrixXd m_F;           // Transition matrix
+    Eigen::MatrixXd m_H;           // Observation matrix
+    Eigen::MatrixXd m_B;           // Control matrix
+    Eigen::MatrixXd m_Q;           // Process noise covariance
+    Eigen::MatrixXd m_R;           // Measurement noise covariance
+    Eigen::MatrixXd m_Q_base;      // Base process noise (for scaling)
+    Eigen::MatrixXd m_R_base;      // Base measurement noise (for scaling)
+    Eigen::MatrixXd m_K;           // Kalman gain (stored for Joseph form)
     
     // State tracking
-    bool initialized_ = false;
-    double dt_ = 1.0;             // Time step
-    double last_price_ = 0.0;     // For velocity calculation
-    double scale_prev_ = 1.0;     // Cached noise scale factor
+    bool m_initialized = false;
+    double m_dt = 1.0;             // Time step
+    double m_last_price = 0.0;     // For velocity calculation
+    double m_scale_prev = 1.0;     // Cached noise scale factor
+    
+    // Warm-up period tracking
+    size_t m_update_count = 0;     // Number of updates processed
+    static constexpr size_t WARMUP_PERIOD = 50;  // Updates before trusting velocity
     
     // Performance optimization constants
     static constexpr double SCALE_UPDATE_THRESHOLD = 0.05;  // 5% change threshold
@@ -193,7 +197,7 @@ private:
     void apply_5min_frequency_nudging(const FrequencyFeatures& freq_features, double price_velocity);
     
     // Utility methods
-    double compute_control_input(const BucketConfidence& bucket_conf, double price, double& extra_noise);
+    double compute_control_input(const BucketConfidence20& bucket_conf, double price, double& extra_noise);
     double compute_market_volatility(double price_velocity, double current_price);
     double compute_adaptive_lambda(double volatility);
 };

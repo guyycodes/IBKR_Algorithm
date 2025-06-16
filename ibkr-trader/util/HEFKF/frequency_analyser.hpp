@@ -1,42 +1,6 @@
 // FrequencyAnalyser - FFTW3-based frequency domain analysis for HEFKF
 // Implements 2-segment non-overlapping Welch PSD estimation and coherence analysis with 256-sample rolling window
 // Designed for <50µs per-tick latency with O(1) push, O(log n) compute
-// ═══════════════════════════════════ COMPREHENSIVE FEATURE USAGE CHART ═══════════════════════════════════
-
-// Feature	                    Used in Simple Scoring?	      Used in Complex Regime?	        Used in Quality Factor?  Used with 1min filter?    Used with 5min filter?
-// coherence_price_volume_peak	✅ Yes (weight: 0.4-0.6)	     ✅ Yes (breakout detection)	      ✅ Yes (core quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
-// spectral_flux	            ✅ Yes (weight: 0.1)	         ✅ Yes (high-vol detection)	      ✅ Yes (freq quality)    ✅ Yes (volatility alert) ✅ Yes (volatility alert)
-// trend_strength_derivative	✅ Yes (weight: 0.05-0.15)	 ✅ Yes (bull/bear detection)	  ✅ Yes (trend quality)   ✅ Yes (directional bias) ✅ Yes (directional bias)
-// centroid_velocity	        ✅ Yes (via enhanced quality) ✅ Yes (reversal detection)	      ✅ Yes (freq quality)    ✅ Yes (freq instability) ✅ Yes (freq instability)
-// spectral_centroid (price)    ✅ Yes (via enhanced quality) ✅ Yes (via enhanced quality)     ✅ Yes (freq quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
-// spectral_centroid (volume)   ✅ Yes (via enhanced quality) ✅ Yes (via enhanced quality)     ✅ Yes (freq quality)    ✅ Yes (volatility alert) ✅ Yes (volatility alert)
-// entropy (all 4 bands)        ✅ Yes (via enhanced quality) ✅ Yes (via enhanced quality)     ✅ Yes (entropy quality) ✅ Yes (volatility alert) ✅ Yes (volatility alert)
-// trend_strength               ✅ Yes (weight: varies)       ✅ Yes (regime classification)    ✅ Yes (trend quality)   ✅ Yes (regime detect)    ✅ Yes (regime detect)
-// coherence_price_spread_peak  ✅ Yes (via enhanced quality) ✅ Yes (via enhanced quality)     ✅ Yes (core quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
-
-// 📊 Enhanced Quality Signal Breakdown (ALL FEATURES NOW USED):
-// Component	        Weight  Features Used	                                                Purpose
-// Core Quality	        40%	    (coher_pv×0.7 + coher_ps×0.3) × (1-entropy_short)	            Dual-coherence signal validation
-// Trend Quality	    25%	    trend_strength×0.7 + d_trend×0.3	                            Directional stability
-// Freq Quality	        20%	    (1-flux)×0.4 + centroid_price×0.25 + centroid_volume×0.15 + (1-centroid_velocity)×0.2	Dual-centroid spectral stability
-// Entropy Quality	    15%	    All 4 entropy bands (micro, short, medium, trend)	            Multi-timeframe noise
-
-// ⚡ Volatility Alert Breakdown (ENHANCED WITH NEW FEATURES):
-// Component	        Weight	Features Used	                                Purpose
-// Flux Alert	        50%	    spectral_flux	                                Primary volatility indicator
-// Freq Instability	    30%	    centroid_velocity×0.6 + entropy_trend×0.4	    Frequency domain chaos
-// Entropy Chaos	    20%	    entropy_micro + entropy_short + entropy_medium	Multi-timeframe noise
-
-// 🔧 Filter Knob Adjustments (NEW INTEGRATION):
-// Parameter	        Formula	                                            Features Used                            Purpose
-// bucket_weight	    base + 0.30×quality - 0.20×volatility	            Enhanced quality + volatility alert      Dynamic u-channel gain
-// freq_domain_weight	base + 0.15×quality	                                Enhanced quality signal                  Spectral nudging strength
-// lambda_fixed	        base - 0.02×volatility (if vol>0.6)	                Volatility alert signal                  Adaptive forgetting rate
-
-// 🎯 SUMMARY: Feature Coverage
-// ✅ FULLY UTILIZED: coherence_pv_peak, coherence_ps_peak, spectral_flux, trend_strength_derivative, 
-//                   centroid_velocity, spectral_centroid_price, spectral_centroid_volume, entropy_bands, trend_strength
-// 📈 INTEGRATION STATUS: ALL 9 major spectral features now actively drive filter parameters and scoring
 
 #ifndef FREQUENCY_ANALYSER_HPP
 #define FREQUENCY_ANALYSER_HPP
@@ -55,8 +19,8 @@ namespace hefkf_common {
 struct FrequencyFeatures {
     // Existing core features
     double trend_strength = 0.0;
-    double coherence_price_volume_peak = 0.0;
-    double coherence_price_spread_peak = 0.0;
+    double coherence_price_volume_peak = 0.0;  // Weighted avg coherence across trading frequencies
+    double coherence_price_spread_peak = 0.0;  // Weighted avg coherence across trading frequencies
     
     // Coherence by frequency band
     std::unordered_map<std::string, double> coherence_price_volume_by_band;
@@ -98,8 +62,8 @@ public:
     bool compute(hefkf_common::FrequencyFeatures& out);    // false = not enough data
     
     // State queries
-    bool is_ready() const { return filled_; }
-    int sample_count() const { return filled_ ? WIN : idx_; }
+    bool is_ready() const { return m_filled; }
+    int sample_count() const { return m_filled ? WIN : m_idx; }
     
     // Reset state
     void reset();
@@ -118,21 +82,21 @@ private:
     static const std::vector<FreqBand> FREQ_BANDS;
     
     // Rolling window state
-    int idx_ = 0;                                     // circular index
-    bool filled_ = false;
-    double fs_;                                       // sampling frequency
+    int m_idx = 0;                                     // circular index
+    bool m_filled = false;
+    double m_fs;                                       // sampling frequency
     
     // Data buffers (circular)
-    std::array<double, WIN> price_, volume_, spread_;
+    std::array<double, WIN> m_price, m_volume, m_spread;
     
     // FFTW plans and buffers (reused for performance)
-    fftw_plan plan_forward_;
-    fftw_plan plan_forward_y_;  // Second plan for coherence computation
-    std::vector<double> window_;                      // Hanning window
-    std::vector<double> fft_input_;                   // Real input for FFT
-    std::vector<double> fft_input_y_;                 // Real input for second signal (coherence)
-    std::vector<std::complex<double>> fft_output_;    // Complex output from FFT
-    std::vector<std::complex<double>> fft_output_y_;  // Complex output for second signal
+    fftw_plan m_plan_forward;
+    fftw_plan m_plan_forward_y;  // Second plan for coherence computation
+    std::vector<double> m_window;                      // Hanning window
+    std::vector<double> m_fft_input;                   // Real input for FFT
+    std::vector<double> m_fft_input_y;                 // Real input for second signal (coherence)
+    std::vector<std::complex<double>> m_fft_output;    // Complex output from FFT
+    std::vector<std::complex<double>> m_fft_output_y;  // Complex output for second signal
     
     // Frequency analysis helpers
     void welch_psd(const double* x, std::vector<double>& out_psd, std::vector<double>& out_freq);
@@ -140,7 +104,10 @@ private:
                      double f_low, double f_high) const;
     double coherence_estimate(const double* x, const double* y, 
                             std::vector<double>& out_coherence, std::vector<double>& out_freq);
-    double find_peak_coherence(const std::vector<double>& coherence) const;
+
+    double band_coherence_weighted(const std::vector<double>& coherence,
+                                  const std::vector<double>& freq,
+                                  double f_low, double f_high) const;
     
     // Frequency band analysis
     void compute_band_coherence(const std::vector<double>& freq, const std::vector<double>& coherence,
@@ -167,13 +134,14 @@ private:
     void cleanup_fftw();
     
     // Historical tracking for derivatives
-    double prev_trend_strength_ = 0.0;
-    double prev_coherence_pv_peak_ = 0.0;
-    double prev_spectral_centroid_ = 0.0;
-    std::vector<double> prev_psd_price_;  // For spectral flux calculation
-    bool has_previous_compute_ = false;   // Flag for first computation
+    double m_prev_trend_strength = 0.0;
+    double m_prev_coherence_pv_peak = 0.0;
+    double m_prev_spectral_centroid = 0.0;
+    std::vector<double> m_prev_psd_price;  // For spectral flux calculation
+    bool m_has_previous_compute = false;   // Flag for first computation
+    
+    // Debug tick counter
+    size_t m_total_ticks_pushed = 0;  // Track total ticks for boundary debugging
 };
 
 #endif // FREQUENCY_ANALYSER_HPP 
-
-

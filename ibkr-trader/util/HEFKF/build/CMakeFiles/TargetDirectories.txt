@@ -1,7 +1,6 @@
 /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/hefkf.dir
-/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/smoke_tests.dir
-/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/standalone_example.dir
-/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/unit_tests.dir
+/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/test_20bucket_integration.dir
+/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/test_comprehensive.dir
 /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/edit_cache.dir
 /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/rebuild_cache.dir
 /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles/list_install_components.dir

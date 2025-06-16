@@ -1,4 +1,4 @@
-// Posterior Bucket Probability Extraction Implementation
+// Posterior 20 Bucket Probability Extraction Implementation
 // Gaussian integration over bucket boundaries and Dirichlet sharpening
 
 #include "posterior.hpp"
@@ -6,84 +6,28 @@
 #include <algorithm>
 #include <numeric>
 #include <stdexcept>
+#include <iostream>
 
-// ─────────────────────── Common BucketConfidence Implementation ───────────────────────
+// ─────────────────────── Key Configuration Parameters ───────────────────────
+namespace {
+    // Minimum uncertainty in return predictions (as fraction of price)
+    // This prevents overconfidence when Kalman uncertainty is very low
+    // Set to ensure proper bucket discrimination for 25bp increments
+    constexpr double MIN_RETURN_STD = 0.0002;  // 0.02% (2 basis points) - allows bucket discrimination
+    
+    // Velocity-dependent uncertainty factor
+    // Adds uncertainty proportional to the expected move size
+    // Rationale: Larger/faster moves are inherently less certain
+    // Range: 0.3 (standard) to 2.0 (high uncertainty for extreme moves)
+    constexpr double VELOCITY_UNCERTAINTY_FACTOR = 0.9;  // Keep at 0.9-1.0 for proper risk modeling
+    
+    // Maximum return for bucket integration (caps extreme tails)
+    // Prevents numerical issues with very large moves
+    constexpr double MAX_RETURN_FOR_BUCKETS = 0.05;  // 5% max single-period return
+}
+
+// ─────────────────────── Common namespace ───────────────────────
 namespace hefkf_common {
-
-void BucketConfidence::normalize() {
-    double total = up_001_002 + up_002_005 + up_005_010 + up_010_plus +
-                   dn_001_002 + dn_002_005 + dn_005_010 + dn_010_plus;
-    
-    if (total > 1e-10) {
-        up_001_002 /= total;
-        up_002_005 /= total;
-        up_005_010 /= total;
-        up_010_plus /= total;
-        dn_001_002 /= total;
-        dn_002_005 /= total;
-        dn_005_010 /= total;
-        dn_010_plus /= total;
-    }
-}
-
-bool BucketConfidence::is_valid() const {
-    double total = up_001_002 + up_002_005 + up_005_010 + up_010_plus +
-                   dn_001_002 + dn_002_005 + dn_005_010 + dn_010_plus;
-    
-    return total > 1e-10 && total <= 1.0 + 1e-6;
-}
-
-hefkf_1min::BucketConfidence BucketConfidence::to_1min() const {
-    hefkf_1min::BucketConfidence bc;
-    bc.up_001_002 = up_001_002;
-    bc.up_002_005 = up_002_005;
-    bc.up_005_010 = up_005_010;
-    bc.up_010_plus = up_010_plus;
-    bc.dn_001_002 = dn_001_002;
-    bc.dn_002_005 = dn_002_005;
-    bc.dn_005_010 = dn_005_010;
-    bc.dn_010_plus = dn_010_plus;
-    return bc;
-}
-
-hefkf_5min::BucketConfidence BucketConfidence::to_5min() const {
-    hefkf_5min::BucketConfidence bc;
-    bc.up_001_002 = up_001_002;
-    bc.up_002_005 = up_002_005;
-    bc.up_005_010 = up_005_010;
-    bc.up_010_plus = up_010_plus;
-    bc.dn_001_002 = dn_001_002;
-    bc.dn_002_005 = dn_002_005;
-    bc.dn_005_010 = dn_005_010;
-    bc.dn_010_plus = dn_010_plus;
-    return bc;
-}
-
-BucketConfidence BucketConfidence::from_1min(const hefkf_1min::BucketConfidence& bc) {
-    BucketConfidence common_bc;
-    common_bc.up_001_002 = bc.up_001_002;
-    common_bc.up_002_005 = bc.up_002_005;
-    common_bc.up_005_010 = bc.up_005_010;
-    common_bc.up_010_plus = bc.up_010_plus;
-    common_bc.dn_001_002 = bc.dn_001_002;
-    common_bc.dn_002_005 = bc.dn_002_005;
-    common_bc.dn_005_010 = bc.dn_005_010;
-    common_bc.dn_010_plus = bc.dn_010_plus;
-    return common_bc;
-}
-
-BucketConfidence BucketConfidence::from_5min(const hefkf_5min::BucketConfidence& bc) {
-    BucketConfidence common_bc;
-    common_bc.up_001_002 = bc.up_001_002;
-    common_bc.up_002_005 = bc.up_002_005;
-    common_bc.up_005_010 = bc.up_005_010;
-    common_bc.up_010_plus = bc.up_010_plus;
-    common_bc.dn_001_002 = bc.dn_001_002;
-    common_bc.dn_002_005 = bc.dn_002_005;
-    common_bc.dn_005_010 = bc.dn_005_010;
-    common_bc.dn_010_plus = bc.dn_010_plus;
-    return common_bc;
-}
 
 } // namespace hefkf_common
 
@@ -114,20 +58,27 @@ double GaussianIntegrator::standard_normal_cdf(double x) {
     if (x < -8.0) return 0.0;
     if (x > 8.0) return 1.0;
     
+    // Save the sign of x
     int sign = (x >= 0) ? 1 : -1;
-    x = std::abs(x);
+    x = std::abs(x) / SQRT_2;
     
-    // A&S formula 7.1.26
+    // Abramowitz and Stegun approximation formula 7.1.26 for erf
     double t = 1.0 / (1.0 + p * x);
-    double y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * std::exp(-x * x / 2.0) * INV_SQRT_2PI;
+    double y = (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * std::exp(-x * x);
     
-    return 0.5 * (1.0 + sign * y);
+    // CDF = 0.5 * (1 + erf(x/sqrt(2)))
+    return 0.5 * (1.0 + sign * (1.0 - y));
 }
 
-// ─────────────────────── Posterior Extraction Implementation ───────────────────────
-hefkf_common::BucketConfidence posterior_from_1min_KF(const hefkf_1min::OneMinuteHEFKF& kf,
-                                                      double current_price, 
-                                                      double dt) {
+// ─────────────────────── hefkf_common namespace continues ───────────────────────
+namespace hefkf_common {
+
+// ─────────────────────── 20-Bucket Posterior Extraction ───────────────────────
+BucketConfidence20 posterior_from_KF_20bucket(
+    const hefkf_1min::OneMinuteHEFKF& kf,
+    double current_price, 
+    double dt) {
+    
     if (!kf.is_initialized()) {
         throw std::invalid_argument("Kalman filter not initialized");
     }
@@ -144,7 +95,6 @@ hefkf_common::BucketConfidence posterior_from_1min_KF(const hefkf_1min::OneMinut
     double future_price = predicted_price + price_velocity * dt;
     
     // Future price uncertainty from covariance propagation
-    // For simple model: Var[price(t+dt)] ≈ Var[price] + dt² * Var[velocity] + 2*dt*Cov[price,velocity]
     double price_var = covariance(0, 0);
     double velocity_var = covariance(1, 1);
     double price_velocity_cov = covariance(0, 1);
@@ -152,46 +102,47 @@ hefkf_common::BucketConfidence posterior_from_1min_KF(const hefkf_1min::OneMinut
     double future_price_var = price_var + dt * dt * velocity_var + 2.0 * dt * price_velocity_cov;
     double future_price_std = std::sqrt(std::max(future_price_var, 1e-12));
     
-    // Compute return distribution
-    double expected_return = (future_price - current_price) / current_price;
-    double return_std = future_price_std / current_price;
+    // Compute return based on velocity
+    double expected_return = (price_velocity * dt) / current_price;
     
-    // Integrate over bucket boundaries
-    hefkf_common::BucketConfidence buckets;
+    // Add minimum uncertainty to prevent overly narrow distributions
+    double min_return_std = MIN_RETURN_STD;
     
-    using Bounds = GaussianIntegrator::BucketBounds;
+    // Add velocity-dependent uncertainty
+    double velocity_uncertainty = std::abs(expected_return) * VELOCITY_UNCERTAINTY_FACTOR;
     
-    buckets.up_001_002 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::UP_001_002_LOW, Bounds::UP_001_002_HIGH);
+    double return_std = std::max(future_price_std / current_price, 
+                                 min_return_std + velocity_uncertainty);
     
-    buckets.up_002_005 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::UP_002_005_LOW, Bounds::UP_002_005_HIGH);
+    // Integrate over all 20 buckets
+    BucketConfidence20 buckets;
     
-    buckets.up_005_010 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::UP_005_010_LOW, Bounds::UP_005_010_HIGH);
-    
-    buckets.up_010_plus = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::UP_010_PLUS_LOW, Bounds::UP_010_PLUS_HIGH);
-    
-    buckets.dn_001_002 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::DN_001_002_LOW, Bounds::DN_001_002_HIGH);
-    
-    buckets.dn_002_005 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::DN_002_005_LOW, Bounds::DN_002_005_HIGH);
-    
-    buckets.dn_005_010 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::DN_005_010_LOW, Bounds::DN_005_010_HIGH);
-    
-    buckets.dn_010_plus = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::DN_010_PLUS_LOW, Bounds::DN_010_PLUS_HIGH);
+//----------------- Gaussian integration over bucket boundaries -----------------
+    // Process all buckets using the assignment system
+    for (int i = 0; i <= 9; ++i) {
+        // UP buckets
+        BucketAssignment ba_up{UP, i};
+        auto [low, high] = BucketBounds20::get_bounds(ba_up);
+        buckets[ba_up] = GaussianIntegrator::gaussian_cdf_interval(
+            expected_return, return_std, low, high);
+        
+        // DOWN buckets  
+        BucketAssignment ba_dn{DOWN, i};
+        auto [dn_low, dn_high] = BucketBounds20::get_bounds(ba_dn);
+        buckets[ba_dn] = GaussianIntegrator::gaussian_cdf_interval(
+            expected_return, return_std, dn_low, dn_high);
+    }
     
     buckets.normalize();
     return buckets;
 }
 
-hefkf_common::BucketConfidence posterior_from_5min_KF(const hefkf_5min::FiveMinuteHEFKF& kf,
-                                                      double current_price, 
-                                                      double dt) {
+// 5-minute version
+BucketConfidence20 posterior_from_5min_KF_20bucket(
+    const hefkf_5min::FiveMinuteHEFKF& kf,
+    double current_price, 
+    double dt) {
+    
     if (!kf.is_initialized()) {
         throw std::invalid_argument("Kalman filter not initialized");
     }
@@ -213,71 +164,147 @@ hefkf_common::BucketConfidence posterior_from_5min_KF(const hefkf_5min::FiveMinu
     double future_price_var = price_var + dt * dt * velocity_var + 2.0 * dt * price_velocity_cov;
     double future_price_std = std::sqrt(std::max(future_price_var, 1e-12));
     
-    // Compute return distribution
-    double expected_return = (future_price - current_price) / current_price;
-    double return_std = future_price_std / current_price;
+    // Compute return based on velocity
+    double expected_return = (price_velocity * dt) / current_price;
     
-    // Integrate over bucket boundaries (same as 1min)
-    hefkf_common::BucketConfidence buckets;
+    // Add minimum uncertainty
+    double min_return_std = MIN_RETURN_STD;
     
-    using Bounds = GaussianIntegrator::BucketBounds;
+    // Add velocity-dependent uncertainty
+    double velocity_uncertainty = std::abs(expected_return) * VELOCITY_UNCERTAINTY_FACTOR;
     
-    buckets.up_001_002 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::UP_001_002_LOW, Bounds::UP_001_002_HIGH);
+    double return_std = std::max(future_price_std / current_price, 
+                                 min_return_std + velocity_uncertainty);
     
-    buckets.up_002_005 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::UP_002_005_LOW, Bounds::UP_002_005_HIGH);
+    // Integrate over all 20 buckets
+    BucketConfidence20 buckets;
     
-    buckets.up_005_010 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::UP_005_010_LOW, Bounds::UP_005_010_HIGH);
-    
-    buckets.up_010_plus = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::UP_010_PLUS_LOW, Bounds::UP_010_PLUS_HIGH);
-    
-    buckets.dn_001_002 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::DN_001_002_LOW, Bounds::DN_001_002_HIGH);
-    
-    buckets.dn_002_005 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::DN_002_005_LOW, Bounds::DN_002_005_HIGH);
-    
-    buckets.dn_005_010 = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::DN_005_010_LOW, Bounds::DN_005_010_HIGH);
-    
-    buckets.dn_010_plus = GaussianIntegrator::gaussian_cdf_interval(
-        expected_return, return_std, Bounds::DN_010_PLUS_LOW, Bounds::DN_010_PLUS_HIGH);
+    // Process all buckets
+    for (int i = 0; i <= 9; ++i) {
+        // UP buckets
+        BucketAssignment ba_up{UP, i};
+        auto [low, high] = BucketBounds20::get_bounds(ba_up);
+        buckets[ba_up] = GaussianIntegrator::gaussian_cdf_interval(
+            expected_return, return_std, low, high);
+        
+        // DOWN buckets  
+        BucketAssignment ba_dn{DOWN, i};
+        auto [dn_low, dn_high] = BucketBounds20::get_bounds(ba_dn);
+        buckets[ba_dn] = GaussianIntegrator::gaussian_cdf_interval(
+            expected_return, return_std, dn_low, dn_high);
+    }
     
     buckets.normalize();
     return buckets;
 }
 
-// ─────────────────────── Template Specializations ───────────────────────
-template<>
-hefkf_common::BucketConfidence posterior_from_KF<hefkf_1min::OneMinuteHEFKF>(
-    const hefkf_1min::OneMinuteHEFKF& kf, 
-    double current_price, 
-    double dt) {
-    return posterior_from_1min_KF(kf, current_price, dt);
-}
 
-template<>
-hefkf_common::BucketConfidence posterior_from_KF<hefkf_5min::FiveMinuteHEFKF>(
-    const hefkf_5min::FiveMinuteHEFKF& kf, 
-    double current_price, 
-    double dt) {
-    return posterior_from_5min_KF(kf, current_price, dt);
-}
-
-// ─────────────────────── Dirichlet Sharpening Implementation ───────────────────────
-void sharpen_dirichlet(hefkf_common::BucketConfidence& p, double quality_factor) {
-    // Alpha parameter: 1.0 + 4.0 * quality_factor gives range [1, 5]
-    // quality_factor = 0 → alpha = 1 (no change)
-    // quality_factor = 1 → alpha = 5 (strong sharpening)
-    double alpha = 1.0 + 4.0 * std::clamp(quality_factor, 0.0, 1.0);
+// ─────────────────────── Closed Loop Integration Helpers (20-Bucket) ───────────────────────
+hefkf_1min::MarketData create_market_data_1min_20bucket(double price, double volume, double spread,
+                                               const BucketConfidence20& bucket_conf,
+                                               const FrequencyFeatures& freq_features) {
+    hefkf_1min::MarketData data;
+    data.price = price;
+    data.volume = volume;
+    data.spread = spread;
+    data.timestamp = std::chrono::system_clock::now();
     
-    // Array of pointers to all bucket probabilities
+    // Convert bucket confidence 20 to 1min format
+    data.bucket_conf = std::make_unique<hefkf_1min::BucketConfidence20>();
+    auto& bc = *data.bucket_conf;
+    
+    // Copy all 20 buckets
+    bc.up_000 = bucket_conf.up_000;
+    bc.up_010 = bucket_conf.up_010;
+    bc.up_020 = bucket_conf.up_020;
+    bc.up_030 = bucket_conf.up_030;
+    bc.up_040 = bucket_conf.up_040;
+    bc.up_050 = bucket_conf.up_050;
+    bc.up_060 = bucket_conf.up_060;
+    bc.up_070 = bucket_conf.up_070;
+    bc.up_080 = bucket_conf.up_080;
+    bc.up_090 = bucket_conf.up_090;
+    
+    bc.dn_000 = bucket_conf.dn_000;
+    bc.dn_010 = bucket_conf.dn_010;
+    bc.dn_020 = bucket_conf.dn_020;
+    bc.dn_030 = bucket_conf.dn_030;
+    bc.dn_040 = bucket_conf.dn_040;
+    bc.dn_050 = bucket_conf.dn_050;
+    bc.dn_060 = bucket_conf.dn_060;
+    bc.dn_070 = bucket_conf.dn_070;
+    bc.dn_080 = bucket_conf.dn_080;
+    bc.dn_090 = bucket_conf.dn_090;
+    
+    // Convert frequency features
+    data.freq_features = std::make_unique<hefkf_1min::FrequencyFeatures>();
+    data.freq_features->trend_strength = freq_features.trend_strength;
+    data.freq_features->coherence_price_volume_peak = freq_features.coherence_price_volume_peak;
+    data.freq_features->coherence_price_spread_peak = freq_features.coherence_price_spread_peak;
+    data.freq_features->coherence_price_volume_by_band = freq_features.coherence_price_volume_by_band;
+    data.freq_features->coherence_price_spread_by_band = freq_features.coherence_price_spread_by_band;
+    
+    return data;
+}
+
+hefkf_5min::MarketData create_market_data_5min_20bucket(double price, double volume, double spread,
+                                               const BucketConfidence20& bucket_conf,
+                                               const FrequencyFeatures& freq_features) {
+    hefkf_5min::MarketData data;
+    data.price = price;
+    data.volume = volume;
+    data.spread = spread;
+    data.timestamp = std::chrono::system_clock::now();
+    
+    // Convert bucket confidence 20 to 5min format
+    data.bucket_conf = std::make_unique<hefkf_5min::BucketConfidence20>();
+    auto& bc = *data.bucket_conf;
+    
+    // Copy all 20 buckets
+    bc.up_000 = bucket_conf.up_000;
+    bc.up_010 = bucket_conf.up_010;
+    bc.up_020 = bucket_conf.up_020;
+    bc.up_030 = bucket_conf.up_030;
+    bc.up_040 = bucket_conf.up_040;
+    bc.up_050 = bucket_conf.up_050;
+    bc.up_060 = bucket_conf.up_060;
+    bc.up_070 = bucket_conf.up_070;
+    bc.up_080 = bucket_conf.up_080;
+    bc.up_090 = bucket_conf.up_090;
+    
+    bc.dn_000 = bucket_conf.dn_000;
+    bc.dn_010 = bucket_conf.dn_010;
+    bc.dn_020 = bucket_conf.dn_020;
+    bc.dn_030 = bucket_conf.dn_030;
+    bc.dn_040 = bucket_conf.dn_040;
+    bc.dn_050 = bucket_conf.dn_050;
+    bc.dn_060 = bucket_conf.dn_060;
+    bc.dn_070 = bucket_conf.dn_070;
+    bc.dn_080 = bucket_conf.dn_080;
+    bc.dn_090 = bucket_conf.dn_090;
+    
+    // Convert frequency features
+    data.freq_features = std::make_unique<hefkf_5min::FrequencyFeatures>();
+    data.freq_features->trend_strength = freq_features.trend_strength;
+    data.freq_features->coherence_price_volume_peak = freq_features.coherence_price_volume_peak;
+    data.freq_features->coherence_price_spread_peak = freq_features.coherence_price_spread_peak;
+    data.freq_features->coherence_price_volume_by_band = freq_features.coherence_price_volume_by_band;
+    data.freq_features->coherence_price_spread_by_band = freq_features.coherence_price_spread_by_band;
+    
+    return data;
+}
+
+// ─────────────────────── 20-Bucket Dirichlet Sharpening ───────────────────────
+void sharpen_dirichlet_20bucket(BucketConfidence20& p, double quality_factor) {
+    // Alpha parameter: 1.0 + 1.5 * quality_factor gives range [1, 2.5]
+    double alpha = 1.0 + 1.5 * std::clamp(quality_factor, 0.0, 1.0);
+    
+    // Array of all bucket probabilities (20 total)
     double* probs[] = {
-        &p.up_001_002, &p.up_002_005, &p.up_005_010, &p.up_010_plus,
-        &p.dn_001_002, &p.dn_002_005, &p.dn_005_010, &p.dn_010_plus
+        &p.up_000, &p.up_010, &p.up_020, &p.up_030, &p.up_040,
+        &p.up_050, &p.up_060, &p.up_070, &p.up_080, &p.up_090,
+        &p.dn_000, &p.dn_010, &p.dn_020, &p.dn_030, &p.dn_040,
+        &p.dn_050, &p.dn_060, &p.dn_070, &p.dn_080, &p.dn_090
     };
     
     // Apply Dirichlet sharpening: p_i = p_i^alpha
@@ -299,54 +326,245 @@ void sharpen_dirichlet(hefkf_common::BucketConfidence& p, double quality_factor)
     } else {
         // Fallback: uniform distribution
         for (double* q : probs) {
-            *q = 1.0 / 8.0;
+            *q = 1.0 / 20.0;
+        }
+    }
+    
+    // Cap enhanced probabilities to maintain uncertainty
+    constexpr double MAX_BUCKET_PROB = 0.95;
+    
+    // Check if any probability exceeds the cap
+    bool needs_recapping = false;
+    for (double* q : probs) {
+        if (*q > MAX_BUCKET_PROB) {
+            needs_recapping = true;
+            break;
+        }
+    }
+    
+    // If capping is needed, redistribute excess probability
+    if (needs_recapping) {
+        double excess_total = 0.0;
+        int capped_count = 0;
+        
+        // First pass: cap and calculate excess
+        for (double* q : probs) {
+            if (*q > MAX_BUCKET_PROB) {
+                excess_total += (*q - MAX_BUCKET_PROB);
+                *q = MAX_BUCKET_PROB;
+                capped_count++;
+            }
+        }
+        
+        // Second pass: redistribute excess proportionally to uncapped buckets
+        if (capped_count < 20 && excess_total > 1e-12) {
+            double redistribution_sum = 0.0;
+            
+            // Calculate sum of uncapped probabilities for proportional redistribution
+            for (double* q : probs) {
+                if (*q < MAX_BUCKET_PROB - 1e-12) {
+                    redistribution_sum += *q;
+                }
+            }
+            
+            // Redistribute if possible
+            if (redistribution_sum > 1e-12) {
+                for (double* q : probs) {
+                    if (*q < MAX_BUCKET_PROB - 1e-12) {
+                        double share = (*q / redistribution_sum) * excess_total;
+                        *q = std::min(*q + share, MAX_BUCKET_PROB);
+                    }
+                }
+            }
+        }
+        
+        // Final normalization to ensure sum = 1
+        sum = 0.0;
+        for (double* q : probs) {
+            sum += *q;
+        }
+        if (sum > 1e-12) {
+            for (double* q : probs) {
+                *q /= sum;
+            }
         }
     }
 }
 
-// ─────────────────────── Closed Loop Integration Helpers ───────────────────────
-hefkf_1min::MarketData create_market_data_1min(double price, double volume, double spread,
-                                               const hefkf_common::BucketConfidence& bucket_conf,
-                                               const hefkf_common::FrequencyFeatures& freq_features) {
-    hefkf_1min::MarketData data;
-    data.price = price;
-    data.volume = volume;
-    data.spread = spread;
-    data.timestamp = std::chrono::system_clock::now();
+// ─────────────────────── 20-Bucket System Implementation ───────────────────────
+
+// BucketConfidence20 normalize implementation
+void BucketConfidence20::normalize() {
+    double total = up_000 + up_010 + up_020 + up_030 + up_040 + 
+                   up_050 + up_060 + up_070 + up_080 + up_090 +
+                   dn_000 + dn_010 + dn_020 + dn_030 + dn_040 + 
+                   dn_050 + dn_060 + dn_070 + dn_080 + dn_090;
     
-    // Convert bucket confidence
-    data.bucket_conf = std::make_unique<hefkf_1min::BucketConfidence>(bucket_conf.to_1min());
-    
-    // Convert frequency features
-    data.freq_features = std::make_unique<hefkf_1min::FrequencyFeatures>();
-    data.freq_features->trend_strength = freq_features.trend_strength;
-    data.freq_features->coherence_price_volume_peak = freq_features.coherence_price_volume_peak;
-    data.freq_features->coherence_price_spread_peak = freq_features.coherence_price_spread_peak;
-    data.freq_features->coherence_price_volume_by_band = freq_features.coherence_price_volume_by_band;
-    data.freq_features->coherence_price_spread_by_band = freq_features.coherence_price_spread_by_band;
-    
-    return data;
+    if (total > 1e-10) {
+        up_000 /= total;
+        up_010 /= total;
+        up_020 /= total;
+        up_030 /= total;
+        up_040 /= total;
+        up_050 /= total;
+        up_060 /= total;
+        up_070 /= total;
+        up_080 /= total;
+        up_090 /= total;
+        
+        dn_000 /= total;
+        dn_010 /= total;
+        dn_020 /= total;
+        dn_030 /= total;
+        dn_040 /= total;
+        dn_050 /= total;
+        dn_060 /= total;
+        dn_070 /= total;
+        dn_080 /= total;
+        dn_090 /= total;
+    }
 }
 
-hefkf_5min::MarketData create_market_data_5min(double price, double volume, double spread,
-                                               const hefkf_common::BucketConfidence& bucket_conf,
-                                               const hefkf_common::FrequencyFeatures& freq_features) {
-    hefkf_5min::MarketData data;
-    data.price = price;
-    data.volume = volume;
-    data.spread = spread;
-    data.timestamp = std::chrono::system_clock::now();
+bool BucketConfidence20::is_valid() const {
+    double total = up_000 + up_010 + up_020 + up_030 + up_040 + 
+                   up_050 + up_060 + up_070 + up_080 + up_090 +
+                   dn_000 + dn_010 + dn_020 + dn_030 + dn_040 + 
+                   dn_050 + dn_060 + dn_070 + dn_080 + dn_090;
     
-    // Convert bucket confidence
-    data.bucket_conf = std::make_unique<hefkf_5min::BucketConfidence>(bucket_conf.to_5min());
+    return total > 1e-10 && total <= 1.0 + 1e-6;
+}
+
+// Array access operators
+double& BucketConfidence20::operator[](const BucketAssignment& ba) {
+    if (ba.type == UP) {
+        switch (ba.index) {
+            case 0: return up_000;
+            case 1: return up_010;
+            case 2: return up_020;
+            case 3: return up_030;
+            case 4: return up_040;
+            case 5: return up_050;
+            case 6: return up_060;
+            case 7: return up_070;
+            case 8: return up_080;
+            case 9: return up_090;
+            default: throw std::out_of_range("Invalid UP bucket index");
+        }
+    } else if (ba.type == DOWN) {
+        switch (ba.index) {
+            case 0: return dn_000;
+            case 1: return dn_010;
+            case 2: return dn_020;
+            case 3: return dn_030;
+            case 4: return dn_040;
+            case 5: return dn_050;
+            case 6: return dn_060;
+            case 7: return dn_070;
+            case 8: return dn_080;
+            case 9: return dn_090;
+            default: throw std::out_of_range("Invalid DOWN bucket index");
+        }
+    } else {  // NEUTRAL
+        if (ba.index == 0) {
+            // For neutral, return average of up_000 and dn_000
+            static double neutral_temp;
+            neutral_temp = (up_000 + dn_000) / 2.0;
+            return neutral_temp;
+        }
+        throw std::out_of_range("Invalid NEUTRAL bucket index");
+    }
+}
+
+double BucketConfidence20::operator[](const BucketAssignment& ba) const {
+    if (ba.type == UP) {
+        switch (ba.index) {
+            case 0: return up_000;
+            case 1: return up_010;
+            case 2: return up_020;
+            case 3: return up_030;
+            case 4: return up_040;
+            case 5: return up_050;
+            case 6: return up_060;
+            case 7: return up_070;
+            case 8: return up_080;
+            case 9: return up_090;
+            default: throw std::out_of_range("Invalid UP bucket index");
+        }
+    } else if (ba.type == DOWN) {
+        switch (ba.index) {
+            case 0: return dn_000;
+            case 1: return dn_010;
+            case 2: return dn_020;
+            case 3: return dn_030;
+            case 4: return dn_040;
+            case 5: return dn_050;
+            case 6: return dn_060;
+            case 7: return dn_070;
+            case 8: return dn_080;
+            case 9: return dn_090;
+            default: throw std::out_of_range("Invalid DOWN bucket index");
+        }
+    } else {  // NEUTRAL
+        if (ba.index == 0) {
+            return (up_000 + dn_000) / 2.0;
+        }
+        throw std::out_of_range("Invalid NEUTRAL bucket index");
+    }
+}
+
+// BucketBounds20 helper implementation
+std::pair<double, double> BucketBounds20::get_bounds(const BucketAssignment& ba) {
+    if (ba.type == UP) {
+        switch (ba.index) {
+            case 0: return {UP_000_LOW, UP_000_HIGH};
+            case 1: return {UP_010_LOW, UP_010_HIGH};
+            case 2: return {UP_020_LOW, UP_020_HIGH};
+            case 3: return {UP_030_LOW, UP_030_HIGH};
+            case 4: return {UP_040_LOW, UP_040_HIGH};
+            case 5: return {UP_050_LOW, UP_050_HIGH};
+            case 6: return {UP_060_LOW, UP_060_HIGH};
+            case 7: return {UP_070_LOW, UP_070_HIGH};
+            case 8: return {UP_080_LOW, UP_080_HIGH};
+            case 9: return {UP_090_LOW, UP_090_HIGH};
+            default: throw std::out_of_range("Invalid UP bucket index");
+        }
+    } else if (ba.type == DOWN) {
+        switch (ba.index) {
+            case 0: return {DN_000_LOW, DN_000_HIGH};
+            case 1: return {DN_010_LOW, DN_010_HIGH};
+            case 2: return {DN_020_LOW, DN_020_HIGH};
+            case 3: return {DN_030_LOW, DN_030_HIGH};
+            case 4: return {DN_040_LOW, DN_040_HIGH};
+            case 5: return {DN_050_LOW, DN_050_HIGH};
+            case 6: return {DN_060_LOW, DN_060_HIGH};
+            case 7: return {DN_070_LOW, DN_070_HIGH};
+            case 8: return {DN_080_LOW, DN_080_HIGH};
+            case 9: return {DN_090_LOW, DN_090_HIGH};
+            default: throw std::out_of_range("Invalid DOWN bucket index");
+        }
+    } else {  // NEUTRAL  
+        return {-0.00125, 0.00125};  // ±0.125%
+    }
+}
+
+// Phase 1 bucket assignment implementation
+BucketAssignment assign_bucket(double return_pct) {
+    const double NEUTRAL_THRESHOLD = 0.125;  // ±0.125% is neutral
     
-    // Convert frequency features
-    data.freq_features = std::make_unique<hefkf_5min::FrequencyFeatures>();
-    data.freq_features->trend_strength = freq_features.trend_strength;
-    data.freq_features->coherence_price_volume_peak = freq_features.coherence_price_volume_peak;
-    data.freq_features->coherence_price_spread_peak = freq_features.coherence_price_spread_peak;
-    data.freq_features->coherence_price_volume_by_band = freq_features.coherence_price_volume_by_band;
-    data.freq_features->coherence_price_spread_by_band = freq_features.coherence_price_spread_by_band;
+    if (std::abs(return_pct) < NEUTRAL_THRESHOLD) {
+        return {NEUTRAL, 0};  // Maps to up_000 or dn_000
+    }
     
-    return data;
-} 
+    BucketType type = (return_pct > 0) ? UP : DOWN;
+    double abs_return = std::abs(return_pct);
+    
+    // Calculate bucket index based on distance from neutral zone
+    int index = static_cast<int>((abs_return + 0.125) / 0.25);
+    
+    // Cap at boundary bucket
+    if (index > 9) index = 9;
+    
+    return {type, index};
+}
+
+} // namespace hefkf_common 

@@ -1,1 +1,0 @@
-/usr/bin/c++  -Wall -Wextra -O3 CMakeFiles/standalone_example.dir/standalone_example.cpp.o -o standalone_example  libhefkf.a /usr/lib/x86_64-linux-gnu/libfftw3.so /usr/lib/x86_64-linux-gnu/libfftw3_threads.so 

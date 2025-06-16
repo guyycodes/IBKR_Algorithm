@@ -42,40 +42,58 @@ add_library(hefkf STATIC
     5min_HEFKF.cpp
     frequency_analyser.cpp
     posterior.cpp
-    integration_loop.cpp
+    # integration_loop.cpp
+    analytic_scorer.cpp
+    # bucket_convergence.cpp
 )
 
 target_link_libraries(hefkf ${FFTW3_LIB} ${FFTW3_THREADS_LIB})
 
 # Build smoke tests
-add_executable(smoke_tests
-    smoke_tests.cpp
+# add_executable(smoke_tests
+#     smoke_tests.cpp
+# )
+
+# target_link_libraries(smoke_tests hefkf)
+
+# Build test data generator
+# add_executable(test_data_generator
+#     test_data_generator.cpp
+# )
+
+# target_link_libraries(test_data_generator)
+
+# Build enhanced unit tests
+# add_executable(enhanced_unit_tests
+#     enhanced_unit_tests.cpp
+# )
+
+# target_link_libraries(enhanced_unit_tests hefkf)
+
+# Build 20-bucket integration test
+add_executable(test_20bucket_integration
+    test_20bucket_integration.cpp
 )
 
-target_link_libraries(smoke_tests hefkf)
+target_link_libraries(test_20bucket_integration hefkf)
 
-# Build standalone example
-add_executable(standalone_example
-    standalone_example.cpp
+# Build comprehensive test suite
+add_executable(test_comprehensive
+    test_comprehensive.cpp
 )
 
-target_link_libraries(standalone_example hefkf)
-
-# Build unit tests for the pipeline
-add_executable(unit_tests
-    unit_tests.cpp
-)
-
-target_link_libraries(unit_tests hefkf)
+target_link_libraries(test_comprehensive hefkf)
 
 # Install targets
-install(TARGETS hefkf smoke_tests standalone_example unit_tests DESTINATION bin)
+install(TARGETS hefkf test_20bucket_integration test_comprehensive DESTINATION bin)
 install(FILES 
     1min_HEFKF.hpp 
     5min_HEFKF.hpp 
     frequency_analyser.hpp
     posterior.hpp
     integration_loop.hpp
+    analytic_scorer.hpp
+    bucket_convergence.hpp
     DESTINATION include)
 
 # Optional: Build tests if we have them

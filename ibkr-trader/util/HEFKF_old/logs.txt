@@ -1,0 +1,486 @@
+Starting Enhanced HEFKF Pipeline Tests with Controlled Data...
+================================================================================
+
+============================================================
+RUNNING TEST: Uptrend Scenario Test
+============================================================
+Debug: velocity=0.0263607, trend=0.413835, raw_up=0.974205, enhanced_up=0.994993
+Debug: velocity=0.0351333, trend=0.415251, raw_up=0.970814, enhanced_up=0.994151
+Debug: velocity=0.012337, trend=0.416705, raw_up=0.984784, enhanced_up=0.997221
+Debug: velocity=0.0111836, trend=0.418187, raw_up=0.986161, enhanced_up=0.997552
+Debug: velocity=0.0154726, trend=0.419696, raw_up=0.981536, enhanced_up=0.996432
+
+--- sharpen_dirichlet (call 995) ---
+quality_factor: 0.260058, alpha: 1.39009
+Input buckets - up: 0.971484, down: 0.028516
+After sharpening - up: 0.993422, down: 0.00657788
+
+--- sharpen_dirichlet (call 996) ---
+quality_factor: 0.260058, alpha: 1.39009
+Input buckets - up: 0.976982, down: 0.0230183
+After sharpening - up: 0.99502, down: 0.00497961
+
+--- sharpen_dirichlet (call 997) ---
+quality_factor: 0.260246, alpha: 1.39037
+Input buckets - up: 0.978463, down: 0.0215373
+After sharpening - up: 0.995395, down: 0.00460501
+
+--- sharpen_dirichlet (call 998) ---
+quality_factor: 0.260246, alpha: 1.39037
+Input buckets - up: 0.977506, down: 0.0224936
+After sharpening - up: 0.995134, down: 0.00486626
+=== normalize_features (call 1998) ===
+Input spectral_flux: 1.28457e-08
+flux_scale_: 5e-05, raw/scale: 0.000256913, norm.flux: 0.000256913
+
+--- sharpen_dirichlet (call 999) ---
+quality_factor: 0.260446, alpha: 1.39067
+Input buckets - up: 0.977733, down: 0.0222671
+After sharpening - up: 0.995223, down: 0.00477717
+=== normalize_features (call 1999) ===
+Input spectral_flux: 1.28457e-08
+flux_scale_: 5e-05, raw/scale: 0.000256913, norm.flux: 0.000256913
+=== normalize_features (call 2000) ===
+Input spectral_flux: 1.28457e-08
+flux_scale_: 5e-05, raw/scale: 0.000256913, norm.flux: 0.000256913
+
+--- sharpen_dirichlet (call 1000) ---
+quality_factor: 0.260446, alpha: 1.39067
+Input buckets - up: 0.976589, down: 0.0234105
+After sharpening - up: 0.994859, down: 0.00514145
+=== normalize_features (call 2001) ===
+Input spectral_flux: 1.26044e-08
+flux_scale_: 5e-05, raw/scale: 0.000252087, norm.flux: 0.000252087
+=== normalize_features (call 2002) ===
+Input spectral_flux: 1.26044e-08
+flux_scale_: 5e-05, raw/scale: 0.000252087, norm.flux: 0.000252087
+
+--- sharpen_dirichlet (call 1001) ---
+quality_factor: 0.260659, alpha: 1.39099
+Input buckets - up: 0.980302, down: 0.0196976
+After sharpening - up: 0.995488, down: 0.00451182
+
+--- sharpen_dirichlet (call 1002) ---
+quality_factor: 0.260659, alpha: 1.39099
+Input buckets - up: 0.969216, down: 0.0307844
+After sharpening - up: 0.991761, down: 0.00823915
+
+--- sharpen_dirichlet (call 1003) ---
+quality_factor: 0.260882, alpha: 1.39132
+Input buckets - up: 0.985231, down: 0.0147687
+After sharpening - up: 0.996921, down: 0.00307922
+
+--- sharpen_dirichlet (call 1004) ---
+quality_factor: 0.260882, alpha: 1.39132
+Input buckets - up: 0.954446, down: 0.0455541
+After sharpening - up: 0.986058, down: 0.0139415
+
+--- sharpen_dirichlet (call 1005) ---
+quality_factor: 0.261116, alpha: 1.39167
+Input buckets - up: 0.984563, down: 0.0154369
+After sharpening - up: 0.996742, down: 0.00325779
+FrequencyAnalyser::push - tick 995, idx=228, filled=1, price=122.005
+FrequencyAnalyser::push - tick 996, idx=229, filled=1, price=122.067
+FrequencyAnalyser::push - tick 997, idx=230, filled=1, price=122.07
+FrequencyAnalyser::push - tick 998, idx=231, filled=1, price=122.104
+FrequencyAnalyser::push - tick 999, idx=232, filled=1, price=122.103
+FrequencyAnalyser::push - tick 1000, idx=233, filled=1, price=122.153
+FrequencyAnalyser::push - tick 1001, idx=234, filled=1, price=122.145
+FrequencyAnalyser::push - tick 1002, idx=235, filled=1, price=122.179
+FrequencyAnalyser::push - tick 1003, idx=236, filled=1, price=122.215
+FrequencyAnalyser::push - tick 1004, idx=237, filled=1, price=122.247
+FrequencyAnalyser::push - tick 1005, idx=238, filled=1, price=122.246
+
+=== apply_simple_regime_scoring Debug (call 1999) ===
+Regime: Bull
+Quality: 0.724153
+Prior buckets - up total: 0.986246
+Bias created - up bias: 0.108623
+After bias addition - up total: 1.09487
+Individual buckets after bias:
+  up_001_002: 0.902808
+  up_002_005: 0.126779
+  up_005_010: 0.0381254
+  up_010_plus: 0.0271557
+  dn_001_002: 0.0123334
+  dn_002_005: 0.00142093
+  dn_005_010: 2.46085e-08
+  dn_010_plus: 0
+After normalization - up total: 0.987593
+After sharpening - up total: 0.997704
+Sharpening parameter passed: 0.271557
+
+=== apply_simple_regime_scoring Debug (call 2001) ===
+Regime: Bull
+Quality: 0.724127
+Prior buckets - up total: 0.975181
+Bias created - up bias: 0.108619
+After bias addition - up total: 1.0838
+Individual buckets after bias:
+  up_001_002: 0.0779186
+  up_002_005: 0.898812
+  up_005_010: 0.0797887
+  up_010_plus: 0.0272807
+  dn_001_002: 0.0150927
+  dn_002_005: 0.00950688
+  dn_005_010: 0.000219139
+  dn_010_plus: 1.15154e-08
+After normalization - up total: 0.977613
+After sharpening - up total: 0.995503
+Sharpening parameter passed: 0.271548
+Tick 500: Price=110.517, Velocity=0.0218678, ExpReturn=0.0197868%, Raw=0.977323, Enhanced=0.994961
+Tick 1000: Price=122.153, Velocity=0.0218678, ExpReturn=0.017902%, Raw=0.978716, Enhanced=0.99413
+
+=== Additional test debug for tick 1000 ===
+Index i in outputs: 999
+up_prob being used: 0.99413
+Recalculated from outputs[999]: 0.99413
+Tick 1500: Price=134.986, Velocity=0.0218678, ExpReturn=0.0162%, Raw=0.980133, Enhanced=0.994715
+Tick 2000: Price=149.168, Velocity=0.0218678, ExpReturn=0.0146599%, Raw=0.981569, Enhanced=0.997004
+Tick 2500: Price=164.832, Velocity=0.0218678, ExpReturn=0.0132667%, Raw=0.983008, Enhanced=0.985595
+Average upward probability: 0.940805
+Average downward probability: 0.0591952
+Actual price return: 82.1699%
+1min filter return: 82.1753%
+5min filter return: 82.1811%
+Final trend strength: 0.44884
+
+--- Bucket Convergence Validation for Uptrend ---
+Tick 300: Entropy=0.50, Stability=0.18, Bias=+0.75, Extreme=0.01, Confidence=0.76
+Tick 400: Entropy=0.44, Stability=0.09, Bias=+0.92, Extreme=0.01, Confidence=0.79
+Tick 500: Entropy=0.45, Stability=0.24, Bias=+0.94, Extreme=0.01, Confidence=0.78
+Tick 600: Entropy=0.46, Stability=0.15, Bias=+0.95, Extreme=0.01, Confidence=0.78
+Tick 700: Entropy=0.48, Stability=0.71, Bias=+0.95, Extreme=0.01, Confidence=0.77
+Tick 800: Entropy=0.51, Stability=0.46, Bias=+0.95, Extreme=0.01, Confidence=0.76
+Tick 900: Entropy=0.46, Stability=0.58, Bias=+0.96, Extreme=0.01, Confidence=0.78
+Tick 1000: Entropy=0.55, Stability=0.07, Bias=+0.14, Extreme=0.01, Confidence=0.73
+Tick 1100: Entropy=0.46, Stability=0.36, Bias=+0.95, Extreme=0.01, Confidence=0.78
+Tick 1200: Entropy=0.44, Stability=0.58, Bias=+0.94, Extreme=0.01, Confidence=0.79
+Tick 1300: Entropy=0.56, Stability=0.68, Bias=+0.95, Extreme=0.01, Confidence=0.73
+Tick 1400: Entropy=0.47, Stability=0.48, Bias=+0.92, Extreme=0.01, Confidence=0.78
+Tick 1500: Entropy=0.45, Stability=0.15, Bias=+0.95, Extreme=0.01, Confidence=0.78
+Tick 1600: Entropy=0.38, Stability=0.57, Bias=+0.96, Extreme=0.01, Confidence=0.82
+Tick 1700: Entropy=0.41, Stability=0.39, Bias=+0.58, Extreme=0.01, Confidence=0.80
+Tick 1800: Entropy=0.49, Stability=0.49, Bias=+0.94, Extreme=0.01, Confidence=0.77
+Tick 1900: Entropy=0.47, Stability=0.39, Bias=+0.92, Extreme=0.01, Confidence=0.77
+Tick 2000: Entropy=0.44, Stability=0.43, Bias=+0.96, Extreme=0.01, Confidence=0.79
+Tick 2100: Entropy=0.38, Stability=0.31, Bias=+0.95, Extreme=0.01, Confidence=0.82
+Tick 2200: Entropy=0.41, Stability=0.22, Bias=+0.95, Extreme=0.01, Confidence=0.80
+Tick 2300: Entropy=0.40, Stability=0.28, Bias=+0.96, Extreme=0.01, Confidence=0.81
+Tick 2400: Entropy=0.47, Stability=0.30, Bias=+0.95, Extreme=0.01, Confidence=0.78
+Tick 2500: Entropy=0.49, Stability=0.41, Bias=+0.71, Extreme=0.01, Confidence=0.76
+Tick 2600: Entropy=0.46, Stability=0.30, Bias=+0.84, Extreme=0.01, Confidence=0.78
+Tick 2700: Entropy=0.40, Stability=0.12, Bias=+0.96, Extreme=0.01, Confidence=0.81
+Tick 2800: Entropy=0.42, Stability=0.24, Bias=+0.95, Extreme=0.01, Confidence=0.80
+Tick 2900: Entropy=0.44, Stability=0.53, Bias=+0.94, Extreme=0.01, Confidence=0.79
+=== Convergence Statistics ===
+Average Entropy: 0.453
+Entropy Trend: -0.000018 (negative = converging)
+Stability Score: 0.345
+Bias Consistency: 0.815
+Time to Convergence: 999.000 ticks
+Is Converged: NO
+ASSERTION FAILED: Should converge to uptrend pattern
+Uptrend test failed: Test failed: Should converge to uptrend pattern
+
+============================================================
+RUNNING TEST: Downtrend Scenario Test
+============================================================
+FrequencyAnalyser::push - tick 995, idx=228, filled=1, price=81.9544
+FrequencyAnalyser::push - tick 996, idx=229, filled=1, price=81.9397
+FrequencyAnalyser::push - tick 997, idx=230, filled=1, price=81.9214
+FrequencyAnalyser::push - tick 998, idx=231, filled=1, price=81.8923
+FrequencyAnalyser::push - tick 999, idx=232, filled=1, price=81.884
+FrequencyAnalyser::push - tick 1000, idx=233, filled=1, price=81.8641
+FrequencyAnalyser::push - tick 1001, idx=234, filled=1, price=81.8577
+FrequencyAnalyser::push - tick 1002, idx=235, filled=1, price=81.8545
+FrequencyAnalyser::push - tick 1003, idx=236, filled=1, price=81.8058
+FrequencyAnalyser::push - tick 1004, idx=237, filled=1, price=81.8182
+FrequencyAnalyser::push - tick 1005, idx=238, filled=1, price=81.7871
+Average upward probability: 0.076
+Average downward probability: 0.924
+
+--- Bucket Convergence Validation for Downtrend ---
+Tick 300: Entropy=0.53, Stability=0.35, Bias=-0.95, Extreme=0.01, Confidence=0.75
+Tick 400: Entropy=0.51, Stability=0.06, Bias=-0.49, Extreme=0.01, Confidence=0.75
+Tick 500: Entropy=0.57, Stability=0.25, Bias=-0.92, Extreme=0.01, Confidence=0.72
+Tick 600: Entropy=0.57, Stability=0.17, Bias=-0.81, Extreme=0.01, Confidence=0.72
+Tick 700: Entropy=0.47, Stability=0.42, Bias=-0.95, Extreme=0.01, Confidence=0.77
+Tick 800: Entropy=0.63, Stability=0.33, Bias=-0.83, Extreme=0.01, Confidence=0.70
+Tick 900: Entropy=0.54, Stability=0.24, Bias=-0.91, Extreme=0.01, Confidence=0.74
+Tick 1000: Entropy=0.55, Stability=0.26, Bias=-0.93, Extreme=0.01, Confidence=0.73
+Tick 1100: Entropy=0.54, Stability=0.31, Bias=-0.93, Extreme=0.01, Confidence=0.74
+Tick 1200: Entropy=0.70, Stability=0.49, Bias=-0.70, Extreme=0.01, Confidence=0.66
+Tick 1300: Entropy=0.53, Stability=0.52, Bias=-0.94, Extreme=0.01, Confidence=0.74
+Tick 1400: Entropy=0.51, Stability=0.42, Bias=-0.94, Extreme=0.01, Confidence=0.75
+Tick 1500: Entropy=0.53, Stability=0.57, Bias=-0.93, Extreme=0.01, Confidence=0.75
+Tick 1600: Entropy=0.57, Stability=0.39, Bias=-0.91, Extreme=0.01, Confidence=0.73
+Tick 1700: Entropy=0.73, Stability=0.26, Bias=-0.38, Extreme=0.01, Confidence=0.65
+Tick 1800: Entropy=0.50, Stability=0.21, Bias=-0.95, Extreme=0.01, Confidence=0.76
+Tick 1900: Entropy=0.42, Stability=0.40, Bias=-0.95, Extreme=0.01, Confidence=0.80
+Tick 2000: Entropy=0.54, Stability=0.44, Bias=-0.74, Extreme=0.01, Confidence=0.74
+Tick 2100: Entropy=0.56, Stability=0.50, Bias=-0.83, Extreme=0.01, Confidence=0.73
+Tick 2200: Entropy=0.50, Stability=0.38, Bias=-0.92, Extreme=0.01, Confidence=0.76
+Tick 2300: Entropy=0.45, Stability=0.29, Bias=-0.89, Extreme=0.01, Confidence=0.78
+Tick 2400: Entropy=0.48, Stability=0.31, Bias=-0.95, Extreme=0.01, Confidence=0.77
+Tick 2500: Entropy=0.68, Stability=0.09, Bias=-0.63, Extreme=0.01, Confidence=0.67
+Tick 2600: Entropy=0.42, Stability=0.32, Bias=-0.49, Extreme=0.01, Confidence=0.80
+Tick 2700: Entropy=0.49, Stability=0.67, Bias=-0.95, Extreme=0.01, Confidence=0.77
+Tick 2800: Entropy=0.48, Stability=0.27, Bias=-0.93, Extreme=0.01, Confidence=0.77
+Tick 2900: Entropy=0.48, Stability=0.39, Bias=-0.93, Extreme=0.01, Confidence=0.77
+=== Convergence Statistics ===
+Average Entropy: 0.561
+Entropy Trend: 0.000032 (negative = converging)
+Stability Score: 0.358
+Bias Consistency: 0.831
+Time to Convergence: 999.000 ticks
+Is Converged: NO
+ASSERTION FAILED: Should converge to downtrend pattern
+Downtrend test failed: Test failed: Should converge to downtrend pattern
+
+============================================================
+RUNNING TEST: Sideways Market Test
+============================================================
+FrequencyAnalyser::push - tick 995, idx=228, filled=1, price=101.821
+FrequencyAnalyser::push - tick 996, idx=229, filled=1, price=101.803
+FrequencyAnalyser::push - tick 997, idx=230, filled=1, price=101.783
+FrequencyAnalyser::push - tick 998, idx=231, filled=1, price=101.785
+FrequencyAnalyser::push - tick 999, idx=232, filled=1, price=101.776
+FrequencyAnalyser::push - tick 1000, idx=233, filled=1, price=101.74
+FrequencyAnalyser::push - tick 1001, idx=234, filled=1, price=101.707
+FrequencyAnalyser::push - tick 1002, idx=235, filled=1, price=101.672
+FrequencyAnalyser::push - tick 1003, idx=236, filled=1, price=101.668
+FrequencyAnalyser::push - tick 1004, idx=237, filled=1, price=101.655
+FrequencyAnalyser::push - tick 1005, idx=238, filled=1, price=101.637
+Average upward probability: 0.503
+Average downward probability: 0.497
+Average small move probability: 0.310
+
+--- Bucket Convergence Validation for Sideways ---
+Tick 300: Entropy=0.50, Stability=0.55, Bias=+0.95, Extreme=0.02, Confidence=0.76
+Tick 400: Entropy=0.43, Stability=0.60, Bias=-0.93, Extreme=0.01, Confidence=0.79
+Tick 500: Entropy=0.40, Stability=0.46, Bias=-0.96, Extreme=0.01, Confidence=0.81
+Tick 600: Entropy=0.46, Stability=0.20, Bias=+0.96, Extreme=0.02, Confidence=0.78
+Tick 700: Entropy=0.57, Stability=0.14, Bias=-0.82, Extreme=0.01, Confidence=0.73
+Tick 800: Entropy=0.54, Stability=0.64, Bias=-0.95, Extreme=0.01, Confidence=0.74
+Tick 900: Entropy=0.53, Stability=0.90, Bias=+0.95, Extreme=0.02, Confidence=0.75
+Tick 1000: Entropy=0.54, Stability=0.45, Bias=-0.83, Extreme=0.01, Confidence=0.74
+Tick 1100: Entropy=0.50, Stability=0.43, Bias=-0.83, Extreme=0.01, Confidence=0.76
+Tick 1200: Entropy=0.46, Stability=0.43, Bias=+0.95, Extreme=0.02, Confidence=0.78
+Tick 1300: Entropy=0.47, Stability=0.41, Bias=-0.95, Extreme=0.01, Confidence=0.77
+Tick 1400: Entropy=0.43, Stability=0.31, Bias=-0.96, Extreme=0.01, Confidence=0.79
+Tick 1500: Entropy=0.48, Stability=0.29, Bias=+0.96, Extreme=0.02, Confidence=0.77
+Tick 1600: Entropy=0.62, Stability=0.34, Bias=-0.46, Extreme=0.01, Confidence=0.70
+Tick 1700: Entropy=0.48, Stability=0.68, Bias=-0.96, Extreme=0.01, Confidence=0.77
+Tick 1800: Entropy=0.48, Stability=0.64, Bias=+0.95, Extreme=0.02, Confidence=0.77
+Tick 1900: Entropy=0.58, Stability=0.21, Bias=-0.68, Extreme=0.01, Confidence=0.72
+Tick 2000: Entropy=0.42, Stability=0.55, Bias=-0.96, Extreme=0.01, Confidence=0.80
+Tick 2100: Entropy=0.51, Stability=0.32, Bias=+0.96, Extreme=0.03, Confidence=0.76
+Tick 2200: Entropy=0.60, Stability=0.08, Bias=-0.62, Extreme=0.01, Confidence=0.71
+Tick 2300: Entropy=0.50, Stability=0.42, Bias=-0.94, Extreme=0.01, Confidence=0.76
+Tick 2400: Entropy=0.50, Stability=0.85, Bias=+0.95, Extreme=0.02, Confidence=0.76
+Tick 2500: Entropy=0.55, Stability=0.18, Bias=-0.86, Extreme=0.01, Confidence=0.74
+Tick 2600: Entropy=0.54, Stability=0.11, Bias=-0.56, Extreme=0.01, Confidence=0.74
+Tick 2700: Entropy=0.48, Stability=0.71, Bias=+0.96, Extreme=0.02, Confidence=0.77
+Tick 2800: Entropy=0.42, Stability=0.56, Bias=-0.95, Extreme=0.01, Confidence=0.80
+Tick 2900: Entropy=0.43, Stability=0.39, Bias=-0.96, Extreme=0.01, Confidence=0.79
+=== Convergence Statistics ===
+Average Entropy: 0.498
+Entropy Trend: -0.000001 (negative = converging)
+Stability Score: 0.440
+Bias Consistency: 0.152
+Time to Convergence: 999.000 ticks
+Is Converged: NO
+ASSERTION FAILED: Should converge to sideways pattern
+Sideways test failed: Test failed: Should converge to sideways pattern
+
+============================================================
+RUNNING TEST: Frequency Analysis Test
+============================================================
+FrequencyAnalyser::push - tick 995, idx=228, filled=1, price=101.192
+FrequencyAnalyser::push - tick 996, idx=229, filled=1, price=101.199
+FrequencyAnalyser::push - tick 997, idx=230, filled=1, price=101.198
+FrequencyAnalyser::push - tick 998, idx=231, filled=1, price=101.197
+FrequencyAnalyser::push - tick 999, idx=232, filled=1, price=101.185
+FrequencyAnalyser::push - tick 1000, idx=233, filled=1, price=101.175
+FrequencyAnalyser::push - tick 1001, idx=234, filled=1, price=101.157
+FrequencyAnalyser::push - tick 1002, idx=235, filled=1, price=101.14
+FrequencyAnalyser::push - tick 1003, idx=236, filled=1, price=101.118
+FrequencyAnalyser::push - tick 1004, idx=237, filled=1, price=101.093
+FrequencyAnalyser::push - tick 1005, idx=238, filled=1, price=101.068
+Average microstructure coherence: 0.130
+Average short-term coherence: 0.000
+Average medium-term coherence: 0.000
+ASSERTION FAILED: Should detect short-term frequency component | Expected 0 > 0.1
+Frequency analysis test failed: Test failed: Should detect short-term frequency component
+
+============================================================
+RUNNING TEST: Step Function Response Test
+============================================================
+FrequencyAnalyser::push - tick 995, idx=228, filled=1, price=99.986
+FrequencyAnalyser::push - tick 996, idx=229, filled=1, price=99.9899
+FrequencyAnalyser::push - tick 997, idx=230, filled=1, price=99.9768
+FrequencyAnalyser::push - tick 998, idx=231, filled=1, price=99.9909
+FrequencyAnalyser::push - tick 999, idx=232, filled=1, price=99.9851
+FrequencyAnalyser::push - tick 1000, idx=233, filled=1, price=99.9881
+FrequencyAnalyser::push - tick 1001, idx=234, filled=1, price=99.995
+FrequencyAnalyser::push - tick 1002, idx=235, filled=1, price=99.9841
+FrequencyAnalyser::push - tick 1003, idx=236, filled=1, price=99.9903
+FrequencyAnalyser::push - tick 1004, idx=237, filled=1, price=99.9871
+FrequencyAnalyser::push - tick 1005, idx=238, filled=1, price=99.9907
+1min filter - Max velocity: 0.936
+1min filter - Avg velocity: 0.008
+
+--- Bucket Convergence Validation for Steps ---
+Tick 300: Entropy=0.63, Stability=0.18, Bias=-0.61, Extreme=0.19, Confidence=0.70
+Tick 350: Entropy=0.50, Stability=0.18, Bias=-0.32, Extreme=0.00, Confidence=0.76
+Tick 400: Entropy=0.61, Stability=0.33, Bias=+0.01, Extreme=0.00, Confidence=0.71
+Tick 450: Entropy=0.60, Stability=0.42, Bias=-0.13, Extreme=0.00, Confidence=0.71
+Tick 500: Entropy=0.56, Stability=0.15, Bias=-0.26, Extreme=0.00, Confidence=0.73
+Tick 550: Entropy=0.69, Stability=0.21, Bias=-0.11, Extreme=0.00, Confidence=0.67
+Tick 600: Entropy=0.45, Stability=0.21, Bias=+0.05, Extreme=0.00, Confidence=0.78
+Tick 650: Entropy=0.69, Stability=0.62, Bias=-0.44, Extreme=0.00, Confidence=0.67
+Tick 700: Entropy=0.66, Stability=0.46, Bias=-0.27, Extreme=0.00, Confidence=0.68
+Tick 750: Entropy=0.67, Stability=0.55, Bias=-0.31, Extreme=0.00, Confidence=0.68
+Tick 800: Entropy=0.77, Stability=0.48, Bias=+0.04, Extreme=0.00, Confidence=0.63
+Tick 850: Entropy=0.52, Stability=0.41, Bias=-0.40, Extreme=0.00, Confidence=0.75
+Tick 900: Entropy=0.74, Stability=0.28, Bias=+0.53, Extreme=0.19, Confidence=0.64
+Tick 950: Entropy=0.66, Stability=0.63, Bias=-0.44, Extreme=0.00, Confidence=0.68
+Tick 1000: Entropy=0.56, Stability=0.37, Bias=+0.40, Extreme=0.00, Confidence=0.73
+Tick 1050: Entropy=0.55, Stability=0.44, Bias=+0.46, Extreme=0.00, Confidence=0.74
+Tick 1100: Entropy=0.68, Stability=0.36, Bias=+0.16, Extreme=0.00, Confidence=0.67
+Tick 1150: Entropy=0.63, Stability=0.37, Bias=-0.09, Extreme=0.00, Confidence=0.70
+Tick 1200: Entropy=0.68, Stability=0.13, Bias=+0.44, Extreme=0.19, Confidence=0.67
+Tick 1250: Entropy=0.63, Stability=0.55, Bias=-0.41, Extreme=0.00, Confidence=0.70
+Tick 1300: Entropy=0.62, Stability=0.15, Bias=-0.12, Extreme=0.00, Confidence=0.70
+Tick 1350: Entropy=0.55, Stability=0.11, Bias=-0.24, Extreme=0.00, Confidence=0.74
+Tick 1400: Entropy=0.60, Stability=0.22, Bias=-0.09, Extreme=0.00, Confidence=0.71
+Tick 1450: Entropy=0.47, Stability=0.06, Bias=+0.22, Extreme=0.00, Confidence=0.77
+Tick 1500: Entropy=0.68, Stability=0.56, Bias=-0.32, Extreme=0.00, Confidence=0.67
+Tick 1550: Entropy=0.58, Stability=0.15, Bias=+0.21, Extreme=0.00, Confidence=0.72
+Tick 1600: Entropy=0.69, Stability=0.33, Bias=-0.22, Extreme=0.00, Confidence=0.67
+Tick 1650: Entropy=0.56, Stability=0.29, Bias=-0.18, Extreme=0.00, Confidence=0.73
+Tick 1700: Entropy=0.76, Stability=0.63, Bias=+0.20, Extreme=0.00, Confidence=0.63
+Tick 1750: Entropy=0.73, Stability=0.56, Bias=+0.28, Extreme=0.00, Confidence=0.65
+Tick 1800: Entropy=0.68, Stability=0.20, Bias=+0.56, Extreme=0.20, Confidence=0.68
+Tick 1850: Entropy=0.64, Stability=0.31, Bias=+0.17, Extreme=0.00, Confidence=0.69
+Tick 1900: Entropy=0.69, Stability=0.50, Bias=-0.17, Extreme=0.00, Confidence=0.67
+Tick 1950: Entropy=0.56, Stability=0.50, Bias=-0.35, Extreme=0.00, Confidence=0.73
+Tick 2000: Entropy=0.65, Stability=0.29, Bias=+0.14, Extreme=0.00, Confidence=0.69
+Tick 2050: Entropy=0.51, Stability=0.24, Bias=+0.23, Extreme=0.00, Confidence=0.75
+Tick 2100: Entropy=0.68, Stability=0.25, Bias=-0.52, Extreme=0.19, Confidence=0.67
+Tick 2150: Entropy=0.74, Stability=0.63, Bias=-0.02, Extreme=0.00, Confidence=0.64
+Tick 2200: Entropy=0.66, Stability=0.41, Bias=+0.14, Extreme=0.00, Confidence=0.68
+Tick 2250: Entropy=0.68, Stability=0.56, Bias=+0.35, Extreme=0.00, Confidence=0.67
+Tick 2300: Entropy=0.74, Stability=0.56, Bias=+0.30, Extreme=0.00, Confidence=0.65
+Tick 2350: Entropy=0.49, Stability=0.28, Bias=-0.16, Extreme=0.00, Confidence=0.77
+Tick 2400: Entropy=0.59, Stability=0.11, Bias=+0.37, Extreme=0.19, Confidence=0.71
+Tick 2450: Entropy=0.59, Stability=0.18, Bias=+0.09, Extreme=0.00, Confidence=0.72
+Tick 2500: Entropy=0.55, Stability=0.32, Bias=+0.07, Extreme=0.00, Confidence=0.74
+Tick 2550: Entropy=0.79, Stability=0.71, Bias=-0.11, Extreme=0.00, Confidence=0.62
+Tick 2600: Entropy=0.62, Stability=0.24, Bias=+0.05, Extreme=0.00, Confidence=0.70
+Tick 2650: Entropy=0.74, Stability=0.57, Bias=-0.06, Extreme=0.00, Confidence=0.64
+Tick 2700: Entropy=0.60, Stability=0.09, Bias=-0.58, Extreme=0.20, Confidence=0.71
+Tick 2750: Entropy=0.67, Stability=0.53, Bias=-0.19, Extreme=0.00, Confidence=0.68
+Tick 2800: Entropy=0.61, Stability=0.17, Bias=-0.25, Extreme=0.00, Confidence=0.71
+Tick 2850: Entropy=0.59, Stability=0.15, Bias=+0.22, Extreme=0.00, Confidence=0.72
+Tick 2900: Entropy=0.70, Stability=0.51, Bias=-0.16, Extreme=0.00, Confidence=0.66
+Tick 2950: Entropy=0.71, Stability=0.49, Bias=+0.10, Extreme=0.00, Confidence=0.66
+=== Convergence Statistics ===
+Average Entropy: 0.644
+Entropy Trend: -0.000009 (negative = converging)
+Stability Score: 0.407
+Bias Consistency: 0.759
+Time to Convergence: 999.000 ticks
+Is Converged: NO
+✓ Bucket convergence validated for Steps
+TEST Step Function Response: PASSED
+
+============================================================
+RUNNING TEST: Volatile Market Test
+============================================================
+FrequencyAnalyser::push - tick 995, idx=228, filled=1, price=106.994
+FrequencyAnalyser::push - tick 996, idx=229, filled=1, price=106.972
+FrequencyAnalyser::push - tick 997, idx=230, filled=1, price=107.277
+FrequencyAnalyser::push - tick 998, idx=231, filled=1, price=108.188
+FrequencyAnalyser::push - tick 999, idx=232, filled=1, price=108.378
+FrequencyAnalyser::push - tick 1000, idx=233, filled=1, price=108.456
+FrequencyAnalyser::push - tick 1001, idx=234, filled=1, price=108.269
+FrequencyAnalyser::push - tick 1002, idx=235, filled=1, price=108.515
+FrequencyAnalyser::push - tick 1003, idx=236, filled=1, price=108.989
+FrequencyAnalyser::push - tick 1004, idx=237, filled=1, price=110.203
+FrequencyAnalyser::push - tick 1005, idx=238, filled=1, price=110.291
+Average lambda (1min): 0.745
+Average lambda (5min): 0.892
+Average spectral flux: 0.000
+Average extreme move probability: 0.806
+
+--- Bucket Convergence Validation for Volatile ---
+Tick 300: Entropy=0.34, Stability=0.38, Bias=-0.01, Extreme=0.83, Confidence=0.84
+Tick 400: Entropy=0.40, Stability=0.30, Bias=+0.36, Extreme=0.87, Confidence=0.81
+Tick 500: Entropy=0.49, Stability=0.20, Bias=-0.63, Extreme=0.65, Confidence=0.76
+Tick 600: Entropy=0.30, Stability=0.43, Bias=+0.02, Extreme=0.90, Confidence=0.85
+Tick 700: Entropy=0.62, Stability=0.47, Bias=+0.19, Extreme=0.86, Confidence=0.70
+Tick 800: Entropy=0.53, Stability=0.24, Bias=+0.01, Extreme=0.86, Confidence=0.74
+Tick 900: Entropy=0.47, Stability=0.33, Bias=+0.03, Extreme=0.86, Confidence=0.77
+Tick 1000: Entropy=0.40, Stability=0.22, Bias=+0.12, Extreme=0.66, Confidence=0.81
+Tick 1100: Entropy=0.46, Stability=0.53, Bias=+0.46, Extreme=0.83, Confidence=0.78
+Tick 1200: Entropy=0.49, Stability=0.20, Bias=+0.03, Extreme=0.79, Confidence=0.77
+Tick 1300: Entropy=0.40, Stability=0.33, Bias=+0.51, Extreme=0.34, Confidence=0.81
+Tick 1400: Entropy=0.42, Stability=0.35, Bias=-0.58, Extreme=0.88, Confidence=0.80
+Tick 1500: Entropy=0.31, Stability=0.07, Bias=-0.12, Extreme=0.84, Confidence=0.85
+Tick 1600: Entropy=0.36, Stability=0.18, Bias=-0.26, Extreme=0.86, Confidence=0.83
+Tick 1700: Entropy=0.35, Stability=0.82, Bias=-0.84, Extreme=0.89, Confidence=0.83
+Tick 1800: Entropy=0.30, Stability=0.47, Bias=-0.79, Extreme=0.77, Confidence=0.85
+Tick 1900: Entropy=0.56, Stability=0.35, Bias=-0.15, Extreme=0.54, Confidence=0.73
+Tick 2000: Entropy=0.48, Stability=0.26, Bias=-0.56, Extreme=0.62, Confidence=0.77
+Tick 2100: Entropy=0.56, Stability=0.56, Bias=+0.36, Extreme=0.88, Confidence=0.73
+Tick 2200: Entropy=0.28, Stability=0.74, Bias=-0.68, Extreme=0.86, Confidence=0.86
+Tick 2300: Entropy=0.42, Stability=0.14, Bias=-0.27, Extreme=0.60, Confidence=0.80
+Tick 2400: Entropy=0.39, Stability=0.26, Bias=+0.10, Extreme=0.89, Confidence=0.81
+Tick 2500: Entropy=0.29, Stability=0.18, Bias=+0.16, Extreme=0.76, Confidence=0.86
+Tick 2600: Entropy=0.48, Stability=0.11, Bias=-0.13, Extreme=0.74, Confidence=0.77
+Tick 2700: Entropy=0.42, Stability=0.45, Bias=+0.62, Extreme=0.84, Confidence=0.80
+Tick 2800: Entropy=0.48, Stability=0.41, Bias=+0.30, Extreme=0.86, Confidence=0.77
+Tick 2900: Entropy=0.39, Stability=0.34, Bias=-0.18, Extreme=0.89, Confidence=0.81
+=== Convergence Statistics ===
+Average Entropy: 0.427
+Entropy Trend: 0.000003 (negative = converging)
+Stability Score: 0.339
+Bias Consistency: 0.575
+Time to Convergence: 999.000 ticks
+Is Converged: NO
+ASSERTION FAILED: Entropy should be high in volatile markets | Expected 0.384781 > 1.5
+Volatile market test failed: Test failed: Entropy should be high in volatile markets
+
+============================================================
+RUNNING TEST: Analytic Scorer Integration Test
+============================================================
+=== Debug Info at Tick 500 ===
+Current price: 110.517
+Smoothed price: 110.518
+Price velocity: 0.026
+Trend strength: 0.381
+Sharpening factor: 2.024
+Confidence score: 0.779
+Filter adjustments:
+  Bucket weight adj: 0.218
+  Freq weight adj: 0.117
+  Lambda adj: 0.000
+Original up probability: 0.975
+Enhanced up probability: 0.995
+Pipeline up probability: 0.995
+
+=== Sampling Multiple Points ===
+Tick 600: Raw=0.599, Enhanced=0.680, Velocity=2.051
+Tick 700: Raw=0.592, Enhanced=0.670, Velocity=2.271
+Tick 800: Raw=0.592, Enhanced=0.670, Velocity=2.319
+Tick 900: Raw=0.592, Enhanced=0.671, Velocity=2.354
+
+Average raw up probability: 0.594
+Average enhanced up probability: 0.673
+Average enhancement factor: 1.133x
+TEST Analytic Scorer Integration: PASSED
+================================================================================
+SUMMARY: 2/7 tests passed
+❌ Some tests failed.
