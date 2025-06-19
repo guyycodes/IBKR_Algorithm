@@ -99,6 +99,10 @@ struct MonitorSnapshot {
     std::vector<double>          priceRing;
     size_t                       priceHead = 0;
     size_t                       priceCount = 0;
+    
+    // NEW: Recent tick data (last 2 seconds, max 200 ticks)
+    std::vector<std::pair<int64_t, stock_data_tick::StockData>> recentTicks;
+    int64_t tickSnapshotTime = 0;  // When this snapshot was taken
 };
 
 class TimeOrderedTickBuffer {

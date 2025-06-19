@@ -128,12 +128,11 @@ BucketConfidence20 posterior_from_5min_KF_20bucket(
     double current_price, 
     double dt);
 
-} // namespace hefkf_common
 // Dirichlet sharpening for 20-bucket system
-void sharpen_dirichlet_20bucket(hefkf_common::BucketConfidence20& p, double quality_factor);
+void sharpen_dirichlet_20bucket(BucketConfidence20& p, double quality_factor);
 
 // Bucket assignment function
-hefkf_common::BucketAssignment assign_bucket(double return_pct);
+BucketAssignment assign_bucket(double return_pct);
 
 // ─────────────────────── Gaussian Integration Helpers ───────────────────────
 class GaussianIntegrator {
@@ -152,12 +151,14 @@ public:
 
 // Create MarketData with bucket confidence for 1min filter (20-bucket)
 hefkf_1min::MarketData create_market_data_1min_20bucket(double price, double volume, double spread,
-                                               const hefkf_common::BucketConfidence20& bucket_conf,
-                                               const hefkf_common::FrequencyFeatures& freq_features);
+                                               const BucketConfidence20& bucket_conf,
+                                               const FrequencyFeatures& freq_features);
 
 // Create MarketData with bucket confidence for 5min filter (20-bucket)
 hefkf_5min::MarketData create_market_data_5min_20bucket(double price, double volume, double spread,
-                                               const hefkf_common::BucketConfidence20& bucket_conf,
-                                               const hefkf_common::FrequencyFeatures& freq_features);
+                                               const BucketConfidence20& bucket_conf,
+                                               const FrequencyFeatures& freq_features);
+
+} // namespace hefkf_common
 
 #endif // POSTERIOR_HPP 

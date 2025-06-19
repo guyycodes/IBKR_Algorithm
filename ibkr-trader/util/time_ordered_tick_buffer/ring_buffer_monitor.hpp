@@ -8,11 +8,13 @@
 #include <iostream>
 #include <mutex>
 #include <thread>
+#include <vector>  // for CSV testing
 
 #include "ring_buffer_trade_handler.hpp"          // for indicator helpers
 #include "time_ordered_tick_buffer.hpp"
 #include "static_ring_buffer.hpp"                 // for high-frequency Kalman buffers
 #include "kalman_tick.hpp"                        // for KalmanTick POD struct
+#include "models/stock_data_tick/stock_data_tick.hpp"  // for StockData
 
 namespace ring_buffer_trade_handler
 {
@@ -54,7 +56,14 @@ public:
     /// @param src Source tick from the main tick buffer
     /// @complexity O(1), target ≤30ns total for all three buffers
     /// @note Non-blocking SPSC write operation
-    inline void emplaceKalmanTicks(const time_ordered_tick_buffer::Tick& src) noexcept;
+    inline void emplaceKalmanTicks(const stock_data_tick::StockData& src) noexcept;
+
+    // Get current bucket confidences (for external use)
+    const hefkf_common::BucketConfidence20& get_current_bucket_1min() const { return current_bucket_1min_; }
+    const hefkf_common::BucketConfidence20& get_current_bucket_5min() const { return current_bucket_5min_; }
+    
+    // -------------- Kalman ring buffer (public for IntegrationLoop access) --------------
+    StaticRingBuffer<KalmanTick, 512>  m_kalman;  // 512 ≥ 300
 
     // Non‑copyable / movable
     RingBufferMonitor(const RingBufferMonitor&)            = delete;
@@ -69,7 +78,8 @@ private:
     void printMinuteRing(const time_ordered_tick_buffer::MonitorSnapshot& s)          const;
     void printCandleRing(const time_ordered_tick_buffer::MonitorSnapshot& s)          const;
     void printPriceRing(const time_ordered_tick_buffer::MonitorSnapshot& s)           const;
-    void printTechnicalIndicators() const;
+    void printRecentTicks(const time_ordered_tick_buffer::MonitorSnapshot& s)         const;
+    void printTechnicalIndicators()                                                   const;
     void printKalmanRing(const char* title, const auto& ring, size_t show = 5)       const;
 
     // ---------- data ----------
@@ -82,10 +92,10 @@ private:
     std::mutex               m_mutex;
     std::condition_variable  m_cv;
 
-    // -------------- new kalman rings --------------
-    StaticRingBuffer<KalmanTick, 128>  m_kalman1m;  // round up to next power‑of‑2
-    StaticRingBuffer<KalmanTick, 512>  m_kalman5m;  // 512 ≥ 300
-    StaticRingBuffer<KalmanTick, 2048> m_kalman20m; // 2048 ≥ 1200
+    // -------------- CSV testing --------------
+    std::vector<stock_data_tick::StockData> m_testTicks;  // CSV data loaded at startup
+    std::size_t m_csvIndex{0};                             // Current position in CSV data
+    
 };
 
 } // namespace ring_buffer_trade_handler

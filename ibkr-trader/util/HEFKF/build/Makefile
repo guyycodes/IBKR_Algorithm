@@ -296,6 +296,54 @@ frequency_analyser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/frequency_analyser.cpp.s
 .PHONY : frequency_analyser.cpp.s
 
+integration_loop.o: integration_loop.cpp.o
+.PHONY : integration_loop.o
+
+# target to build an object file
+integration_loop.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop.cpp.o
+.PHONY : integration_loop.cpp.o
+
+integration_loop.i: integration_loop.cpp.i
+.PHONY : integration_loop.i
+
+# target to preprocess a source file
+integration_loop.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop.cpp.i
+.PHONY : integration_loop.cpp.i
+
+integration_loop.s: integration_loop.cpp.s
+.PHONY : integration_loop.s
+
+# target to generate assembly for a file
+integration_loop.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop.cpp.s
+.PHONY : integration_loop.cpp.s
+
+integration_loop_wrapper.o: integration_loop_wrapper.cpp.o
+.PHONY : integration_loop_wrapper.o
+
+# target to build an object file
+integration_loop_wrapper.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop_wrapper.cpp.o
+.PHONY : integration_loop_wrapper.cpp.o
+
+integration_loop_wrapper.i: integration_loop_wrapper.cpp.i
+.PHONY : integration_loop_wrapper.i
+
+# target to preprocess a source file
+integration_loop_wrapper.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop_wrapper.cpp.i
+.PHONY : integration_loop_wrapper.cpp.i
+
+integration_loop_wrapper.s: integration_loop_wrapper.cpp.s
+.PHONY : integration_loop_wrapper.s
+
+# target to generate assembly for a file
+integration_loop_wrapper.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/integration_loop_wrapper.cpp.s
+.PHONY : integration_loop_wrapper.cpp.s
+
 posterior.o: posterior.cpp.o
 .PHONY : posterior.o
 
@@ -395,6 +443,12 @@ help:
 	@echo "... frequency_analyser.o"
 	@echo "... frequency_analyser.i"
 	@echo "... frequency_analyser.s"
+	@echo "... integration_loop.o"
+	@echo "... integration_loop.i"
+	@echo "... integration_loop.s"
+	@echo "... integration_loop_wrapper.o"
+	@echo "... integration_loop_wrapper.i"
+	@echo "... integration_loop_wrapper.s"
 	@echo "... posterior.o"
 	@echo "... posterior.i"
 	@echo "... posterior.s"

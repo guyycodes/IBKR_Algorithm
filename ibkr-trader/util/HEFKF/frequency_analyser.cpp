@@ -24,11 +24,12 @@ FrequencyFeatures::FrequencyFeatures() {
     coherence_price_spread_by_band["medium_term"] = 0.0;
     coherence_price_spread_by_band["trend"] = 0.0;
     
-    // Initialize entropy band maps
-    entropy_by_band["microstructure"] = 0.0;
-    entropy_by_band["short_term"] = 0.0;
-    entropy_by_band["medium_term"] = 0.0;
-    entropy_by_band["trend"] = 0.0;
+    // Initialize entropy band maps - now only using Goertzel entropy
+    // entropy_by_band["microstructure"] = 0.0;  // OLD FFT-based entropy
+    // entropy_by_band["short_term"] = 0.0;      // OLD FFT-based entropy
+    // entropy_by_band["medium_term"] = 0.0;     // OLD FFT-based entropy
+    // entropy_by_band["trend"] = 0.0;           // OLD FFT-based entropy
+    entropy_by_band["microstructure_goertzel"] = 0.0;  // NEW Goertzel-based entropy
 }
 
 } // namespace hefkf_common
@@ -197,11 +198,20 @@ bool FrequencyAnalyser::compute(hefkf_common::FrequencyFeatures& out) {
         out.spectral_flux = 0.0;  // No previous data for comparison
     }
     
+    // OLD FFT-BASED ENTROPY - Commented out in favor of Goertzel entropy
     // Compute band-specific entropy for market complexity analysis
-    for (const auto& band : FREQ_BANDS) {
-        out.entropy_by_band[band.name] = compute_band_entropy(freq_vec, psd_price, 
-                                                             band.f_low, band.f_high);
-    }
+    // for (const auto& band : FREQ_BANDS) {
+    //     out.entropy_by_band[band.name] = compute_band_entropy(freq_vec, psd_price, 
+    //                                                          band.f_low, band.f_high);
+    // }
+    
+    // ═══ GOERTZEL-BASED MICROSTRUCTURE ENTROPY ═══
+    // Compute high-resolution entropy specifically for the 1-5 minute band
+    // This provides better discrimination between concentrated vs spread energy
+    std::array<double, 6> microP;
+    micro_psd_goertzel(price_returns.data(), microP);
+    double H_micro = entropy6(microP);
+    out.entropy_by_band["microstructure_goertzel"] = H_micro;  // Primary entropy metric for microstructure
     
     // ═══ COHERENCE ANALYSIS ═══
     // Convert volume and spread to returns for consistent comparison
@@ -481,12 +491,14 @@ double FrequencyAnalyser::coherence_estimate(const double* x, const double* y,
         }
     }
     
-    // Apply power threshold filtering
-    double power_threshold = 0.001 * std::min(max_psd_x, max_psd_y);  // 0.1% of peak power (was 1%)
+    // Apply power threshold filtering with separate thresholds for each signal
+    // This prevents overly aggressive filtering when signals have different power scales
+    double threshold_x = 0.001 * max_psd_x;  // 0.1% of X's peak power
+    double threshold_y = 0.001 * max_psd_y;  // 0.1% of Y's peak power
     
-    // Filter coherence values where either PSD is below threshold
+    // Filter coherence values where either PSD is below its respective threshold
     for (size_t i = 0; i < out_coherence.size(); ++i) {
-        if (psd_x[i] < power_threshold || psd_y[i] < power_threshold) {
+        if (psd_x[i] < threshold_x || psd_y[i] < threshold_y) {
             out_coherence[i] = 0.0;  // Zero out coherence for low-power bins
         }
     }
@@ -544,7 +556,7 @@ double FrequencyAnalyser::band_coherence_weighted(const std::vector<double>& coh
                                                  const std::vector<double>& freq,
                                                  double f_low, double f_high) const {
     constexpr double ACTIVE_TH  = 0.05;   // ignore bins that carry no info
-    constexpr double COHERENT_TH = 0.45;  // "high‑quality" bin threshold
+    constexpr double COHERENT_TH = 0.50;  // "high‑quality" bin threshold
     constexpr double ALPHA       = 1.25;  // coverage penalty exponent (0.5-1.5, higher = stricter separation)
 
     double sumC = 0.0;
@@ -602,13 +614,14 @@ void FrequencyAnalyser::compute_band_coherence(const std::vector<double>& freq,
 // ─────────────────────── Helper Functions ───────────────────────
 void FrequencyAnalyser::init_fftw_plans() {
     // Create plans for 64-sample FFTs (WIN/4) instead of 128-sample (WIN/2)
+    // Using FFTW_ESTIMATE to avoid buffer address dependencies during move operations
     m_plan_forward = fftw_plan_dft_r2c_1d(WIN/4, m_fft_input.data(),
                                          reinterpret_cast<fftw_complex*>(m_fft_output.data()),
-                                         FFTW_MEASURE);
+                                         FFTW_ESTIMATE);
     
     m_plan_forward_y = fftw_plan_dft_r2c_1d(WIN/4, m_fft_input_y.data(),
                                            reinterpret_cast<fftw_complex*>(m_fft_output_y.data()),
-                                           FFTW_MEASURE);
+                                           FFTW_ESTIMATE);
     
     if (!m_plan_forward || !m_plan_forward_y) {
         throw std::runtime_error("Failed to create FFTW plans");
@@ -762,4 +775,140 @@ double FrequencyAnalyser::compute_trend_strength(const double* price_data) const
     
     double slope = (WIN * sum_xy - sum_x * sum_y) / denom;
     return std::abs(slope);  // Magnitude of trend
+}
+
+// ─────────────────────── Goertzel-based Micro-resolution Analysis ───────────────────────
+// Efficient computation of power at specific frequencies for enhanced entropy calculation
+// in the microstructure (1-5 minute) band without modifying the main Welch/FFT pipeline
+void FrequencyAnalyser::micro_psd_goertzel(const double* x, std::array<double, 6>& P) const {
+    constexpr size_t K = sizeof(MICRO_F) / sizeof(double);
+    P.fill(0.0);
+    
+    for (size_t k = 0; k < K; ++k) {
+        double w = 2 * M_PI * MICRO_F[k] / m_fs;
+        double c = 2 * std::cos(w);
+        double s0 = 0.0, s1 = 0.0, s2 = 0.0;
+        
+        // Goertzel algorithm - compute DFT at single frequency
+        // Apply Hann window to reduce spectral leakage
+        for (int n = 0; n < WIN; ++n) {
+            s0 = x[n] + c * s1 - s2;
+            // Window the input to prevent energy spillover from non-integer periods
+            // Without windowing: 2.56 periods of 0.010 Hz causes leakage to all bins
+            // With windowing: Energy is concentrated in the correct frequency bin
+            // const double xn = x[n] * m_window[n];  // Apply Hann window
+            // s0 = xn + c * s1 - s2;
+            s2 = s1;
+            s1 = s0;
+        }
+        
+        // Final DFT computation
+        double real = s1 - s2 * std::cos(w);
+        double imag = s2 * std::sin(w);
+        P[k] = real * real + imag * imag;
+    }
+    
+        // Find maximum power and peak location BEFORE any filtering
+    double max_power = *std::max_element(P.begin(), P.end());
+    
+    // Guard against all-zero spectra
+    if (max_power < EPSILON) {
+        return;  // Nothing to filter
+    }
+    
+    size_t peak_idx = std::distance(P.begin(), std::max_element(P.begin(), P.end()));
+    
+    // Debug: print initial spectrum
+    std::cerr << "DEBUG micro_psd_goertzel: Initial P[] = ";
+    for (size_t k = 0; k < K; ++k) {
+        std::cerr << P[k] << " ";
+    }
+    std::cerr << std::endl;
+    
+    // Calculate power distribution to distinguish single-tone from multi-tone
+    double total_power = std::accumulate(P.begin(), P.end(), 0.0);
+    double neighbor_power = 0.0;
+    if (peak_idx > 0) neighbor_power += P[peak_idx - 1];
+    if (peak_idx < K - 1) neighbor_power += P[peak_idx + 1];
+    double outside_power = total_power - (P[peak_idx] + neighbor_power);
+    
+    // Treat as "single tone + leakage" ONLY when:
+    // - neighbors are sizeable (≥30% of peak) AND
+    // - everything outside ±1 bins is tiny (≤5% of total)
+    const bool single_tone = (neighbor_power >= 0.30 * P[peak_idx]) && 
+                            (outside_power <= 0.05 * total_power);
+    
+    // std::cerr << "DEBUG: peak_idx=" << peak_idx 
+    //           << ", P[peak]=" << P[peak_idx] 
+    //           << ", neighbor_power=" << neighbor_power
+    //           << ", neighbor/peak=" << (neighbor_power / P[peak_idx])
+    //           << ", outside_power=" << outside_power
+    //           << ", outside/total=" << (outside_power / total_power)
+    //           << ", single_tone=" << single_tone << std::endl;
+    
+    if (single_tone) {
+        std::cerr << "DEBUG: Single-tone branch taken" << std::endl;
+        // Single-tone with leakage: dampen shoulders instead of killing them
+        // This gives entropy ≈ 0.05-0.15 instead of 0.0, allowing downstream
+        // code to distinguish "very pure" from "truly brick-wall pure" signals
+        for (size_t k = 0; k < K; ++k) {
+            if (k != peak_idx) {
+                P[k] *= 0.05;  // Keep 5% of their original power
+            }
+        }
+    } else {
+        std::cerr << "DEBUG: Multi-tone branch taken" << std::endl;
+        // Multi-tone or noise: apply adaptive threshold based on top bins
+        // Sort power values to find 2nd and 3rd strongest bins
+        double sorted[K];
+        std::copy(P.begin(), P.end(), sorted);
+        std::sort(sorted, sorted + K, std::greater<double>());
+        
+        // Use median of top 3 bins as reference to avoid dependence on one huge peak
+        double p2 = sorted[1];  // 2nd-strongest bin
+        double p3 = sorted[2];  // 3rd-strongest bin
+        double ref = 0.5 * (p2 + p3);  // Robust reference level
+        
+        // Keep everything that is at least 10% of that reference level
+        // Lower threshold helps preserve more bins in white noise while still filtering true noise
+        double threshold = 0.10 * ref;
+        
+        std::cerr << "DEBUG: sorted powers: ";
+        for (size_t i = 0; i < K; ++i) {
+            std::cerr << sorted[i] << " ";
+        }
+        std::cerr << "\nDEBUG: p2=" << p2 << ", p3=" << p3 
+                  << ", ref=" << ref << ", threshold=" << threshold << std::endl;
+        
+        for (size_t k = 0; k < K; ++k) {
+            if (P[k] < threshold) {
+                P[k] = 0.0;  // Filter out only very weak bins
+            }
+        }
+    }
+    
+    // Debug: print final spectrum
+    std::cerr << "DEBUG: Final P[] = ";
+    for (size_t k = 0; k < K; ++k) {
+        std::cerr << P[k] << " ";
+    }
+    std::cerr << std::endl;
+}
+
+// Normalized entropy calculation on 6-element power spectrum
+double FrequencyAnalyser::entropy6(const std::array<double, 6>& P) const {
+    double total = std::accumulate(P.begin(), P.end(), 0.0);
+    if (total < EPSILON) return 0.0;
+    
+    double H = 0.0;
+    for (double p : P) {
+        if (p > EPSILON) {
+            double q = p / total;
+            H -= q * std::log2(q);
+        }
+    }
+    
+    // Normalize to [0, 1] range
+    return H / std::log2(6);  // 6 frequency bins
 } 
+

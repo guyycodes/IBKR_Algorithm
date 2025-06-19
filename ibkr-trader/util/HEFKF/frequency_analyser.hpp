@@ -142,6 +142,14 @@ private:
     
     // Debug tick counter
     size_t m_total_ticks_pushed = 0;  // Track total ticks for boundary debugging
+    
+    // Goertzel-based micro-resolution spectral analysis for entropy
+    static constexpr double MICRO_F[] = {
+        0.004, 0.0065, 0.009, 0.0115, 0.014, 0.0165
+    };  // 6 frequencies spanning 1-5 min band
+    
+    void micro_psd_goertzel(const double* x, std::array<double, 6>& P) const;
+    double entropy6(const std::array<double, 6>& P) const;
 };
 
 #endif // FREQUENCY_ANALYSER_HPP 

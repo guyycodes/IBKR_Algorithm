@@ -29,8 +29,6 @@ namespace {
 // ─────────────────────── Common namespace ───────────────────────
 namespace hefkf_common {
 
-} // namespace hefkf_common
-
 // ─────────────────────── Gaussian Integration Implementation ───────────────────────
 double GaussianIntegrator::gaussian_cdf_interval(double mean, double std_dev, double a, double b) {
     if (std_dev <= 1e-12) {
@@ -60,7 +58,7 @@ double GaussianIntegrator::standard_normal_cdf(double x) {
     
     // Save the sign of x
     int sign = (x >= 0) ? 1 : -1;
-    x = std::abs(x) / SQRT_2;
+    x = std::abs(x) / GaussianIntegrator::SQRT_2;
     
     // Abramowitz and Stegun approximation formula 7.1.26 for erf
     double t = 1.0 / (1.0 + p * x);
@@ -69,9 +67,6 @@ double GaussianIntegrator::standard_normal_cdf(double x) {
     // CDF = 0.5 * (1 + erf(x/sqrt(2)))
     return 0.5 * (1.0 + sign * (1.0 - y));
 }
-
-// ─────────────────────── hefkf_common namespace continues ───────────────────────
-namespace hefkf_common {
 
 // ─────────────────────── 20-Bucket Posterior Extraction ───────────────────────
 BucketConfidence20 posterior_from_KF_20bucket(
@@ -567,4 +562,4 @@ BucketAssignment assign_bucket(double return_pct) {
     return {type, index};
 }
 
-} // namespace hefkf_common 
+} // namespace hefkf_common

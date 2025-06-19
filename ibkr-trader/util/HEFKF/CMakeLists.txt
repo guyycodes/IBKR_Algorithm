@@ -42,7 +42,8 @@ add_library(hefkf STATIC
     5min_HEFKF.cpp
     frequency_analyser.cpp
     posterior.cpp
-    # integration_loop.cpp
+    integration_loop.cpp
+    integration_loop_wrapper.cpp
     analytic_scorer.cpp
     # bucket_convergence.cpp
 )
@@ -84,6 +85,13 @@ add_executable(test_comprehensive
 
 target_link_libraries(test_comprehensive hefkf)
 
+# Build integration pipeline test
+# add_executable(test_integration_pipeline
+#     test_integration_pipeline.cpp
+# )
+
+# target_link_libraries(test_integration_pipeline hefkf)
+
 # Install targets
 install(TARGETS hefkf test_20bucket_integration test_comprehensive DESTINATION bin)
 install(FILES 
@@ -92,8 +100,11 @@ install(FILES
     frequency_analyser.hpp
     posterior.hpp
     integration_loop.hpp
+    integration_loop_wrapper.hpp
     analytic_scorer.hpp
     bucket_convergence.hpp
+    kalman_tick.hpp
+    static_ring_buffer.hpp
     DESTINATION include)
 
 # Optional: Build tests if we have them

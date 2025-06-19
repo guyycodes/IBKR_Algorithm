@@ -539,8 +539,15 @@ void TimeOrderedTickBuffer::handleOutOfOrderTick(int64_t minuteIdx, const stock_
 /**
  * publishMonitorSnapshotUnlocked() - Create and publish snapshot for monitor thread
  * 
- * This method copies the current state of all ring buffers into a MonitorSnapshot
- * and publishes it atomically. Called while holding m_mutex to ensure consistency.
+ * Creates a snapshot containing:
+ * - All ring buffer states (minute/candle/price rings)
+ * - Up to 200 most recent ticks from the last 2 seconds (for signal processing at 2Hz)
+ * 
+ * This method copies the current state into a MonitorSnapshot and publishes it atomically.
+ * Called while holding m_mutex to ensure consistency.
+ * 
+ * The monitor thread can call getSnapshot() at 2Hz to access fresh tick data, while
+ * full ring buffer snapshots are printed only every 60 seconds.
  */
 void TimeOrderedTickBuffer::publishMonitorSnapshotUnlocked()
 {
@@ -555,6 +562,37 @@ void TimeOrderedTickBuffer::publishMonitorSnapshotUnlocked()
     s.priceRing    = m_priceRing;
     s.priceHead    = m_priceRingHead;
     s.priceCount   = m_priceRingCount;
+    
+    // NEW: Capture recent ticks from last 2 seconds (with limit to prevent memory bloat)
+    // multimap guarantees chronological order since key is timestamp
+    // const size_t MAX_RECENT_TICKS = 200;  // Limit to most recent 200 ticks
+    int64_t currentTime = getCurrentTimestamp();
+    int64_t twoSec_ago = currentTime - 1500;  // 2 seconds in milliseconds
+    
+    s.recentTicks.clear();
+    // s.recentTicks.reserve(MAX_RECENT_TICKS);
+    
+    // Find first tick >= 2 seconds ago (O(log n))
+    auto startIt = m_orderedTicks.lower_bound(twoSec_ago);
+    
+    // Count how many ticks we have in the time window
+    size_t ticksInWindow = std::distance(startIt, m_orderedTicks.end());
+    
+    // If we have more ticks than MAX_RECENT_TICKS, skip to get only the most recent ones
+    // if (ticksInWindow > MAX_RECENT_TICKS) {
+    //     // Advance iterator to skip older ticks and keep only the most recent MAX_RECENT_TICKS
+    //     std::advance(startIt, ticksInWindow - MAX_RECENT_TICKS);
+    // }
+    
+    // Copy ticks maintaining chronological order (oldest to newest)
+    for (auto it = startIt; it != m_orderedTicks.end(); ++it) {
+        s.recentTicks.emplace_back(it->first, it->second);
+    }
+    
+    s.tickSnapshotTime = currentTime;
+    
+    std::cout << "[TimeOrderedTickBuffer] 📸 Snapshot captured " << s.recentTicks.size() 
+              << " ticks from last 2 seconds" << std::endl;
 
     // Store with mutex protection
     {

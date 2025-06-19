@@ -1,16 +1,16 @@
 
 <!--
  ═══════════════════════════════════ COMPREHENSIVE FEATURE USAGE CHART ═══════════════════════════════════
-Feature	                     Used in Simple Scoring?	      Used in Complex Regime?	        Used in Quality Factor?  Used with 1min filter?    Used with 5min filter?
-coherence_price_volume_peak	 ✅ Yes (weight: 0.4-0.6)	     ✅ Yes (breakout detection)	      ✅ Yes (core quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
-spectral_flux	             ✅ Yes (weight: 0.1)	         ✅ Yes (high-vol detection)	      ✅ Yes (freq quality)    ✅ Yes (volatility alert) ✅ Yes (volatility alert)
-trend_strength_derivative	 ✅ Yes (weight: 0.05-0.15)	     ✅ Yes (bull/bear detection)	  ✅ Yes (trend quality)   ✅ Yes (directional bias) ✅ Yes (directional bias)
-centroid_velocity	         ✅ Yes (via enhanced quality)    ✅ Yes (reversal detection)	      ✅ Yes (freq quality)    ✅ Yes (freq instability) ✅ Yes (freq instability)
-spectral_centroid (price)    ✅ Yes (via enhanced quality)    ✅ Yes (via enhanced quality)     ✅ Yes (freq quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
-spectral_centroid (volume)   ✅ Yes (via enhanced quality)    ✅ Yes (via enhanced quality)     ✅ Yes (freq quality)    ✅ Yes (volatility alert) ✅ Yes (volatility alert)
-entropy (all 4 bands)        ✅ Yes (via enhanced quality)    ✅ Yes (via enhanced quality)     ✅ Yes (entropy quality) ✅ Yes (volatility alert) ✅ Yes (volatility alert)
-trend_strength               ✅ Yes (weight: varies)          ✅ Yes (regime classification)    ✅ Yes (trend quality)   ✅ Yes (regime detect)    ✅ Yes (regime detect)
-coherence_price_spread_peak  ✅ Yes (via enhanced quality)    ✅ Yes (via enhanced quality)     ✅ Yes (core quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
+Feature	                                            Used in Simple Scoring?	      Used in Complex Regime?	        Used in Quality Factor?  Used with 1min filter?    Used with 5min filter?
+coherence_price_volume_peak	                        ✅ Yes (weight: 0.4-0.6)	     ✅ Yes (breakout detection)	      ✅ Yes (core quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
+spectral_flux	                                    ✅ Yes (weight: 0.1)	         ✅ Yes (high-vol detection)	      ✅ Yes (freq quality)    ✅ Yes (volatility alert) ✅ Yes (volatility alert)
+trend_strength_derivative	                        ✅ Yes (weight: 0.05-0.15)	 ✅ Yes (bull/bear detection)	  ✅ Yes (trend quality)   ✅ Yes (directional bias) ✅ Yes (directional bias)
+centroid_velocity	                                ✅ Yes (via enhanced quality) ✅ Yes (reversal detection)	      ✅ Yes (freq quality)    ✅ Yes (freq instability) ✅ Yes (freq instability)
+spectral_centroid (price)                           ✅ Yes (via enhanced quality) ✅ Yes (via enhanced quality)     ✅ Yes (freq quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
+spectral_centroid (volume)                          ✅ Yes (via enhanced quality) ✅ Yes (via enhanced quality)     ✅ Yes (freq quality)    ✅ Yes (volatility alert) ✅ Yes (volatility alert)
+entropy (Only microstructure_goertzel band)         ✅ Yes (via enhanced quality) ✅ Yes (via enhanced quality)     ✅ Yes (entropy quality) ✅ Yes (volatility alert) ✅ Yes (volatility alert)
+trend_strength                                      ✅ Yes (weight: varies)       ✅ Yes (regime classification)    ✅ Yes (trend quality)   ✅ Yes (regime detect)    ✅ Yes (regime detect)
+coherence_price_spread_peak                         ✅ Yes (via enhanced quality) ✅ Yes (via enhanced quality)     ✅ Yes (core quality)    ✅ Yes (filter knobs)     ✅ Yes (filter knobs)
 
 📊 Enhanced Quality Signal Breakdown (ALL FEATURES NOW USED):
 Component	        Weight  Features Used	                                                                        Purpose

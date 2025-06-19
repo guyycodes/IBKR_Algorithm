@@ -85,12 +85,12 @@ clean: CMakeFiles/test_comprehensive.dir/clean
 CMakeFiles/hefkf.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hefkf.dir/build.make CMakeFiles/hefkf.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target hefkf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target hefkf"
 .PHONY : CMakeFiles/hefkf.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/hefkf.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/hefkf.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 0
 .PHONY : CMakeFiles/hefkf.dir/rule
@@ -111,12 +111,12 @@ CMakeFiles/hefkf.dir/clean:
 CMakeFiles/test_20bucket_integration.dir/all: CMakeFiles/hefkf.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_20bucket_integration.dir/build.make CMakeFiles/test_20bucket_integration.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_20bucket_integration.dir/build.make CMakeFiles/test_20bucket_integration.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=7,8 "Built target test_20bucket_integration"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=9,10 "Built target test_20bucket_integration"
 .PHONY : CMakeFiles/test_20bucket_integration.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/test_20bucket_integration.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 10
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_20bucket_integration.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 0
 .PHONY : CMakeFiles/test_20bucket_integration.dir/rule
@@ -137,12 +137,12 @@ CMakeFiles/test_20bucket_integration.dir/clean:
 CMakeFiles/test_comprehensive.dir/all: CMakeFiles/hefkf.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_comprehensive.dir/build.make CMakeFiles/test_comprehensive.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_comprehensive.dir/build.make CMakeFiles/test_comprehensive.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=9,10 "Built target test_comprehensive"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspace/ibkr-trader/util/HEFKF/build/CMakeFiles --progress-num=11,12 "Built target test_comprehensive"
 .PHONY : CMakeFiles/test_comprehensive.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/test_comprehensive.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 10
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_comprehensive.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/ibkr-trader/util/HEFKF/build/CMakeFiles 0
 .PHONY : CMakeFiles/test_comprehensive.dir/rule

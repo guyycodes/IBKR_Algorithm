@@ -85,8 +85,11 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
     "/workspace/ibkr-trader/util/HEFKF/frequency_analyser.hpp"
     "/workspace/ibkr-trader/util/HEFKF/posterior.hpp"
     "/workspace/ibkr-trader/util/HEFKF/integration_loop.hpp"
+    "/workspace/ibkr-trader/util/HEFKF/integration_loop_wrapper.hpp"
     "/workspace/ibkr-trader/util/HEFKF/analytic_scorer.hpp"
     "/workspace/ibkr-trader/util/HEFKF/bucket_convergence.hpp"
+    "/workspace/ibkr-trader/util/HEFKF/kalman_tick.hpp"
+    "/workspace/ibkr-trader/util/HEFKF/static_ring_buffer.hpp"
     )
 endif()
 

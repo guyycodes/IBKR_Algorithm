@@ -1,14 +1,109 @@
 #include "ring_buffer_monitor.hpp"
 #include <sstream>
+#include <cmath>  // for std::isfinite
+#include <fstream>  // for CSV file reading
+#include "models/stock_data_tick/stock_data_tick.hpp"  // for StockData
 
 namespace ring_buffer_trade_handler
 {
+
+// --------------------------------------------------------------------
+// 1) Let's define a compile-time or run-time switch to use CSV or not
+// --------------------------------------------------------------------
+static constexpr bool USE_CSV_FOR_TESTING = true;  // set true to feed from CSV
+static const char*   TEST_CSV_PATH = "/workspace/ibkr-trader/util/HEFKF/build/test_csv/test_data_downtrend.csv";
+static constexpr int TICK_POLL_INTERVAL = 250; // 4Hz
+static constexpr int FULL_SNAPSHOT_INTERVAL = 60000; // 60s
+// --------------------------------------------------------------------
+// 2) Helper function to parse one line of CSV into StockData
+//    (Adjust column indexes to match your actual CSV structure.)
+// --------------------------------------------------------------------
+static stock_data_tick::StockData parseCSVLine(const std::string& line)
+{
+    stock_data_tick::StockData sd{};
+    // CSV columns: Symbol, Timestamp, Last, Bid, Ask, BidSize, AskSize, Volume,
+    //             Open, High, Low, Close, Spread, VWAP, RSI, ...
+    // We'll parse only the columns we actually need.
+
+    std::stringstream ss(line);
+    std::string token;
+    int colIndex = 0;
+
+    while (std::getline(ss, token, ',')) {
+        switch (colIndex) {
+            case 0: // Symbol
+                sd.symbol = token;
+                break;
+            case 1: // Timestamp
+                sd.timestamp = std::stoll(token);
+                break;
+            case 2: // Last
+                sd.last = std::stod(token);
+                break;
+            case 3: // Bid
+                sd.bid = std::stod(token);
+                break;
+            case 4: // Ask
+                sd.ask = std::stod(token);
+                break;
+            case 7: // Volume
+                sd.volume = std::stod(token);
+                break;
+            case 12: // Spread
+                sd.spread = std::stod(token);
+                break;
+            default:
+                // Skip columns we don't need
+                break;
+        }
+        ++colIndex;
+    }
+    return sd;
+}
+
+// Helper function to check whether a tick is "valid enough" for Kalman
+static bool isValidForKalman(const stock_data_tick::StockData& t)
+{
+    // Example checks; tailor them to your data requirements:
+    if (!std::isfinite(t.last)  || t.last  <= 0.0) return false;
+    if (!std::isfinite(t.volume) || t.volume < 0.0) return false;
+    if (!std::isfinite(t.bid)   || t.bid   <= 0.0) return false;
+    if (!std::isfinite(t.ask)   || t.ask   <= 0.0) return false;
+    if (!std::isfinite(t.spread) || t.spread <= 0.0) return false;
+    if (t.ask < t.bid) return false;  // Spread must be >= 0
+
+    // If all checks pass, good to go
+    return true;
+}
 
 RingBufferMonitor::RingBufferMonitor(time_ordered_tick_buffer::TimeOrderedTickBuffer& buf,
                                      RingBufferTradeHandler&                          handler)
     : m_buf(buf)
     , m_handler(handler)
-{}
+{
+    if (USE_CSV_FOR_TESTING) {
+        std::ifstream fin(TEST_CSV_PATH);
+        if (!fin.is_open()) {
+            std::cerr << "[RingBufferMonitor] ⚠️ Could not open CSV file: " << TEST_CSV_PATH << "\n";
+        } else {
+            std::string line;
+            bool firstLine = true; // skip header row
+            while (std::getline(fin, line)) {
+                if (firstLine) {
+                    firstLine = false;
+                    continue; // skip the CSV header
+                }
+                if (!line.empty()) {
+                    // parse line → StockData, store in m_testTicks
+                    auto sd = parseCSVLine(line);
+                    m_testTicks.push_back(sd);
+                }
+            }
+            std::cout << "[RingBufferMonitor] Loaded " << m_testTicks.size()
+                      << " ticks from CSV\n";
+        }
+    }
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -61,22 +156,26 @@ void RingBufferMonitor::requestSnapshot() noexcept
 
 /*----------------------------------------------------------------------*/
 
-inline void RingBufferMonitor::emplaceKalmanTicks(const time_ordered_tick_buffer::Tick& src) noexcept
+inline void RingBufferMonitor::emplaceKalmanTicks(const stock_data_tick::StockData& src) noexcept
 {
-    // TODO: Complete tick ingestion hook implementation
-    // 1. Fix method signature: change from time_ordered_tick_buffer::Tick to stock_data_tick::StockData
-    // 2. Find appropriate hook location in TimeOrderedTickBuffer::addTick() method
-    // 3. Add call to monitor->emplaceKalmanTicks(tick) in the tick processing pipeline
-    // 4. Verify ≤30ns performance target for all three buffer pushes
-    // 5. Test with real market data to ensure correct frequency distribution
+    // Create KalmanTick from StockData
+    KalmanTick k;
+    k.ts = static_cast<uint64_t>(src.timestamp);  // Cast timestamp_t to uint64_t
+    k.px = src.last;
+    k.volume = static_cast<double>(src.volume); // Cast volume_t to double
+    k.spread = src.ask - src.bid;
+    k.bid = src.bid;
+    k.ask = src.ask;
     
-    // Create KalmanTick with current timestamp and source price
-    KalmanTick k{std::chrono::steady_clock::now(), src.price};
+
+    // k.vwap = src.vwap;
+    // k.priceChange = src.priceChange;
+    // k.barRange = src.barRange;
+    // k.imbalance = src.imbalance;
+    // k.momentum = src.momentum;
     
-    // Push to all three buffers - no locks, just three pointer bumps
-    m_kalman1m.push(k);   // 1-minute buffer (2Hz target)
-    m_kalman5m.push(k);   // 5-minute buffer (1Hz target)  
-    m_kalman20m.push(k);  // 20-minute buffer (1Hz target)
+    // Push to buffers at 2Hz rate
+    m_kalman.push(k);  
 }
 
 /*----------------------------------------------------------------------*/
@@ -84,61 +183,150 @@ inline void RingBufferMonitor::emplaceKalmanTicks(const time_ordered_tick_buffer
 void RingBufferMonitor::monitorLoop(std::chrono::seconds maxDuration) noexcept
 {
     try {
-        auto deadline   = std::chrono::steady_clock::now() + maxDuration;
-        int  iteration  = 0;
+        auto deadline          = std::chrono::steady_clock::now() + maxDuration;
+        auto lastFullSnapshot  = std::chrono::steady_clock::now();
+        const auto FULL_SNAPSHOT_INTERVAL = std::chrono::milliseconds{FULL_SNAPSHOT_INTERVAL};  // 60s
+        const auto TICK_POLL_INTERVAL    = std::chrono::milliseconds{TICK_POLL_INTERVAL};    // 4Hz
 
+        int  iteration         = 0;
+        int  tickAccessCount   = 0;
+
+        // Acquire the monitor's lock once outside the loop
         std::unique_lock<std::mutex> lk(m_mutex);
 
-        std::cout << "\n🚀 [RingBufferMonitor] Real‑time monitoring engaged\n";
+        std::cout << "\n🚀 [RingBufferMonitor] Real‑time monitoring engaged "
+                  << "(4Hz tick polling, 60s full snapshots)\n";
+                  
+        if (USE_CSV_FOR_TESTING) {
+            std::cout << "📁 [CSV Mode] Feeding " << m_testTicks.size() 
+                      << " ticks from CSV at 4Hz rate\n";
+        }
 
         while (m_running.load() && std::chrono::steady_clock::now() < deadline)
         {
-            // Wait either for an external wake‑up (requestSnapshot) or for 100 ms.
-            m_cv.wait_for(lk, std::chrono::milliseconds{60000}, // 1 minute
-                          [this] { return !m_running.load() || m_snapshotRequested.exchange(false); });
+            // Wait up to 500ms for either:
+            //  (a) a stop signal (m_running = false), or
+            //  (b) a manual snapshot request (m_snapshotRequested),
+            //  (c) or simply timeout after 500ms if nothing happens.
+            m_cv.wait_for(lk, TICK_POLL_INTERVAL, [this]
+            {
+                return !m_running.load() || m_snapshotRequested.exchange(false);
+            });
 
+            // If we've been signaled to stop, exit right away.
             if (!m_running.load())
                 break;
 
-            // ----- produce snapshot (outside the lock, keep wait‑time short) -----
+            // --- Outside the lock, to let other threads proceed quickly ---
             lk.unlock();
 
-            // Load snapshot once per iteration
+            // ===============================
+            // (A) If CSV testing, add 1 tick from CSV into the pipeline
+            // ===============================
+            if (USE_CSV_FOR_TESTING && (m_csvIndex < m_testTicks.size())) {
+                const auto& csvTick = m_testTicks[m_csvIndex++];
+                // This feeds the tick into TimeOrderedTickBuffer
+                m_buf.addTick(csvTick);
+                
+                // Log when CSV data is exhausted
+                if (m_csvIndex == m_testTicks.size()) {
+                    std::cout << "\n📊 [CSV Mode] All " << m_testTicks.size() 
+                              << " CSV ticks have been fed into the system\n";
+                }
+            }
+
+            // ===============================
+            // (B) Then do the normal snapshot logic
+            // ===============================
+            // 1) Poll for the latest snapshot of ticks (2Hz)
             auto snap = m_buf.getSnapshot();
             if (!snap) {
                 std::cout << "[RingBufferMonitor] (no snapshot yet)\n";
+                // Re‑lock before next loop iteration
                 lk.lock();
                 continue;
             }
 
             try {
-                std::cout << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-                std::cout << "📸 [SNAPSHOT #" << ++iteration << "] Ring Buffer Contents:\n";
+                // 2) Check if it's time for the 60s "full" snapshot
+                auto now = std::chrono::steady_clock::now();
+                bool printFullSnapshot = ((now - lastFullSnapshot) >= FULL_SNAPSHOT_INTERVAL);
+                if (printFullSnapshot)
+                {
+                    lastFullSnapshot = now;
+                    ++iteration;
 
-                printMinuteRing(*snap);
-                printCandleRing(*snap);
-                printPriceRing(*snap);
-                printTechnicalIndicators();
+                    std::cout << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                    std::cout << "📊 [DATA FREQUENCY] Snapshot #" << iteration << " contains:\n"
+                              << "   • " << snap->recentTicks.size()
+                              << " real‑time ticks (last 2 seconds, max 200)\n"
+                              << "   • Last snapshot time: " << snap->tickSnapshotTime << " ms\n";
+                    
+                    // Print ring buffers, indicators, etc.
+                    printMinuteRing(*snap);
+                    printCandleRing(*snap);
+                    printPriceRing(*snap);
+                    printTechnicalIndicators();
+                    printRecentTicks(*snap);
+                }
+
+                // ────────────────────────────
+                // (A) High-frequency (2Hz) Kalman feed
+                // ────────────────────────────
+                if (!snap->recentTicks.empty()) {
+                    tickAccessCount++;
+
+                    // Find the newest valid tick by scanning from back (newest) to front (oldest)
+                    const stock_data_tick::StockData* newest_valid = nullptr;
+                    for (auto rit = snap->recentTicks.rbegin();
+                         rit != snap->recentTicks.rend(); 
+                         ++rit)
+                    {
+                        const auto & st = rit->second; // The StockData
+                        if (isValidForKalman(st)) {
+                            newest_valid = &st;
+                            break;
+                        }
+                    }
+
+                    // If we found a valid tick, feed it into the Kalman buffer
+                    if (newest_valid) {
+                        emplaceKalmanTicks(*newest_valid);
+                    } else {
+                        // No valid ticks in the last 2s => skip this cycle
+                        // (optionally log or do nothing)
+                        std::cout << "[monitorLoop] No valid ticks found in last 2s.\n";
+                    }
+                }
+
+                // ────────────────────────────
+                // (B) Print Kalman ring states every 60s
+                // ────────────────────────────
+                if (printFullSnapshot) {
+                    printKalmanRing("KALMAN BUFFER", m_kalman, 5);
+                }
                 
-                // Print Kalman ring buffer snapshots
-                printKalmanRing("KALMAN 1-MINUTE BUFFER", m_kalman1m, 5);
-                printKalmanRing("KALMAN 5-MINUTE BUFFER", m_kalman5m, 5);
-                printKalmanRing("KALMAN 20-MINUTE BUFFER", m_kalman20m, 5);
             } catch (const std::exception& e) {
                 std::cerr << "[RingBufferMonitor] ⚠️ Exception in snapshot: " << e.what() << "\n";
             } catch (...) {
                 std::cerr << "[RingBufferMonitor] ⚠️ Unknown exception in snapshot\n";
             }
 
+            // Re‑lock for the next iteration's wait_for
             lk.lock();
         }
 
-        std::cout << "\n🛑 [RingBufferMonitor] Monitoring finished ("
-                  << iteration << " snapshots)\n";
-    }
-    catch (const std::exception& ex) {
-        std::cerr << "[RingBufferMonitor] Uncaught exception: "
-                  << ex.what() << '\n';
+        std::cout << "\n🛑 [RingBufferMonitor] Monitoring finished:\n"
+                  << "   • Full snapshots printed: " << iteration << "\n"
+                  << "   • Tick data accessed ~" << tickAccessCount << " times (2Hz)\n";
+                  
+        if (USE_CSV_FOR_TESTING) {
+            std::cout << "   • CSV ticks processed: " << m_csvIndex 
+                      << " of " << m_testTicks.size() << "\n";
+        }
+
+    } catch (const std::exception& ex) {
+        std::cerr << "[RingBufferMonitor] Uncaught exception: " << ex.what() << '\n';
     }
 }
 
@@ -227,6 +415,46 @@ void RingBufferMonitor::printPriceRing(
 
 /*----------------------------------------------------------------------*/
 
+void RingBufferMonitor::printRecentTicks(
+        const time_ordered_tick_buffer::MonitorSnapshot& s) const
+{
+    std::cout << "\n4️⃣  RECENT TICKS (last 2 seconds, max 200):\n";
+    std::cout << "   Total ticks: " << s.recentTicks.size() 
+              << " | Snapshot time: " << s.tickSnapshotTime << " ms\n";
+    
+    if (s.recentTicks.empty()) {
+        std::cout << "   💤 No ticks in the last 2 seconds\n";
+        return;
+    }
+    
+    // Show first and last few ticks
+    const std::size_t showStart = std::min<std::size_t>(3, s.recentTicks.size());
+    const std::size_t showEnd = std::min<std::size_t>(3, s.recentTicks.size());
+    
+    std::cout << "   📊 First " << showStart << " ticks:\n";
+    for (std::size_t i = 0; i < showStart; ++i) {
+        const auto& [ts, tick] = s.recentTicks[i];
+        std::cout << "      • " << ts << " ms: $" << std::fixed << std::setprecision(2) 
+                  << tick.last << " (vol: " << tick.volume << ")\n";
+    }
+    
+    if (s.recentTicks.size() > showStart + showEnd) {
+        std::cout << "      ... (" << (s.recentTicks.size() - showStart - showEnd) 
+                  << " more ticks) ...\n";
+    }
+    
+    if (s.recentTicks.size() > showStart) {
+        std::cout << "   📊 Last " << showEnd << " ticks:\n";
+        for (std::size_t i = s.recentTicks.size() - showEnd; i < s.recentTicks.size(); ++i) {
+            const auto& [ts, tick] = s.recentTicks[i];
+            std::cout << "      • " << ts << " ms: $" << std::fixed << std::setprecision(2) 
+                      << tick.last << " (vol: " << tick.volume << ")\n";
+        }
+    }
+}
+
+/*----------------------------------------------------------------------*/
+
 void RingBufferMonitor::printTechnicalIndicators() const
 {
     const auto ind = m_handler.computeIndicatorsFromCandles();
@@ -278,7 +506,7 @@ void RingBufferMonitor::printTechnicalIndicators() const
 
 void RingBufferMonitor::printKalmanRing(const char* title, const auto& ring, size_t show) const
 {
-    std::cout << "\n4️⃣  " << title << " (snapshot):\n";
+    std::cout << "\n5️⃣  " << title << " (snapshot):\n";
     std::cout << "   Size: " << ring.size() 
               << " slots | Capacity: " << ring.capacity << '\n';
     

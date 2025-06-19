@@ -1,6 +1,8 @@
-CMakeFiles/test_comprehensive.dir/test_comprehensive.cpp.o: \
- /workspace/ibkr-trader/util/HEFKF/test_comprehensive.cpp \
+CMakeFiles/hefkf.dir/integration_loop_wrapper.cpp.o: \
+ /workspace/ibkr-trader/util/HEFKF/integration_loop_wrapper.cpp \
  /usr/include/stdc-predef.h \
+ /workspace/ibkr-trader/util/HEFKF/integration_loop_wrapper.hpp \
+ /workspace/ibkr-trader/util/HEFKF/integration_loop.hpp \
  /workspace/ibkr-trader/util/HEFKF/frequency_analyser.hpp \
  /usr/include/fftw3.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
@@ -428,8 +430,6 @@ CMakeFiles/test_comprehensive.dir/test_comprehensive.cpp.o: \
  /workspace/ibkr-trader/util/HEFKF/../../lib/eigen-3.4.0/Eigen/src/Eigenvalues/./RealQZ.h \
  /workspace/ibkr-trader/util/HEFKF/../../lib/eigen-3.4.0/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h \
  /workspace/ibkr-trader/util/HEFKF/5min_HEFKF.hpp \
- /workspace/ibkr-trader/util/HEFKF/integration_loop_wrapper.hpp \
- /workspace/ibkr-trader/util/HEFKF/integration_loop.hpp \
  /workspace/ibkr-trader/util/HEFKF/analytic_scorer.hpp \
  /workspace/ibkr-trader/util/HEFKF/static_ring_buffer.hpp \
  /workspace/ibkr-trader/util/HEFKF/kalman_tick.hpp \
@@ -445,4 +445,7 @@ CMakeFiles/test_comprehensive.dir/test_comprehensive.cpp.o: \
  /usr/include/libintl.h /usr/include/c++/11/bits/codecvt.h \
  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
  /usr/include/c++/11/bits/locale_conv.h \
- /usr/include/c++/11/bits/quoted_string.h
+ /usr/include/c++/11/bits/quoted_string.h /usr/include/c++/11/fstream \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
+ /usr/include/c++/11/bits/fstream.tcc
